@@ -1,0 +1,736 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@source "./**/*.{ts,tsx,md,mdx}";
+@source "../components/**/*.{ts,tsx,md,mdx}";
+@source "../pages/**/*.{ts,tsx,md,mdx}";
+@source "../hooks/**/*.{ts,tsx}";
+@source "../lib/**/*.{ts,tsx}";
+
+@layer base {
+
+  /* -------------------------------------------------------------------
+     ☀️ LIGHT THEME
+     ------------------------------------------------------------------- */
+  :root {
+
+    /* ------------------------------ 🧱 Background Colors ------------------------------ */
+    --background-solid: hsla(0, 0%, 100%, 1);
+    /* Use this to set the color for the entire page. This is black or white.  */
+
+	 --background-base: hsla(260, 60%, 98%, 1);
+    /* This is the base color for our sidebar, top nav, table headers, headers, and dialogs. */
+
+	 --background-primary: hsla(260, 50%, 99%, 1);
+    /* This is the typical base color for buttons and some backgrounds to dialogues and content views */
+	 
+    --background-secondary: hsla(260, 61.9%, 96%, 1);
+    /* For hover states or secondary background states that contrast with the primary background color. */
+	 
+    --background-accent: hsla(260, 69%, 61%, 1);
+    /* This is used to act as the background for active states and buttons, drop-downs, and other UI components. It's also meant to give occasional background accents to specific UI elements that need them */
+    
+   --gradient-subtle: linear-gradient(180deg, hsla(260, 54%, 48%, 0) 0%, hsla(260, 54%, 48%, 0.04) 100%), hsla(260, 60%, 98%, 1);
+   /*  This is an optional gradient to apply to the top nav used in most views for contrast if needed. */
+
+   
+    /* ------------------------------ ✍️ Foreground (Text) Colors ------------------------------ */
+	 --foreground: hsla(0, 0%, 10%, 1);
+    /* Default text and icon color */
+
+	 --foreground-inverse: hsla(60, 14%, 93%, 1);
+    /*  For rare use where inverting foreground color is necessary. */  
+
+    --foreground-muted: hsla(60, 0.56%, 35%, 1);
+    /* Secondary copy such as sublines. Inactive and disabled button and UI text color.  */
+
+    --foreground-subtle: hsla(60, 1%, 60%, 1);
+    /* Tertiary color used for inactive and disabled states.  */
+
+
+    /* ------------------------------ 🧱 Border & Divider Colors ------------------------------ */
+    --border: hsla(259, 68%, 90%, 1);
+    /* Default border for containers, inputs, UI controls, and dividers.  */
+
+	 --border-inverse: hsla(0, 0%, 83%, 1);
+    /* Use to leverage the opposite themes default border color*/
+
+	 --border-muted: hsla(259, 11%, 91%, 1);
+    /* Table cell border colors, inactive and disabled states of UI containers and inputs, and more gray-toned dividers. */
+	 
+    --border-subtle: hsla(259, 50%, 96%, 1);
+    /* Secondary option for disabled states of UI containers and inputs. Mostly used for very soft boundaries. */
+
+	 --border-accent: hsla(260, 69%, 61%, 1);
+   /* Occasionally used for purple-hued soft borders and boundaries where necessary.  */
+
+	 --border-active: hsla(261, 43%, 50%, 1);
+    /* For UI controls that need active border states. Pairs with --background-accent.  */
+
+
+    /* ------------------------------ 🎨 Accent & Brand Colors ------------------------------ */
+    --accent-primary: hsla(260, 69%, 61%, 1);
+   /* Primary brand accent for icons and links in place of --foreground. Can be alternatively used to --background-accent */
+
+    --accent-subtle: hsla(25, 62%, 96%, 1);
+    /* For a tint on a dark background such as a purple button */
+
+    --accent-active: hsla(261, 43%, 50%, 1);
+    /* Active accent color used in --border-active. Can be applied to UI if needed   */
+    
+   /* ---- Our primary brand color pallete ----*/
+    --accent-brand-purple: hsla(260, 69%, 61%, 1);
+    --accent-brand-fuschia: hsla(285, 97%, 71%, 1);
+    --accent-brand-blue: hsla(203, 58%, 52%, 1);
+
+    --accent-brand-green: hsla(129, 72%, 25%, 1);
+   /* Use this accent of green to have enough contrast in either light or dark themes */
+
+    --accent-brand-light-green: hsla(134, 42%, 56%, 1);
+    --accent-brand-dark-green: hsla(129, 72%, 25%, 1);
+    --accent-brand-orange: hsla(16, 98%, 56%, 1);
+    --accent-brand-yellow: hsla(42, 94%, 56%, 1);
+    --accent-brand-red: hsla(1, 88%, 60%, 1);
+    --accent-brand-off-white: hsla(60, 14%, 93%, 1);
+    --accent-brand-light-gray: hsla(60, 1%, 60%, 1);
+    --accent-brand-dark-gray: hsla(60, 1%, 35%, 1);
+
+    /* ------------------------------ 🧭 Status Colors ------------------------------ */
+    /* Status colors using our brand accent colors, which can alternatively be used in place of these */
+    --success: hsla(129, 71%, 25%, 1);
+	 --warning: hsla(42, 94%, 56%, 1);
+	 --error: hsla(1, 88%, 60%, 1);
+  }
+
+  /* -------------------------------------------------------------------
+     🌑 DARK MODE THEME
+     ------------------------------------------------------------------- */
+  .dark {
+    --background-solid: hsla(0, 0%, 6%, 1);
+    /* Use this to set the color for the entire page. This is black or white.  */
+
+	 --background-base: hsla(0, 0%, 10%, 1);
+	/* This is the base color for our sidebar, top nav, table headers, headers, and dialogs. */
+
+    --background-primary: hsla(0, 0%, 15%, 1);
+    /* This is the typical base color for buttons and some backgrounds to dialogues and content views */
+
+	 --background-secondary: hsla(60, 1%, 25%, 1);
+    /*  For hover states or secondary background states that contrast with the primary background color. */
+
+	 --background-accent: hsla(260, 69%, 61%, 1);
+    /* Background for active states and buttons, drop-downs, and other UI components. It's also meant to give occasional background accents to specific UI elements that need them */
+
+    --gradient-subtle: linear-gradient(180deg, hsla(270, 50%, 99%, 0.04) 0%, hsla(270, 50%, 99%, 0) 100%), hsla(0, 0%, 15%, 1);
+    /*  This is an optional gradient to apply to the top nav used in most views for contrast if needed. */
+
+
+    /* ------------------------------ ✍️ Foreground (Text) Colors ------------------------------ */
+    --foreground: hsla(60, 14%, 93%, 1);
+    /* Default text and icon color */
+
+	 --foreground-inverse: hsla(0, 0%, 10%, 1);
+    /* Use to leverage the opposite themes default border color*/
+
+    --foreground-muted: hsla(60, 1%, 35%, 1);
+    /* Secondary copy such as sublines. Inactive button and UI text color.  */
+
+	 --foreground-subtle: hsla(60, 1%, 60%, 1);
+    /* Tertiary color used for inactive and disabled states.  */
+
+
+    /* ------------------------------ 🧱 Border & Divider Colors ------------------------------ */
+    --border: hsla(60, 1%, 25%, 1);
+        /* Default border for containers, inputs, UI controls, and dividers.  */
+
+	 --border-inverse: hsla(259, 68%, 90%, 1);
+    /* Use to leverage the opposite themes default border color*/
+    
+    --border-muted: hsla(60, 1%, 20%, 1);
+    /* Table cell border colors, inactive and disabled states of UI containers and inputs, and more gray-toned dividers. */
+	 
+    --border-subtle: hsla(0, 0%, 15%, 1);
+    /* Secondary option for disabled states of UI containers and inputs. Mostly used for very soft boundaries. */
+
+    --border-accent: hsla(260, 69%, 61%, 1);
+    /* Occasionally used for purple-hued soft borders and boundaries where necessary.  */
+
+	 --border-active: hsla(260, 69%, 72%, 1);
+   /* For UI controls that need active border states. Pairs with --background-accent.  */
+
+
+    /* ------------------------------ 🎨 Accent & Brand Colors ------------------------------ */
+    --accent-primary: hsla(285, 97%, 71%, 1);
+    /* Primary brand accent for icons and links in place of --foreground. Can be alternatively used to --background-accent */
+
+	 --accent-subtle: hsla(258, 62%, 96%, 1);
+    /* For a tint on a dark background such as a purple button */
+
+	 --accent-active: hsla(261, 43%, 50%, 1);
+    /* Active accent color used in --border-active. Can be applied to UI if needed   */
+      
+      /* ---- Our primary brand color pallete ----*/
+	 --accent-brand-purple: hsla(260, 69%, 61%, 1);
+	 --accent-brand-fuschia: hsla(285, 97%, 71%, 1);
+	 --accent-brand-blue: hsla(203, 58%, 52%, 1);
+
+	 --accent-brand-green: hsla(134, 42%, 56%, 1);
+      /* Use this accent of green to have enough contrast in either light or dark themes */
+
+    --accent-brand-light-green: hsla(134, 42%, 56%, 1);
+	 --accent-brand-dark-green: hsla(129, 72%, 25%, 1);
+	 --accent-brand-orange: hsla(16, 98%, 56%, 1);
+	 --accent-brand-yellow: hsla(42, 94%, 56%, 1);
+	 --accent-brand-red: hsla(1, 88%, 60%, 1);
+	 --accent-brand-off-white: hsla(60, 14%, 93%, 1);
+	 --accent-brand-light-gray: hsla(60, 2%, 60%, 1);
+ 	 --accent-brand-dark-gray: hsla(60, 1%, 35%, 1);
+
+    /* ------------------------------ 🧭 Status Colors ------------------------------ */
+      /* Status colors using our brand accent colors, which can alternatively be used in place of these */
+    --success: hsla(134, 42%, 56%, 1);
+	 --warning: hsla(42, 94%, 56%, 1);
+	 --error: hsla(1, 88%, 60%, 1);
+  }
+}
+
+@theme inline {
+  /* Fonts */
+  --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+  /* Background colors - use as bg-background-solid, bg-background-base, etc. */
+  --color-background-solid: var(--background-solid);
+  --color-background-base: var(--background-base);
+  --color-background-primary: var(--background-primary);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-accent: var(--background-accent);
+  --color-gradient-subtle: var(--gradient-subtle);
+  
+  /* Foreground colors - use as text-foreground, text-foreground-muted, etc. */
+  --color-foreground: var(--foreground);
+  --color-foreground-inverse: var(--foreground-inverse);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  
+  /* Border colors - use as border-border, border-border-muted, etc. */
+  --color-border: var(--border);
+  --color-border-inverse: var(--border-inverse);
+  --color-border-muted: var(--border-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-accent: var(--border-accent);
+  --color-border-active: var(--border-active);
+  
+  /* Accent colors - use as bg-accent-primary, bg-accent-subtle, etc. */
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-active: var(--accent-active);
+  
+  /* Brand accent colors - use as bg-accent-brand-red, bg-accent-brand-purple, etc. */
+  --color-accent-brand-purple: var(--accent-brand-purple);
+  --color-accent-brand-fuschia: var(--accent-brand-fuschia);
+  --color-accent-brand-blue: var(--accent-brand-blue);
+  --color-accent-brand-green: var(--accent-brand-green);
+  --color-accent-brand-light-green: var(--accent-brand-light-green);
+  --color-accent-brand-dark-green: var(--accent-brand-dark-green);
+  --color-accent-brand-orange: var(--accent-brand-orange);
+  --color-accent-brand-yellow: var(--accent-brand-yellow);
+  --color-accent-brand-red: var(--accent-brand-red);
+  --color-accent-brand-off-white: var(--accent-brand-off-white);
+  --color-accent-brand-light-gray: var(--accent-brand-light-gray);
+  --color-accent-brand-dark-gray: var(--accent-brand-dark-gray);
+  
+  /* Status colors - use as bg-success, bg-warning, bg-error */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background-solid);
+    color: var(--foreground);
+  }
+}
+
+/* Form element tweaks */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Scroll container helpers */
+.table-container,
+.rank-table-container {
+  overflow: hidden;
+  padding-right: 6px;
+  transition: overflow 0.5s ease-in-out;
+}
+
+.table-container:hover,
+.rank-table-container:hover {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #ccc;
+  padding-right: 0;
+}
+
+.table-container::-webkit-scrollbar,
+.rank-table-container::-webkit-scrollbar,
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.rank-table-container::-webkit-scrollbar-thumb,
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover,
+.rank-table-container::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.dark .scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #262626 #000;
+}
+
+.dark .scrollbar-dark::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.dark .scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 9999px;
+}
+
+.cm-gutter {
+  @apply bg-[#595958];
+}
+
+.cm-editor {
+  outline: none !important;
+  @apply bg-[#191919] rounded-sm;
+}
+
+.cm-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+.scrollbar-thin {
+  padding-right: 5.5px;
+  padding-bottom: 5.5px;
+  overflow: hidden;
+}
+
+.scrollbar-thin:hover {
+  padding-right: 0;
+  padding-bottom: 0;
+  overflow: scroll;
+}
+
+.visible-scrollbar-thin {
+  padding-right: 5.5px;
+  padding-bottom: 5.5px;
+  overflow: hidden;
+}
+
+/* .visible-scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+} */
+
+/* .visible-scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 8px;
+} */
+
+.visible-scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #555;
+}
+
+.dark .visible-scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #262626 #000;
+}
+
+.dark .visible-scrollbar-thin::-webkit-scrollbar-track {
+  background: #000;
+}
+
+.dark .visible-scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #262626;
+}
+
+/* .dark .visible-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #3d3d3d;
+} */
+
+
+.date-picker .react-datepicker__header {
+  background-color: #fff;
+}
+
+.react-datepicker__header,
+.react-datepicker__header--custom {
+  padding-top: 0 !important;
+}
+
+.recharts-tooltip-wrapper {
+  z-index: 9999 !important;
+  pointer-events: none;
+}
+
+ /* Added syntax highlighting styles for YAML and SQL */
+ .yaml-key {
+  color: oklch(0.55 0.22 285); /* Purple for keys */
+  font-weight: 500;
+}
+
+.yaml-string {
+  color: oklch(0.5 0.15 140); /* Green for strings */
+}
+
+.yaml-number {
+  color: oklch(0.55 0.18 30); /* Orange for numbers */
+}
+
+.yaml-boolean {
+  color: oklch(0.5 0.2 250); /* Blue for booleans */
+}
+
+.yaml-dash {
+  color: oklch(0.45 0 0); /* Gray for list dashes */
+}
+
+.yaml-comment {
+  color: oklch(0.5 0 0); /* Gray for comments */
+  font-style: italic;
+}
+
+.sql-keyword {
+  color: oklch(0.5 0.2 285); /* Purple for SQL keywords */
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.sql-string {
+  color: oklch(0.5 0.15 140); /* Green for strings */
+}
+
+.sql-number {
+  color: oklch(0.55 0.18 30); /* Orange for numbers */
+}
+
+.sql-comment {
+  color: oklch(0.5 0 0); /* Gray for comments */
+  font-style: italic;
+}
+
+/* Dark theme adjustments */
+.dark .yaml-key {
+  color: oklch(0.75 0.2 285);
+}
+
+.dark .yaml-string {
+  color: oklch(0.7 0.15 140);
+}
+
+.dark .yaml-number {
+  color: oklch(0.75 0.18 50);
+}
+
+.dark .yaml-boolean {
+  color: oklch(0.7 0.18 250);
+}
+
+.dark .yaml-dash {
+  color: oklch(0.6 0 0);
+}
+
+.dark .yaml-comment {
+  color: oklch(0.55 0 0);
+}
+
+.dark .sql-keyword {
+  color: oklch(0.75 0.18 285);
+}
+
+.dark .sql-string {
+  color: oklch(0.7 0.15 140);
+}
+
+.dark .sql-number {
+  color: oklch(0.75 0.18 50);
+}
+
+.dark .sql-comment {
+  color: oklch(0.55 0 0);
+}
+
+/* Custom Monaco Editor suggestion widget styling */
+/* Suggestion widget container */
+.monaco-editor .suggest-widget {
+  background: var(--popover) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px 0 !important;
+}
+
+/* Suggestion list */
+.monaco-editor .suggest-widget .monaco-list {
+  background: transparent !important;
+}
+
+/* Suggestion items */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row {
+  color: var(--foreground) !important;
+  padding: 8px 16px !important;
+  border-radius: 4px !important;
+  margin: 2px 4px !important;
+  min-height: 32px !important;
+  line-height: 1.4 !important;
+}
+
+/* Ensure content area has proper padding and spacing */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label {
+  padding-left: 4px !important;
+}
+
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label-container {
+  padding: 0 4px !important;
+}
+
+/* Force text color on all child elements in suggestion rows */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row * {
+  color: inherit !important;
+}
+
+/* Suggestion item hover */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused {
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+/* Suggestion item selected */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected {
+  background: oklch(0.55 0.22 285) !important; /* Primary purple */
+  color: white !important;
+}
+
+/* Ensure selected items have white text for all children */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected * {
+  color: white !important;
+}
+
+/* Suggestion icon */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .codicon {
+  color: oklch(0.55 0.22 285) !important; /* Primary purple for icons */
+}
+
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .codicon {
+  color: oklch(0.55 0.22 285) !important;
+}
+
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .codicon {
+  color: white !important;
+}
+
+/* Explicit styling for suggestion labels and spans */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-name,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label-container,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row span {
+  color: var(--foreground) !important;
+  font-weight: 500 !important;
+}
+
+/* Override for focused state */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .monaco-highlighted-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .label-name,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused span {
+  color: var(--accent-foreground) !important;
+}
+
+/* Override for selected state */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .monaco-highlighted-label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .label-name,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .label,
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected span {
+  color: white !important;
+}
+
+/* Suggestion details panel */
+.monaco-editor .suggest-widget .details {
+  background: var(--card) !important;
+  border-left: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+  padding: 12px !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+/* Suggestion details header */
+.monaco-editor .suggest-widget .details .header {
+  color: oklch(0.55 0.22 285) !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Suggestion details documentation */
+.monaco-editor .suggest-widget .details .docs {
+  color: var(--muted-foreground) !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+/* Suggestion type label */
+.monaco-editor .suggest-widget .monaco-list .monaco-list-row .type-label {
+  opacity: 0.6 !important;
+  font-size: 12px !important;
+}
+
+/* Dark theme overrides */
+.dark .monaco-editor .suggest-widget {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected {
+  background: oklch(0.68 0.24 285) !important; /* Brighter purple for dark mode */
+}
+
+.dark .monaco-editor .suggest-widget .monaco-list .monaco-list-row .codicon {
+  color: oklch(0.68 0.24 285) !important;
+}
+
+.dark .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .codicon {
+  color: oklch(0.68 0.24 285) !important;
+}
+
+.dark .monaco-editor .suggest-widget .details .header {
+  color: oklch(0.68 0.24 285) !important;
+}
+
+ /* Adding masonry layout CSS for Pinterest-style columns */
+ .masonry-grid {
+  column-count: 2;
+  column-gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid {
+    column-count: 4;
+  }
+}
+
+@media (min-width: 1536px) {
+  .masonry-grid {
+    column-count: 5;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+  display: inline-block;
+  width: 100%;
+}
+
+
+  /* Adding masonry drop animation keyframes */
+  @keyframes masonryDrop {
+    from {
+      opacity: 0;
+      transform: translateY(-30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-masonry-drop {
+    animation: masonryDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+ /* Adding fadeScaleIn animation class for grid view */
+ @keyframes fadeScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@layer components {
+  .select--trigger {
+    @apply inline-flex items-center justify-center space-x-2 rounded-md px-4 py-1 shadow;
+  }
+
+  /* Convenience helper: apply subtle gradient with separate image/color layers */
+  .bg-gradient-subtle {
+    background-image: var(--gradient-subtle-image);
+    background-color: var(--gradient-subtle-color);
+  }
+
+  .dialog--content {
+    @apply fixed left-[50%] top-[50%] z-50 max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none;
+  }
+
+  .dialog--content[data-state="open"] {
+    animation: content-show 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes content-show {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* Swiper pagination customization */
+.swiper-pagination-bullet {
+  --swiper-pagination-bullet-inactive-color: var(--foreground-muted);
+  --swiper-pagination-bullet-inactive-opacity: 0.5;
+}
+
+.swiper-pagination-bullet-active {
+  --swiper-pagination-color: var(--accent-brand-purple);
+  --swiper-pagination-bullet-opacity: 1;
+}

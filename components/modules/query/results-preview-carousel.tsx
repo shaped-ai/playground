@@ -86,8 +86,8 @@ export function ResultsPreviewCarousel({
           <div
             key={field.id}
             className={`relative overflow-hidden bg-muted ${
-              heightClasses[field.size || "full"]
-            } ${heightClasses[field.size || "large"]}`}
+              heightClasses[(field.size || "full") as keyof typeof heightClasses]
+            } ${heightClasses[(field.size || "large") as keyof typeof heightClasses]}`}
           >
             <Image
               src={value || "/placeholder.svg"}

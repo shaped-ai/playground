@@ -81,8 +81,8 @@ export const getBucketizedCount = (
   }
 
   const targetFieldData = data
-    .map((item) => item[headerName])
-    .filter((val) => val != null)
+    .map((item: any) => item[headerName])
+    .filter((val: any) => val != null)
 
   if (targetFieldData.length == 0) {
     return {
@@ -97,7 +97,7 @@ export const getBucketizedCount = (
   }
   // Sort data by name (either timestamp or text)
   if (headerType == FeatureType.TIMESTAMP) {
-    targetFieldData.sort((a, b) => {
+    targetFieldData.sort((a: any, b: any) => {
       const timeA = moment(a).unix()
       const timeB = moment(b).unix()
       return timeA - timeB
@@ -107,9 +107,9 @@ export const getBucketizedCount = (
     headerType == FeatureType.TEXT_SEQUENCE ||
     headerType == FeatureType.TEXT_SET
   ) {
-    targetFieldData.sort((a, b) => a.length - b.length)
+    targetFieldData.sort((a: any, b: any) => a.length - b.length)
   } else
-    targetFieldData.sort((a, b) => {
+    targetFieldData.sort((a: any, b: any) => {
       if (Array.isArray(a)) {
         return a[0] - b[0]
       } else return a - b
@@ -127,8 +127,8 @@ export const getBucketizedCount = (
       ? targetFieldData[0].length
       : Array.isArray(targetFieldData[0])
       ? targetFieldData
-          .flatMap((d) => d)
-          .reduce((min, val) => {
+          .flatMap((d: any) => d)
+          .reduce((min: number, val: any) => {
             return typeof val === "number" && !isNaN(val)
               ? Math.min(min, val)
               : min
@@ -145,11 +145,11 @@ export const getBucketizedCount = (
       ? targetFieldData[targetFieldData.length - 1].length
       : Array.isArray(targetFieldData[targetFieldData.length - 1])
       ? targetFieldData
-          .flatMap((d) => d)
+          .flatMap((d: any) => d)
           .filter(
-            (val): val is number => typeof val === "number" && !isNaN(val)
+            (val: any): val is number => typeof val === "number" && !isNaN(val)
           )
-          .reduce((max, val) => Math.max(max, val), -Infinity)
+          .reduce((max: number, val: number) => Math.max(max, val), -Infinity)
       : targetFieldData[targetFieldData.length - 1]
   )
 
@@ -157,7 +157,7 @@ export const getBucketizedCount = (
   const bucketCount = range < 1 ? 12 : range <= 12 ? range : 12
   const bucketSize = range / bucketCount
 
-  const parsedData = data.map((item) => ({
+  const parsedData = data.map((item: any) => ({
     ...item,
     parsedValue:
       headerType == FeatureType.TIMESTAMP
@@ -175,7 +175,7 @@ export const getBucketizedCount = (
   for (let i = 0; i < bucketCount; i++) {
     const isBucketRangeTypeInteger =
       (Array.isArray(targetFieldData[0])
-        ? targetFieldData.flatMap((d) => d).every(Number.isInteger)
+        ? targetFieldData.flatMap((d: any) => d).every(Number.isInteger)
         : targetFieldData.every(Number.isInteger)) ||
       headerType == FeatureType.TEXT ||
       headerType == FeatureType.TEXT_SEQUENCE ||
@@ -193,7 +193,7 @@ export const getBucketizedCount = (
         : minValue + (i + 1) * bucketSize
 
     const bucketData = parsedData.filter(
-      (item) =>
+      (item: any) =>
         item.parsedValue >= bucketStart &&
         (isBucketRangeTypeInteger
           ? item.parsedValue <=

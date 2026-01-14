@@ -113,8 +113,8 @@ export function ResultsPreviewFeed({
         return (
           <div
             className={`relative overflow-hidden rounded-t-xl bg-muted ${
-              widthClasses[field.width || "full"]
-            } ${heightClasses[field.height || "medium"]}`}
+              widthClasses[(field.width || "full") as keyof typeof widthClasses]
+            } ${heightClasses[(field.height || "medium") as keyof typeof heightClasses]}`}
           >
             <Image
               src={value || "/placeholder.svg"}

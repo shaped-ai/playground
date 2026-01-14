@@ -9,7 +9,7 @@ import {
 
 export const quantitativeDataTypes = [FeatureType.NUMERICAL]
 
-export const getRankResult = (data, useItemFeature = true) => {
+export const getRankResult = (data: any, useItemFeature = true) => {
   const { ids, scores, metadata } = data
   const rankResults = [] as any
   for (let i = 0; i < ids.length; i++) {
@@ -26,11 +26,11 @@ export const getRankResult = (data, useItemFeature = true) => {
   return rankResults
 }
 
-export const getRankScoreExplanation = (data) => {
+export const getRankScoreExplanation = (data: any) => {
   const scores = data?.explanation?.score?.scoring_policy_scores
   return Object.entries(scores ?? {})
     .filter(([Key, value]) => Array.isArray(value))
-    .reduce((acc, [key, value]) => {
+    .reduce((acc: Record<string, any>, [key, value]) => {
       acc[key] = value
       return acc
     }, {})
@@ -74,7 +74,7 @@ export const getFeatureFilters = (
   chartType: string,
   featureFilterValues: { name: string; type: string }[]
 ) => {
-  let transformedData = {}
+  let transformedData: Record<string, { name: string; type: string }[]> = {}
 
   if (chartType === "EventsSummary") {
     transformedData = {
@@ -160,11 +160,11 @@ export const calculateRankFeatures = async (
 }
 
 export const getRankAPIConfigFromConfig = (
-  configuration,
-  currentQueryTab,
-  currentRankTab,
-  modelDetails,
-  queryStep
+  configuration: any,
+  currentQueryTab: QueryTab,
+  currentRankTab: UserRecommendationTab | ItemRecommendationTab,
+  modelDetails: ModelDetails,
+  queryStep: number
 ) => {
   const policyType =
     modelDetails.config.model.policy_configs?.scoring_policy?.policy_type
@@ -250,7 +250,7 @@ export const getRankAPIConfigFromConfig = (
               attributes[attribute] = configuration.user_attributes[attribute]
                 .replace(/[\[\]]/g, "")
                 .split(",")
-                .map((part) => part.trim().replace(/^"|"$/g, ""))
+                .map((part: string) => part.trim().replace(/^"|"$/g, ""))
             }
           } catch (error) {}
         }
@@ -317,11 +317,11 @@ export const getRankAPIConfigFromConfig = (
 }
 
 export const getRankApiUriFromConfig = (
-  configuration,
-  currentQueryTab,
-  currentRankTab,
-  modelUri,
-  queryStep
+  configuration: any,
+  currentQueryTab: QueryTab,
+  currentRankTab: UserRecommendationTab | ItemRecommendationTab,
+  modelUri: string,
+  queryStep: number
 ) => {
   if (queryStep == 2) {
     if (configuration.user_id) return `${modelUri}/rank`
@@ -340,9 +340,9 @@ export const getRankApiUriFromConfig = (
 }
 
 export const getRankApiMethodFromConfig = (
-  configuration,
-  currentQueryTab,
-  currentRankTab
+  configuration: any,
+  currentQueryTab: QueryTab,
+  currentRankTab: UserRecommendationTab | ItemRecommendationTab
 ) => {
   if (currentQueryTab == QueryTab.SESSION || currentQueryTab == QueryTab.USER) {
     if (currentRankTab == UserRecommendationTab.RANK) return "POST"

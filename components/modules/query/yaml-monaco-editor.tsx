@@ -54,7 +54,9 @@ export function YamlMonacoEditor({
 
     try {
       await Promise.all([
+        // @ts-ignore - dynamic import may not have types
         import("monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution"),
+        // @ts-ignore - dynamic import may not have types
         import("monaco-editor/esm/vs/language/json/monaco.contribution"), // required dependencies for YAML tokens
       ])
     } catch (error) {
@@ -251,7 +253,7 @@ export function YamlMonacoEditor({
         height="100%"
         language="yaml"
         value={value}
-        onChange={(newValue) => onChange(newValue || "")}
+        onChange={(newValue: string | undefined) => onChange(newValue || "")}
         onMount={handleEditorDidMount}
         theme={themeName}
         options={{

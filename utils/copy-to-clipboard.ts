@@ -1,4 +1,4 @@
-const unsecuredCopyToClipboard = (text) => {
+const unsecuredCopyToClipboard = (text: string) => {
   const textArea = document.createElement("textarea")
   textArea.value = text
   document.body.appendChild(textArea)
@@ -12,7 +12,7 @@ const unsecuredCopyToClipboard = (text) => {
   document.body.removeChild(textArea)
 }
 
-const copyToClipboard = (content) => {
+const copyToClipboard = (content: string) => {
   if (window.isSecureContext && navigator.clipboard) {
     navigator.clipboard.writeText(content)
   } else {

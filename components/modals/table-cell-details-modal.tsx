@@ -35,7 +35,7 @@ export function TableCellDetailsModal({
 }: TableCellDetailsModalProps) {
   const [imageLoaded, setimageLoaded] = React.useState("Loading")
 
-  const TriggerIcon = Icons[iconName ?? "zoomIn"]
+  const TriggerIcon = Icons[(iconName ?? "zoomIn") as keyof typeof Icons]
   return (
     <Dialog.Root
       onOpenChange={(open) => {

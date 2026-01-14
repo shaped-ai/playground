@@ -232,7 +232,7 @@ export function PlainMonacoEditor({
         height="100%"
         language="yaml"
         value={value}
-        onChange={(newValue) => onChange(newValue || "")}
+        onChange={(newValue: string | undefined) => onChange(newValue || "")}
         onMount={handleEditorDidMount}
         theme={themeName}
         loading={

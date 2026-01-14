@@ -35,7 +35,7 @@ const DataCatalogBarChart: React.FC<DataCatalogBarChartProps> = memo(
 
     const memoizedChartData = useMemo(() => chartData, [])
 
-    const labelFormatter = (label: string, [barData]: any[]) => {
+    const labelFormatter = (label: string, [barData]: readonly any[]) => {
       const rangeStart = barData.payload.bucket_start
       const rangeEnd = barData.payload.bucket_end
       return [`${rangeStart} - ${rangeEnd}`]

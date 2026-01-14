@@ -388,7 +388,7 @@ export function TemplateEditorDialog({
             {value
               .toString()
               .split(",")
-              .map((item, i) => (
+              .map((item: string, i: number) => (
                 <Badge key={i} variant="secondary">
                   {item.trim()}
                 </Badge>
@@ -404,7 +404,7 @@ export function TemplateEditorDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        hideCloseButton
+        showCloseButton={false}
         className="dark:bg-background-base flex max-h-[90vh] max-w-[70vw] flex-col gap-0 space-y-0 overflow-auto rounded-lg border border-border bg-background-base p-0"
       >
         <DialogHeader className="border-b border-border bg-background-base p-4">
@@ -440,7 +440,7 @@ export function TemplateEditorDialog({
         </DialogHeader>
 
         <ResizablePanelGroup
-          direction="horizontal"
+          {...({ direction: "horizontal" } as any)}
           className="flex-1 bg-background-solid"
         >
           <ResizablePanel
@@ -497,7 +497,6 @@ export function TemplateEditorDialog({
                             }
                           >
                             <SelectTrigger
-                              chevronsDouble
                               className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground"
                             >
                               <SelectValue />
@@ -519,7 +518,6 @@ export function TemplateEditorDialog({
                             }
                           >
                             <SelectTrigger
-                              chevronsDouble
                               className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground"
                             >
                               <SelectValue />
@@ -541,7 +539,6 @@ export function TemplateEditorDialog({
                             }
                           >
                             <SelectTrigger
-                              chevronsDouble
                               className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground"
                             >
                               <SelectValue />
@@ -637,7 +634,6 @@ export function TemplateEditorDialog({
                               }
                             >
                               <SelectTrigger
-                                chevronsDouble
                                 className="h-9 rounded-none border-0 bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0"
                               >
                                 <SelectValue />
@@ -669,7 +665,6 @@ export function TemplateEditorDialog({
                                 }
                               >
                                 <SelectTrigger
-                                  chevronsDouble
                                   className="h-9 rounded-none border-0 border-r border-border-inverse bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0"
                                 >
                                   <SelectValue />
@@ -689,7 +684,6 @@ export function TemplateEditorDialog({
                                 }
                               >
                                 <SelectTrigger
-                                  chevronsDouble
                                   className="h-9 rounded-none border-0 bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0"
                                 >
                                   <SelectValue />
@@ -792,7 +786,6 @@ export function TemplateEditorDialog({
                       }
                     >
                       <SelectTrigger
-                        chevronsDouble
                         className="shadow-xs h-auto w-fit gap-1 rounded-md border border-border bg-background-primary px-2 py-1.5 text-xs font-medium"
                       >
                         {(() => {

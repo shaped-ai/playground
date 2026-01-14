@@ -35,6 +35,7 @@ import { ResultsPreviewHorizontal } from "./results-preview-horizontal"
 import { ResultsPreviewList } from "./results-preview-list"
 import { ResultsPreviewMasonry } from "./results-preview-masonry"
 import { FeatureType, QueryTab, UserRecommendationTab } from "@/types/enums"
+import type { Feature } from "@/types"
 import { ModelDetails } from "@/types"
 import { ResultsTable } from "@/components/results-table"
 import { cn } from "@/lib/utils"
@@ -446,13 +447,13 @@ export function QueryResults({
   const [rankFeatures, rankImageFeatures] = [
     [
       ...(
-        engineDetails?.model_schema?.[results?.entity_type ?? "item"] ?? []
-      ).filter((d) => d.type != FeatureType.IMAGE),
+        (engineDetails?.model_schema as Record<string, Feature[]> | undefined)?.[results?.entity_type ?? "item"] ?? []
+      ).filter((d: Feature) => d.type != FeatureType.IMAGE),
     ],
     [
       ...(
-        engineDetails?.model_schema?.[results?.entity_type ?? "item"] ?? []
-      ).filter((d) => d.type == FeatureType.IMAGE),
+        (engineDetails?.model_schema as Record<string, Feature[]> | undefined)?.[results?.entity_type ?? "item"] ?? []
+      ).filter((d: Feature) => d.type == FeatureType.IMAGE),
     ],
   ]
 

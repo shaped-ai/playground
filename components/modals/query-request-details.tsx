@@ -245,7 +245,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails.model_uri,
-              queryStep
+              Number(queryStep)
             ),
             getRankApiMethodFromConfig(
               configuration,
@@ -257,7 +257,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails,
-              queryStep
+              Number(queryStep)
             )
           )
         : getNodeCodeSnippet(
@@ -267,7 +267,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails.model_uri,
-              queryStep
+              Number(queryStep)
             ),
             getRankApiMethodFromConfig(
               configuration,
@@ -279,7 +279,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails,
-              queryStep
+              Number(queryStep)
             )
           )
     return codeSnippet
@@ -306,7 +306,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails.model_uri,
-              queryStep
+              Number(queryStep)
             ),
             getRankApiMethodFromConfig(
               configuration,
@@ -318,7 +318,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails,
-              queryStep
+              Number(queryStep)
             )
           )
         : getNodeCodeSnippet(
@@ -328,7 +328,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails.model_uri,
-              queryStep
+              Number(queryStep)
             ),
             getRankApiMethodFromConfig(
               configuration,
@@ -340,7 +340,7 @@ export function QueryRequestDetails({
               currentQueryTab,
               currentRankTab,
               modelDetails,
-              queryStep
+              Number(queryStep)
             )
           )
     return getCopyContent

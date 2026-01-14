@@ -87,7 +87,7 @@ export function QueryPageContent({}: {}) {
     useSavedQueries(selectedEngine)
 
   const selectedSavedQueryObject = selectedSavedQuery
-    ? savedQueriesData?.queries?.find((q) => q.id === selectedSavedQuery) ||
+    ? savedQueriesData?.queries?.find((q: SavedQuery) => q.id === selectedSavedQuery) ||
       null
     : null
 
@@ -99,7 +99,7 @@ export function QueryPageContent({}: {}) {
     data: engineDetails,
     isLoading: isLoadingEngineDetails,
     isError,
-    organizationError,
+    error: organizationError,
   } = useEngineDetails(selectedEngine, {
     isDemoModel: false,
   })
@@ -139,7 +139,7 @@ export function QueryPageContent({}: {}) {
 
     if (pendingRestoration.savedQueryId) {
       const query = savedQueriesData.queries.find(
-        (q) => q.id === pendingRestoration.savedQueryId
+        (q: SavedQuery) => q.id === pendingRestoration.savedQueryId
       )
       if (query) {
         updates.savedQueryId = query.id
@@ -444,8 +444,8 @@ export function QueryPageContent({}: {}) {
             // Handle both wrapped { data: { results: [...] } } and unwrapped { results: [...] } structures
             const resultsArray = Array.isArray(results?.data?.results)
               ? results.data.results
-              : Array.isArray(results?.results)
-              ? results.results
+              : Array.isArray((results as any)?.results)
+              ? (results as any).results
               : []
             const rawResults = { results: resultsArray }
             const responseData = results?.data || results
@@ -510,8 +510,8 @@ export function QueryPageContent({}: {}) {
             // Handle both wrapped { data: { results: [...] } } and unwrapped { results: [...] } structures
             const resultsArray = Array.isArray(results?.data?.results)
               ? results.data.results
-              : Array.isArray(results?.results)
-              ? results.results
+              : Array.isArray((results as any)?.results)
+              ? (results as any).results
               : []
             const responseData = results?.data || results
             console.log("[DEBUG] Raw results after check:", { results: resultsArray })
@@ -721,7 +721,7 @@ export function QueryPageContent({}: {}) {
         <div className="relative min-h-0 flex-1 overflow-hidden">
           {isSplitView ? (
             <ResizablePanelGroup
-              direction="horizontal"
+              {...({ direction: "horizontal" } as any)}
               className="bg-red-600"
               style={{ height: "calc(100vh - 65px)" }}
             >

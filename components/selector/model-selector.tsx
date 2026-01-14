@@ -13,7 +13,14 @@ import { AccountType } from "@/types/enums"
 import { ComboSearchbox } from "./combo-search-box"
 import { useRouter } from "next/navigation"
 import { PLAYGROUND_VIEWER_EMAIL, SHAPED_PLAYGROUND_URL } from "@/lib/constants"
-import { usePostHog } from "posthog-js/react"
+// @ts-ignore - posthog-js/react may not be installed
+let usePostHog: any = () => null
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  usePostHog = require("posthog-js/react").usePostHog
+} catch {
+  // posthog not installed
+}
 import { cn } from "@/lib/utils"
 
 interface ModelSelectorProps extends React.HTMLAttributes<HTMLDivElement> {

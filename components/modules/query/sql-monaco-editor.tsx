@@ -151,7 +151,7 @@ export function SqlMonacoEditor({
 
     try {
       monaco.languages.registerCompletionItemProvider("sql", {
-        provideCompletionItems: (model, position) => {
+        provideCompletionItems: (model: any, position: any) => {
           const word = model.getWordUntilPosition(position)
           const range = {
             startLineNumber: position.lineNumber,
@@ -350,7 +350,7 @@ export function SqlMonacoEditor({
         height="100%"
         language="sql"
         value={value}
-        onChange={(newValue) => onChange(newValue || "")}
+        onChange={(newValue: string | undefined) => onChange(newValue || "")}
         onMount={handleEditorDidMount}
         theme={themeName}
         options={{

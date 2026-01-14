@@ -108,7 +108,7 @@ export function ResultsTable({
   updateQueryParams,
 }: ResultTableProps) {
   const path = usePathname()
-  const [imageLoaded, setImageLoaded] = useState({})
+  const [imageLoaded, setImageLoaded] = useState<Record<string, string>>({})
   const [imagesInView, setImagesInView] = useState<Set<string>>(new Set())
   const imagesInViewRef = useRef<Set<string>>(new Set())
   const nodeRegistryRef = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -230,9 +230,9 @@ export function ResultsTable({
   useEffect(() => {
     setHeaders([
       ...imageFeatures,
-      ...features.filter(({ name }) => !name.startsWith("_derived_")),
+      ...features.filter(({ name }: { name: string }) => !name.startsWith("_derived_")),
       ...(hasScore ? [{ name: "score", type: "Numerical" }] : []),
-      ...features.filter(({ name }) => name.startsWith("_derived_")),
+      ...features.filter(({ name }: { name: string }) => name.startsWith("_derived_")),
     ])
   }, [currentRankTab, features, imageFeatures])
 
@@ -293,7 +293,7 @@ export function ResultsTable({
           colType === FeatureType.TIMESTAMP
         ) {
           const [start, end] = values as [number, number]
-          return filteredData.filter((item) => {
+          return filteredData.filter((item: Record<string, any>) => {
             const raw = item[colName]
 
             if (colType === FeatureType.TIMESTAMP) {
@@ -307,7 +307,7 @@ export function ResultsTable({
 
         if (colType === FeatureType.TEXT) {
           const needles = values as string[]
-          return filteredData.filter((item) => {
+          return filteredData.filter((item: Record<string, any>) => {
             const text = item[colName] as string | undefined
             return text ? needles.some((n) => text.includes(n)) : false
           })
@@ -318,7 +318,7 @@ export function ResultsTable({
           colType === FeatureType.TEXT_SEQUENCE
         ) {
           const needles = values as string[]
-          return filteredData.filter((item) => {
+          return filteredData.filter((item: Record<string, any>) => {
             const arr = item[colName] as string[] | undefined
             return Array.isArray(arr)
               ? arr.some((elem) => needles.some((n) => elem.includes(n)))
@@ -331,7 +331,7 @@ export function ResultsTable({
           colType === FeatureType.NUMERICAL_SEQUENCE
         ) {
           const [start, end] = values as [number, number]
-          return filteredData.filter((item) => {
+          return filteredData.filter((item: Record<string, any>) => {
             const arr = item[colName] as number[] | undefined
             return Array.isArray(arr)
               ? arr.some((num) => start <= num && num <= end)
@@ -340,7 +340,7 @@ export function ResultsTable({
         }
 
         const allowedValues = values as string[]
-        return filteredData.filter((item) => {
+        return filteredData.filter((item: Record<string, any>) => {
           const field = item[colName]
 
           if (Array.isArray(field)) {
@@ -352,7 +352,7 @@ export function ResultsTable({
       }, data)
     }
 
-    const sortData = (tableData) => {
+    const sortData = (tableData: Record<string, any>[]) => {
       const headerName = sortingOrder.colName
       const headerType = headers.find(
         (header) => header.name == headerName
@@ -360,7 +360,7 @@ export function ResultsTable({
 
       if (sortingOrder.order == "Ascending") {
         if (headerType == FeatureType.TEXT) {
-          tableData.sort((a, b) => a[headerName].length - b[headerName].length)
+          tableData.sort((a: Record<string, any>, b: Record<string, any>) => a[headerName].length - b[headerName].length)
           setTableData([...tableData])
         } else if (headerType == FeatureType.TIMESTAMP) {
           tableData.sort((a, b) => {
@@ -370,22 +370,22 @@ export function ResultsTable({
           })
           setTableData([...tableData])
         } else {
-          tableData.sort((a, b) => a[headerName] - b[headerName])
+          tableData.sort((a: Record<string, any>, b: Record<string, any>) => a[headerName] - b[headerName])
           setTableData([...tableData])
         }
       } else {
         if (headerType == FeatureType.TEXT) {
-          tableData.sort((a, b) => b[headerName].length - a[headerName].length)
+          tableData.sort((a: Record<string, any>, b: Record<string, any>) => b[headerName].length - a[headerName].length)
           setTableData([...tableData])
         } else if (headerType == FeatureType.TIMESTAMP) {
-          tableData.sort((a, b) => {
+          tableData.sort((a: Record<string, any>, b: Record<string, any>) => {
             const timeA = moment(a[headerName]).unix()
             const timeB = moment(b[headerName]).unix()
             return timeB - timeA
           })
           setTableData([...tableData])
         } else {
-          tableData.sort((a, b) => b[headerName] - a[headerName])
+          tableData.sort((a: Record<string, any>, b: Record<string, any>) => b[headerName] - a[headerName])
           setTableData([...tableData])
         }
       }
@@ -401,14 +401,14 @@ export function ResultsTable({
     }
   }, [filters, resultsData, sortingOrder])
 
-  const handleImageLoad = (itemId) => {
+  const handleImageLoad = (itemId: string) => {
     setImageLoaded((prevState) => ({
       ...prevState,
       [itemId]: "Loaded",
     }))
   }
 
-  const handleImageError = (itemId) => {
+  const handleImageError = (itemId: string) => {
     setImageLoaded((prevState) => ({
       ...prevState,
       [itemId]: "Error",
@@ -518,7 +518,7 @@ export function ResultsTable({
     return ((count / total_rows) * 100).toFixed(1)
   }
 
-  const handleFilter = (e, header, idx) => {
+  const handleFilter = (e: React.MouseEvent, header: any, idx: number) => {
     e.stopPropagation()
     if (showFilterPopUp[idx]) {
       showFilterPopUp[idx] = false
@@ -577,16 +577,16 @@ export function ResultsTable({
   const getUniqueRows = (headerName: string) => {
     const uniqueRows: any[] = []
     if (Array.isArray(resultsData[0]?.[headerName])) {
-      const uniqueTypes = {}
+      const uniqueTypes: Record<string, number> = {}
       for (let i = 0; i < resultsData.length; i++) {
-        resultsData[i][headerName]?.forEach((d) => {
+        resultsData[i][headerName]?.forEach((d: any) => {
           if (uniqueTypes[d]) uniqueTypes[d]++
           else uniqueTypes[d] = 1
         })
       }
       for (const key in uniqueTypes) uniqueRows.push([key, uniqueTypes[key]])
     } else {
-      const uniqueTypes = {}
+      const uniqueTypes: Record<string, number> = {}
       for (let i = 0; i < resultsData.length; i++) {
         if (uniqueTypes[resultsData[i][headerName]])
           uniqueTypes[resultsData[i][headerName]]++
@@ -594,11 +594,11 @@ export function ResultsTable({
       }
       for (const key in uniqueTypes) uniqueRows.push([key, uniqueTypes[key]])
     }
-    uniqueRows.sort((a, b) => b[1] - a[1])
+    uniqueRows.sort((a: any[], b: any[]) => b[1] - a[1])
     return uniqueRows
   }
 
-  const getSliderRange = (name, type): [number, number] => {
+  const getSliderRange = (name: string, type: string): [number, number] => {
     if (
       FeatureType.getAllNumericalTypes().includes(type) ||
       type == FeatureType.TIMESTAMP ||
@@ -622,7 +622,7 @@ export function ResultsTable({
     } else return [0, 0]
   }
 
-  const isValidUrl = (src) => {
+  const isValidUrl = (src: string) => {
     try {
       new URL(src)
     } catch (e) {
@@ -1127,7 +1127,7 @@ export function ResultsTable({
                 </div>
                 {/* tablecells */}
                 {tableData.map((row, index) =>
-                  imageFeatures.find((f) => f.name == name) ? (
+                  imageFeatures.find((f: any) => f.name == name) ? (
                     <div
                       key={index}
                       onMouseEnter={() => setHoveredColNum(colIdx)}

@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import React from "react"
 import { Icons } from "@/components/icons/icons"
 
-export default function ImageSkeleton({ className }) {
+export default function ImageSkeleton({ className }: { className?: string }) {
   return (
     <div
       role="status"

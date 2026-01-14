@@ -175,8 +175,8 @@ export function ResultsPreviewHorizontal({
           <div
             key={field.id}
             className={`relative overflow-hidden rounded-t-lg bg-muted ${
-              widthClasses[field.size || "full"]
-            } ${heightClasses[field.size || "large"]}`}
+              widthClasses[(field.size || "full") as keyof typeof widthClasses]
+            } ${heightClasses[(field.size || "large") as keyof typeof heightClasses]}`}
           >
             <Image
               src={value || "/placeholder.svg"}

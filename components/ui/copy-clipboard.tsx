@@ -37,7 +37,7 @@ export function CopyClipboard({
       ) : (
         <button
           onClick={() => {
-            copyToClipboard(text)
+            copyToClipboard(text || "")
             setCopied(true)
             setTimeout(() => {
               setCopied(false)

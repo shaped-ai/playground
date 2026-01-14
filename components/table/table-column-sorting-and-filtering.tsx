@@ -51,7 +51,7 @@ export default function TableColumnSortingAndFiltering({
 
   const totalFilters = filters.find((e) => e.colName == header)?.values.length
 
-  const handleSort = (e, order) => {
+  const handleSort = (e: React.MouseEvent, order: string) => {
     e.stopPropagation()
     setShowFilterPopUp([])
     if (sortingOrder.colName == header) {
@@ -63,7 +63,7 @@ export default function TableColumnSortingAndFiltering({
     }
   }
 
-  const handleFilter = (e) => {
+  const handleFilter = (e: React.MouseEvent) => {
     e.stopPropagation()
     setShowFilterOptions(true)
   }
@@ -75,7 +75,7 @@ export default function TableColumnSortingAndFiltering({
   const handleDeleteFilter = (deletedValue: string) => {
     const targetCol = filters.find((e) => e.colName == header)
     const remainingFilters = targetCol.values.filter(
-      (filter) => filter != deletedValue
+      (filter: string) => filter != deletedValue
     )
     const arr = filters.filter((e) => e.colName != header)
     if (remainingFilters.length > 0)
@@ -93,7 +93,7 @@ export default function TableColumnSortingAndFiltering({
     filterInputBoxRef.current?.focus()
   }
 
-  const handleAddTextQuery = (e) => {
+  const handleAddTextQuery = (e: React.KeyboardEvent) => {
     if (textQuery && e.key == "Enter" && suggestions.length == 0) {
       const targetFilter = filters.find((e) => e.colName == header)
       if (targetFilter) {
@@ -270,7 +270,7 @@ export default function TableColumnSortingAndFiltering({
                 <div className="mb-2 flex flex-wrap items-center gap-2 break-all">
                   {filters
                     .find((e) => e.colName == header)
-                    ?.values.map((filter, idx) => (
+                    ?.values.map((filter: string, idx: number) => (
                       <div
                         key={idx}
                         className="flex max-w-full items-center gap-[2px] rounded border border-border-accent bg-background-primary py-[2px] pl-1 pr-[2px] hover:bg-background-secondary"

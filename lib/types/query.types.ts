@@ -63,6 +63,7 @@ export interface QueryParameter {
   type: "string" | "number" | "boolean"
   description?: string
   defaultValue?: any
+  value?: any
   required?: boolean
 }
 

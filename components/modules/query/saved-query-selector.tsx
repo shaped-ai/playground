@@ -1,18 +1,18 @@
 "use client"
 
-import { FolderClosed, Loader2 } from "lucide-react"
+import { FolderClosed } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { SavedQuery } from "@/lib/types/query.types"
+import { DEMO_ENGINES } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { ModelStatus } from "@/types/enums"
 import { ModelDetails } from "@/types"
+import { useMemo } from "react"
 
 interface SavedQuerySelectorProps {
   engine: string
   selectedQueryId?: string | null
-  onQuerySelect: (query: string | null) => void
-  queries: string[]
-  isLoading?: boolean
+  onQuerySelect: (query: SavedQuery | null) => void
   engineDetails?: ModelDetails
 }
 
@@ -20,16 +20,16 @@ export function SavedQuerySelector({
   engine,
   selectedQueryId,
   onQuerySelect,
-  queries,
-  isLoading = false,
   engineDetails,
 }: SavedQuerySelectorProps) {
-  const handleQueryClick = (query: string) => {
-    if (selectedQueryId === query) {
-      onQuerySelect(null)
-    } else {
-      onQuerySelect(query)
-    }
+  const savedQueries = useMemo(() => {
+    if (!engine) return []
+    const demoEngine = DEMO_ENGINES.find((e) => e.id === engine)
+    return (demoEngine?.saved_queries as SavedQuery[]) || []
+  }, [engine])
+
+  const handleQueryClick = (query: SavedQuery) => {
+    onQuerySelect(query)
   }
 
   return (
@@ -43,27 +43,19 @@ export function SavedQuerySelector({
       )}
     >
       <div className="flex shrink-0 items-center gap-1">
-        <FolderClosed className="size-4 text-accent-brand-purple" />
-        <span className="text-xs font-bold text-foreground">Saved</span>
+        <span className="text-xs font-bold text-foreground">Try a query</span>
       </div>
 
       <div
         className={cn(
           "min-w-0 flex-1 overflow-x-auto",
-          queries && queries.length > 0
+          savedQueries && savedQueries.length > 0
             ? "scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
             : ""
         )}
       >
         <div className="flex items-center gap-1">
-          {isLoading ? (
-            <div className="flex items-center gap-2 px-2 py-1">
-              <Loader2 className="size-3 animate-spin text-foreground-muted" />
-              <span className="text-sm text-foreground-muted">
-                Loading queries...
-              </span>
-            </div>
-          ) : queries.length === 0 ? (
+          {savedQueries.length === 0 ? (
             <div className="flex items-center">
               <span className="px-2 text-xs font-medium text-foreground-muted">
                 No saved queries.{" "}
@@ -78,22 +70,20 @@ export function SavedQuerySelector({
               </span>
             </div>
           ) : (
-            queries.map((query: string) => {
-              const isSelected = selectedQueryId === query
+            savedQueries.map((query: SavedQuery) => {
               return (
                 <Button
-                  key={query}
-                  variant={isSelected ? "default" : "outline"}
+                  key={query.id}
+                  variant="outline"
                   size="sm"
                   onClick={() => handleQueryClick(query)}
                   className={cn(
                     "h-auto shrink-0 rounded-[38px] px-2 py-1 text-xs font-medium transition-all",
-                    isSelected
-                      ? "border-border-active bg-[#6338bc] text-accent-brand-off-white hover:bg-[#6338bc]/90"
-                      : "border-border-muted bg-background-primary text-foreground hover:bg-background-secondary"
+                    "border-border-muted bg-background-primary text-foreground hover:bg-background-secondary",
+                    "active:scale-95 active:transition-transform"
                   )}
                 >
-                  {query}
+                  {query.name}
                 </Button>
               )
             })

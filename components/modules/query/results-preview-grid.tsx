@@ -71,19 +71,13 @@ function TemplateCard({
     if (!field.visible) return null
     const value = item[field.dataKey]
     if (!value) return null
+    const displayLabel = field.label?.trim() || field.dataKey
 
     const sizeClasses = {
       small: "text-xs",
       medium: "text-sm",
       large: "text-base",
       full: "text-lg",
-    }
-
-    const widthClasses = {
-      small: "w-32",
-      medium: "w-48",
-      large: "w-64",
-      full: "w-full",
     }
 
     const heightClasses = {
@@ -103,7 +97,7 @@ function TemplateCard({
             {value && typeof value === "string" && !imageError ? (
               <Image
                 src={value || "/placeholder.svg"}
-                alt={field.label || ""}
+                alt={displayLabel}
                 fill
                 className="rounded-t-lg object-cover"
                 onError={() => setImageError(true)}
@@ -122,7 +116,7 @@ function TemplateCard({
         return (
           <div key={field.id} className={sizeClasses[field.size]}>
             <span className="text-sm font-medium text-foreground">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <span
@@ -148,7 +142,7 @@ function TemplateCard({
             }`}
           >
             <span className="text-sm font-medium text-foreground">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <span className="font-semibold text-foreground">{value}</span>
@@ -159,7 +153,7 @@ function TemplateCard({
         return (
           <div key={field.id} className={sizeClasses[field.size]}>
             <span className="text-sm font-medium text-foreground">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <Badge
@@ -176,7 +170,7 @@ function TemplateCard({
         return (
           <div key={field.id} className={sizeClasses[field.size]}>
             <span className="text-sm font-medium text-foreground">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <span className="text-sm text-foreground">

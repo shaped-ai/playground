@@ -1,8 +1,6 @@
 import type { EditorMode, ParameterValue, ResultViewMode } from "@/lib/types/query.types"
 
-export interface QueryTabState {
-  id: string
-  name: string
+export interface QueryPageState {
   content: string
   language: "yaml" | "sql"
   editorMode?: EditorMode
@@ -10,11 +8,6 @@ export interface QueryTabState {
   savedQueryId?: string
   parameterValues?: ParameterValue
   previewMode?: ResultViewMode
-}
-
-export interface QueryPageState {
-  tabs: QueryTabState[]
-  activeTabId: string
 }
 
 /**

@@ -132,7 +132,7 @@ export function TemplateEditorDialog({
       defaultFields.push({
         id: crypto.randomUUID(),
         type: "image",
-        label: "Image",
+        label: "",
         dataKey: imageKey,
         size: "medium",
         width: "full",
@@ -145,7 +145,7 @@ export function TemplateEditorDialog({
       defaultFields.push({
         id: crypto.randomUUID(),
         type: "text",
-        label: "Title",
+        label: "",
         dataKey: titleKey,
         size: "medium",
         width: "full",
@@ -158,7 +158,7 @@ export function TemplateEditorDialog({
       defaultFields.push({
         id: crypto.randomUUID(),
         type: "text",
-        label: "Description",
+        label: "",
         dataKey: descKey,
         size: "small",
         width: "full",
@@ -183,7 +183,7 @@ export function TemplateEditorDialog({
     const newField: TemplateField = {
       id: crypto.randomUUID(),
       type: "text",
-      label: "New Field",
+      label: "",
       dataKey: availableKeys[0] || "",
       size: "medium",
       width: "full",
@@ -283,6 +283,7 @@ export function TemplateEditorDialog({
 
     const value = sampleData[field.dataKey]
     if (!value) return null
+    const displayLabel = field.label?.trim() || field.dataKey || "Field"
 
     const sizeClasses = {
       small: "text-sm",
@@ -317,7 +318,7 @@ export function TemplateEditorDialog({
           >
             <Image
               src={value.toString() || "/placeholder.svg"}
-              alt={field.label || "Image"}
+              alt={displayLabel}
               fill
               className="object-cover"
               unoptimized
@@ -351,7 +352,7 @@ export function TemplateEditorDialog({
             )}
           >
             <span className="font-medium">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             {value.toString()}
           </div>
@@ -361,7 +362,7 @@ export function TemplateEditorDialog({
         return (
           <div className="flex items-center gap-1">
             <span className="text-sm font-medium text-foreground">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             <div className="flex items-center"></div>
             <span className="ml-1 text-sm font-medium text-foreground">
@@ -501,7 +502,7 @@ export function TemplateEditorDialog({
                             >
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="z-500 max-h-40 overflow-y-auto">
+                            <SelectContent className="z-500 max-h-40 overflow-y-auto bg-background-primary text-foreground">
                               <SelectItem value="image">Image</SelectItem>
                               <SelectItem value="video">Video</SelectItem>
                               <SelectItem value="text">Text</SelectItem>
@@ -522,7 +523,7 @@ export function TemplateEditorDialog({
                             >
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="z-500">
+                            <SelectContent className="z-500 bg-background-primary text-foreground">
                               <SelectItem value="image">Image</SelectItem>
                               <SelectItem value="video">Video</SelectItem>
                               <SelectItem value="text">Text</SelectItem>
@@ -543,7 +544,7 @@ export function TemplateEditorDialog({
                             >
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="z-500">
+                            <SelectContent className="z-500 bg-background-primary text-foreground">
                               <SelectItem value="image">Image</SelectItem>
                               <SelectItem value="video">Video</SelectItem>
                               <SelectItem value="text">Text</SelectItem>
@@ -638,7 +639,7 @@ export function TemplateEditorDialog({
                               >
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="z-500 max-h-40 overflow-y-auto">
+                              <SelectContent className="z-500 max-h-40 overflow-y-auto bg-background-primary text-foreground">
                                 {availableKeys.map((key) => (
                                   <SelectItem key={key} value={key}>
                                     {key}
@@ -669,7 +670,7 @@ export function TemplateEditorDialog({
                                 >
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="z-500 max-h-40 overflow-y-auto">
+                                <SelectContent className="z-500 max-h-40 overflow-y-auto bg-background-primary text-foreground">
                                   {availableKeys.map((key) => (
                                     <SelectItem key={key} value={key}>
                                       {key}
@@ -688,7 +689,7 @@ export function TemplateEditorDialog({
                                 >
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="z-500">
+                                <SelectContent className="z-500 bg-background-primary text-foreground">
                                   <SelectItem value="small">Small</SelectItem>
                                   <SelectItem value="medium">Medium</SelectItem>
                                   <SelectItem value="large">Large</SelectItem>
@@ -736,7 +737,7 @@ export function TemplateEditorDialog({
                               <SelectTrigger className="h-9 rounded-none border-0 bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="z-500 max-h-40 overflow-y-auto">
+                              <SelectContent className="z-500 max-h-40 overflow-y-auto bg-background-primary text-foreground">
                                 {availableKeys.map((key) => (
                                   <SelectItem key={key} value={key}>
                                     {key}
@@ -764,7 +765,7 @@ export function TemplateEditorDialog({
             </div>
           </ResizablePanel>
 
-          <ResizableHandle withHandle className="mr-1" />
+          <ResizableHandle className="mr-1" />
 
           <ResizablePanel
             defaultSize={40}
@@ -803,7 +804,7 @@ export function TemplateEditorDialog({
                           )
                         })()}
                       </SelectTrigger>
-                      <SelectContent className="z-500 whitespace-nowrap">
+                      <SelectContent className="z-500 whitespace-nowrap bg-background-primary text-foreground">
                         {previewViewModes.map((mode) => {
                           const Icon = mode.icon
                           return (

@@ -55,6 +55,7 @@ export function ResultsPreviewList({
   const renderField = (row: QueryResultRow, field: any, isCompact = false) => {
     const value = row[field.dataKey]
     if (!value || !field.visible) return null
+    const displayLabel = field.label?.trim() || field.dataKey
 
     switch (field.type) {
       case "image":
@@ -62,7 +63,7 @@ export function ResultsPreviewList({
       case "rating":
         return (
           <div key={field.id} className="flex items-center text-xs font-medium">
-            <span>{field.label}: </span> &nbsp;
+            <span>{displayLabel}: </span> &nbsp;
             <span>{Array.isArray(value) ? value.join(", ") : value}</span>
           </div>
         )
@@ -72,14 +73,14 @@ export function ResultsPreviewList({
             key={field.id}
             className="flex items-center text-xs text-muted-foreground"
           >
-            <span>{field.label}: </span> &nbsp;
+            <span>{displayLabel}: </span> &nbsp;
             <span>{Array.isArray(value) ? value.join(", ") : value}</span>
           </div>
         )
       case "badge":
         return (
           <div key={field.id} className="flex items-center">
-            <span>{field.label}: </span> &nbsp;
+            <span>{displayLabel}: </span> &nbsp;
             <Badge key={field.id} variant="secondary" className="text-xs">
               <span>{Array.isArray(value) ? value.join(", ") : value}</span>
             </Badge>
@@ -92,7 +93,7 @@ export function ResultsPreviewList({
               key={field.id}
               className="flex items-center truncate text-sm font-semibold"
             >
-              <span>{field.label}: </span> &nbsp;
+              <span>{displayLabel}: </span> &nbsp;
               <span>{Array.isArray(value) ? value.join(", ") : value}</span>
             </h4>
           )
@@ -102,7 +103,7 @@ export function ResultsPreviewList({
             key={field.id}
             className="flex items-center truncate text-xs text-muted-foreground"
           >
-            <span>{field.label}: </span> &nbsp;
+            <span>{displayLabel}: </span> &nbsp;
             <span>{Array.isArray(value) ? value.join(", ") : value}</span>
           </p>
         )
@@ -153,7 +154,7 @@ export function ResultsPreviewList({
                         <Image
                           key={field.id}
                           src={imageUrl || "/placeholder.svg"}
-                          alt={field.label || ""}
+                          alt={field.label?.trim() || field.dataKey}
                           fill
                           className="object-cover"
                           unoptimized

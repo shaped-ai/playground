@@ -3,7 +3,7 @@
 import type { QueryResultRow } from "@/lib/types/query.types"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { Film, Star, Calendar, Loader2 } from "lucide-react"
+import { Film, Star, Calendar } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import type { CardTemplate, TemplateField } from "@/lib/types/template.types"
 import { getTemplate } from "@/lib/utils/template-storage"
@@ -68,11 +68,13 @@ function MasonryCard({
 }) {
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null)
 
   const renderField = (field: TemplateField) => {
     if (!field.visible) return null
     const value = item[field.dataKey]
     if (!value) return null
+    const displayLabel = field.label?.trim() || field.dataKey
 
     const sizeClasses = {
       small: "text-xs",
@@ -91,7 +93,7 @@ function MasonryCard({
             key={field.id}
             className={cn(sizeClasses[field.size], "flex items-center")}
           >
-            <span>{field.label ? `${field.label}: ` : ""}</span> &nbsp;
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <span
               className={`${
                 field.size === "large"
@@ -159,10 +161,7 @@ function MasonryCard({
   const otherFields = visibleFields.filter((f) => f.type !== "image")
   const imageField = imageFields[0]
   const imageValue = imageField ? item[imageField.dataKey] : null
-
-  const baseHeight = 300
-  const heightVariance = 220
-  const height = `${baseHeight + ((index * 83) % heightVariance)}px`
+  const imageLabel = imageField?.label?.trim() || imageField?.dataKey || "Image"
 
   const marginTop = `${
     index % 5 === 0
@@ -192,15 +191,20 @@ function MasonryCard({
       <div className="relative overflow-hidden rounded-2xl shadow-md transition-all duration-500 hover:shadow-2xl">
         <div
           className="relative w-full overflow-hidden bg-muted"
-          style={{ height }}
+          style={{ aspectRatio: imageAspectRatio ?? "4 / 3" }}
         >
           {imageValue && typeof imageValue === "string" && !imageError ? (
             <Image
               src={imageValue || "/placeholder.svg"}
-              alt={imageField?.label || "Image"}
+              alt={imageLabel}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-110"
               onError={() => setImageError(true)}
+              onLoadingComplete={({ naturalWidth, naturalHeight }) => {
+                if (naturalWidth && naturalHeight) {
+                  setImageAspectRatio(naturalWidth / naturalHeight)
+                }
+              }}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               unoptimized
             />

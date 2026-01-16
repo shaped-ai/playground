@@ -10,6 +10,14 @@
 @source "../lib/**/*.{ts,tsx}";
 
 @layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    min-height: 100vh;
+  }
 
   /* -------------------------------------------------------------------
      ☀️ LIGHT THEME

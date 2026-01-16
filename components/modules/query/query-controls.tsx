@@ -14,12 +14,10 @@ interface QueryControlsProps {
   selectedEngine: string
   onEngineChange: (engine: string) => void
   selectedQueryId?: string | null
-  onSavedQuerySelect: (query: string | null) => void
+  onSavedQuerySelect: (query: SavedQuery | null) => void
   onRun: () => void
   isExecuting?: boolean
   showRunButton?: boolean
-  savedQueries?: string[]
-  isLoadingQueries?: boolean
   isResultsVisible?: boolean
   onToggleResults?: () => void
   engineDetails?: ModelDetails
@@ -33,14 +31,12 @@ export function QueryControls({
   onRun,
   isExecuting,
   showRunButton = true,
-  savedQueries = [],
-  isLoadingQueries = false,
   isResultsVisible = true,
   onToggleResults,
   engineDetails,
 }: QueryControlsProps) {
   const handleSavedQuerySelect = useCallback(
-    (query: string | null) => {
+    (query: SavedQuery | null) => {
       onSavedQuerySelect(query)
     },
     [onSavedQuerySelect]
@@ -95,8 +91,6 @@ export function QueryControls({
           engine={selectedEngine}
           selectedQueryId={selectedQueryId}
           onQuerySelect={handleSavedQuerySelect}
-          queries={savedQueries}
-          isLoading={isLoadingQueries}
         />
       )}
     </div>

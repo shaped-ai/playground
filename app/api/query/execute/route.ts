@@ -16,9 +16,18 @@ export async function POST(req: NextRequest) {
     let resp: any = null
     console.log("inside execute query", engine, query, language, parameters)
 
+
+    // Build request body with parameters if provided
+    const requestBody: any = {
+      query,
+      parameters,
+      return_metadata: true,
+      return_explanation: true,
+    }
+
     resp = await axios.post(
       `${getApiBaseUrl()}/engines/${engine}/query`,
-      { query, return_metadata: true, return_explanation: true },
+      requestBody,
       { headers: headers }
     )
 

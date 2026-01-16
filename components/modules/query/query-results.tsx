@@ -14,17 +14,10 @@ import { TemplateEditorDialog } from "./template-editor-dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Loader2,
-  Grid3x3,
-  List,
-  Columns,
-  Newspaper,
   LayoutList,
-  ListOrdered,
   LayoutPanelTop,
-  LayoutGrid,
   GalleryVertical,
   GalleryHorizontalEnd,
-  GalleryHorizontal,
   TriangleAlert,
   ArrowUpRight,
   FileCode,
@@ -42,28 +35,17 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 const previewViewModes = [
-  { value: ResultViewMode.PREVIEW_GRID, label: "Grid", icon: LayoutGrid },
+  {
+    value: ResultViewMode.PREVIEW_MASONRY,
+    label: "Masonry",
+    icon: LayoutPanelTop,
+  },
   { value: ResultViewMode.PREVIEW_FEED, label: "Feed", icon: GalleryVertical },
   { value: ResultViewMode.PREVIEW_LIST, label: "List", icon: LayoutList },
   {
     value: ResultViewMode.PREVIEW_CAROUSEL,
     label: "Carousel",
     icon: GalleryHorizontalEnd,
-  },
-  {
-    value: ResultViewMode.PREVIEW_TICKER,
-    label: "Ticker",
-    icon: GalleryHorizontal,
-  },
-  {
-    value: ResultViewMode.PREVIEW_MASONRY,
-    label: "Masonry",
-    icon: LayoutPanelTop,
-  },
-  {
-    value: ResultViewMode.JSON,
-    label: "JSON",
-    icon: FileCode,
   },
 ]
 
@@ -260,8 +242,6 @@ interface QueryResultsProps {
   results: QueryResult | null
   isExecuting?: boolean
   error?: Error | null
-  isEditorVisible?: boolean
-  onToggleEditor?: () => void
   previewMode?: ResultViewMode
   onPreviewModeChange?: (mode: ResultViewMode) => void
   engineName: string
@@ -274,8 +254,6 @@ export function QueryResults({
   results,
   isExecuting,
   error,
-  isEditorVisible = true,
-  onToggleEditor,
   previewMode: externalPreviewMode,
   onPreviewModeChange,
   engineName,
@@ -372,7 +350,7 @@ export function QueryResults({
               defaultFields.push({
                 id: crypto.randomUUID(),
                 type: "image",
-                label: "Image",
+                label: "",
                 dataKey: imageKey,
                 size: "medium",
                 width: "full",
@@ -385,7 +363,7 @@ export function QueryResults({
               defaultFields.push({
                 id: crypto.randomUUID(),
                 type: "text",
-                label: "Title",
+                label: "",
                 dataKey: titleKey,
                 size: "medium",
                 width: "full",
@@ -396,7 +374,7 @@ export function QueryResults({
               defaultFields.push({
                 id: crypto.randomUUID(),
                 type: "text",
-                label: "Description",
+                label: "",
                 dataKey: descKey,
                 size: "small",
                 width: "full",
@@ -407,7 +385,7 @@ export function QueryResults({
               defaultFields.push({
                 id: crypto.randomUUID(),
                 type: "text",
-                label: keys[0],
+                label: "",
                 dataKey: keys[0],
                 size: "small",
                 width: "full",
@@ -460,27 +438,6 @@ export function QueryResults({
   const handleViewModeChange = (mode: ResultViewMode) => {
     setViewMode(mode)
     onPreviewModeChange?.(mode)
-
-    // Load saved template for preview modes
-    // if (
-    //   [
-    //     ResultViewMode.PREVIEW_FEED,
-    //     ResultViewMode.PREVIEW_CAROUSEL,
-    //     ResultViewMode.PREVIEW_GRID,
-    //     ResultViewMode.PREVIEW_EDITORIAL,
-    //   ].includes(mode)
-    // ) {
-    //   const previewMode = mode.replace("preview_", "") as
-    //     | "feed"
-    //     | "carousel"
-    //     | "grid"
-    //     | "editorial"
-    //     | "ticker"
-    //     | "list"
-    //     | "masonry"
-    //   const template = getTemplate(engineName, previewMode)
-    //   setCurrentTemplate(template)
-    // }
   }
 
   const getPreviewMode = ():
@@ -554,8 +511,6 @@ export function QueryResults({
             viewMode={viewMode}
             isPreviewMode={false}
             onViewModeChange={handleViewModeChange}
-            isEditorVisible={isEditorVisible}
-            onToggleEditor={onToggleEditor}
           />
         </div>
         <div
@@ -611,47 +566,49 @@ export function QueryResults({
           viewMode={viewMode}
           isPreviewMode={isPreviewMode}
           onViewModeChange={handleViewModeChange}
-          isEditorVisible={isEditorVisible}
-          onToggleEditor={onToggleEditor}
           onEditTemplate={
             isPreviewMode ? () => setIsTemplateEditorOpen(true) : undefined
           }
+          hasNoResults={!results?.data || results.data.length === 0}
         />
       </div>
-      {isPreviewMode && (
-        <div className="m-4 flex items-center justify-center overflow-x-auto whitespace-nowrap">
-          <div className="flex w-fit shrink-0 items-center gap-0 rounded-[32px] border border-border bg-background-primary p-1">
-            {previewViewModes.map((mode) => {
-              const Icon = mode.icon
-              const isActive = viewMode === mode.value
-              return (
-                <Button
-                  key={mode.value}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleViewModeChange(mode.value)}
-                  className={cn(
-                    "text-nowrap relative h-auto w-auto shrink-0 cursor-pointer gap-1 rounded-[32px] border px-3 py-1.5 transition-all",
-                    isActive
-                      ? "border-border-active bg-background-accent text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
-                      : " border-transparent text-foreground hover:bg-background-secondary hover:text-foreground"
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="text-nowrap shrink-0 text-xs font-medium">
-                    {mode.label}
-                  </span>
-                </Button>
-              )
-            })}
+      {isPreviewMode &&
+        results?.data &&
+        results.data.length > 0 && (
+          <div className="m-4 flex items-center justify-center overflow-x-auto whitespace-nowrap">
+            <div className="flex w-fit shrink-0 items-center gap-0 rounded-[32px] border border-border bg-background-primary p-1">
+              {previewViewModes.map((mode) => {
+                const Icon = mode.icon
+                const isActive = viewMode === mode.value
+                return (
+                  <Button
+                    key={mode.value}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewModeChange(mode.value)}
+                    className={cn(
+                      "text-nowrap relative h-auto w-auto shrink-0 cursor-pointer gap-1 rounded-[32px] border px-3 py-1.5 transition-all",
+                      isActive
+                        ? "border-border-active bg-background-accent text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
+                        : " border-transparent text-foreground hover:bg-background-secondary hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0" />
+                    <span className="text-nowrap shrink-0 text-xs font-medium">
+                      {mode.label}
+                    </span>
+                  </Button>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       {!results?.data || results.data.length === 0 ? (
-        <div className="m-6 flex h-[350px] items-center justify-center rounded-md border border-border bg-background-solid">
-          <p className="text-base font-semibold text-accent-brand-dark-gray">
-            No results found
-          </p>
+        <div
+          className="min-h-0 flex-1 bg-background-solid"
+          style={{ height: "calc(100vh - 171px)" }}
+        >
+          <JsonMonacoViewer data={results} />
         </div>
       ) : (
         <div

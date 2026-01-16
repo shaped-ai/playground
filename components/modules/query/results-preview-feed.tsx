@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Film, Star, Calendar } from "lucide-react"
 import type { QueryResultRow } from "@/lib/types/query.types"
@@ -27,11 +27,6 @@ export function ResultsPreviewFeed({
     template || null
   )
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set())
-  const [isHovered, setIsHovered] = useState(false)
-  const [startAutoScroll, setStartAutoScroll] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const isHoveredRef = useRef(false)
-  const animationFrameRef = useRef<number>(0)
 
   useEffect(() => {
     const loadedTemplate = getTemplate(engineName, "feed")
@@ -46,53 +41,10 @@ export function ResultsPreviewFeed({
     setImageErrors(new Set())
   }, [data])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setStartAutoScroll(true)
-    }, 1600) // Wait for slide animation (1.2s) + small delay
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    if (!startAutoScroll) return
-
-    const scrollContainer = scrollContainerRef.current
-    if (!scrollContainer) return
-
-    const scrollSpeed = 1
-
-    const autoScroll = () => {
-      if (!isHoveredRef.current && scrollContainer) {
-        scrollContainer.scrollTop += scrollSpeed
-
-        // Reset to top when reached bottom
-        if (
-          scrollContainer.scrollTop >=
-          scrollContainer.scrollHeight - scrollContainer.clientHeight
-        ) {
-          scrollContainer.scrollTop = 0
-        }
-      }
-      animationFrameRef.current = requestAnimationFrame(autoScroll)
-    }
-
-    animationFrameRef.current = requestAnimationFrame(autoScroll)
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-    }
-  }, [startAutoScroll])
-
-  useEffect(() => {
-    isHoveredRef.current = isHovered
-  }, [isHovered])
-
   const renderField = (row: QueryResultRow, field: any) => {
     const value = row[field.dataKey]
     if (!value || !field.visible) return null
+    const displayLabel = field.label?.trim() || field.dataKey
 
     const widthClasses = {
       small: "w-32",
@@ -118,7 +70,7 @@ export function ResultsPreviewFeed({
           >
             <Image
               src={value || "/placeholder.svg"}
-              alt={field.label}
+              alt={displayLabel}
               fill
               className="object-cover"
               unoptimized
@@ -130,7 +82,7 @@ export function ResultsPreviewFeed({
         return (
           <div className="flex items-center">
             <span className="text-sm font-medium">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <span className="text-sm font-medium">
@@ -142,7 +94,7 @@ export function ResultsPreviewFeed({
         return (
           <div className="flex items-center text-sm text-foreground">
             <span className="text-sm font-medium">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <span>{Array.isArray(value) ? value.join(", ") : value}</span>
@@ -152,7 +104,7 @@ export function ResultsPreviewFeed({
         return (
           <div className="flex items-center">
             <span className="text-sm font-medium">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <Badge variant="secondary">
@@ -171,7 +123,7 @@ export function ResultsPreviewFeed({
         return (
           <div className="flex items-center">
             <span className="text-sm font-medium">
-              {field.label ? `${field.label}: ` : ""}
+              {displayLabel ? `${displayLabel}: ` : ""}
             </span>
             &nbsp;
             <p className="text-sm text-foreground">
@@ -236,16 +188,7 @@ export function ResultsPreviewFeed({
           opacity: 0;
         }
       `}</style>
-      <div
-        ref={scrollContainerRef}
-        className="hide-scrollbar h-full w-full max-w-md overflow-y-auto p-4"
-        onMouseEnter={() => {
-          setIsHovered(true)
-        }}
-        onMouseLeave={() => {
-          setIsHovered(false)
-        }}
-      >
+      <div className="hide-scrollbar h-full w-full max-w-md overflow-y-auto p-4">
         <div className="space-y-4">
           {data.map((row, index) => {
             let animationClass = "feed-card-fade"

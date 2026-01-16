@@ -26,6 +26,7 @@ export function TemplateCardRenderer({
 
     const value = data[field.dataKey]
     if (value === null || value === undefined) return null
+    const displayLabel = field.label?.trim() || field.dataKey || "Image"
 
     const sizeClasses = {
       small: "text-xs",
@@ -63,7 +64,7 @@ export function TemplateCardRenderer({
             {hasValidImage ? (
               <Image
                 src={imageUrl || "/placeholder.svg"}
-                alt={field.label || "Image"}
+                alt={displayLabel}
                 fill
                 className="object-cover"
                 onError={() => setImageError(true)}

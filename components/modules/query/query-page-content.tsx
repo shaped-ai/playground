@@ -1,14 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
-import { useQueryTabs } from "@/hooks/query/use-query-tabs"
 import { useExecuteQuery } from "@/hooks/query/use-execute-query"
-import { useExecuteSavedQuery } from "@/hooks/query/use-execute-saved-query"
-import { useSavedQueries } from "@/hooks/query/use-saved-queries"
-import { useSavedQueryDetails } from "@/hooks/query/use-saved-query-details"
 import { useQueryStateSync } from "@/hooks/query/use-query-state-sync"
-import { QueryTabs } from "@/components/modules/query/query-tabs"
 import { QueryControls } from "@/components/modules/query/query-controls"
 import { QueryEditor } from "@/components/modules/query/query-editor"
 import { QueryResults } from "@/components/modules/query/query-results"
@@ -19,18 +14,16 @@ import {
   type ParameterValue,
   ResultViewMode,
   QueryResult,
-  type QueryTab,
 } from "@/lib/types/query.types"
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable"
-import type { QueryPageState, QueryTabState } from "@/lib/utils/query-state"
+import type { QueryPageState } from "@/lib/utils/query-state"
 import { AccountType, ModelStatus } from "@/types/enums"
-import { cn } from "@/lib/utils"
+import type { ModelDetails } from "@/types"
 import YAML from "yaml"
-import { getOrganizationInfo } from "@/utils/organization-info"
 import { useQuery } from "@tanstack/react-query"
 import { useEngineDetails } from "@/hooks/engines/use-engine-details"
 import { EngineSelector } from "@/components/selector/engine-selector"
@@ -41,28 +34,23 @@ import {
   TriangleAlert,
 } from "lucide-react"
 import ShapedLogo from "@/components/logo/shaped-logo"
-import { useOrganization } from "@/hooks/use-organization"
 import { AccountUpgradeModal } from "@/components/modals/account-upgrade-modal"
-import { TRIAL_CREDIT_LIMIT } from "@/lib/constants"
+import { TRIAL_CREDIT_LIMIT, DEMO_ENGINES } from "@/lib/constants"
 import { DEFAULT_SQL_QUERY } from "@/lib/constants/query.constants"
-import axios from "axios"
 
 export function QueryPageContent({}: {}) {
   const pathname = usePathname()
-  const {
-    tabs,
-    activeTabId,
-    activeTab,
-    addTab,
-    closeTab,
-    updateTab,
-    renameTab,
-    setActiveTabId,
-    setTabs,
-  } = useQueryTabs()
+  
+  // Direct state variables instead of tab-based state
+  const [content, setContent] = useState<string>(DEFAULT_SQL_QUERY)
+  const [engine, setEngine] = useState<string>("")
+  const [editorMode, setEditorMode] = useState<EditorMode>(EditorMode.SQL)
+  const [language, setLanguage] = useState<"yaml" | "sql">("sql")
+  const [savedQueryId, setSavedQueryId] = useState<string | undefined>(undefined)
+  const [parameterValues, setParameterValues] = useState<ParameterValue>({})
+  const [previewMode, setPreviewMode] = useState<ResultViewMode>(ResultViewMode.RAW_TABLE)
+  const [isExecuting, setIsExecuting] = useState<boolean>(false)
 
-  const [isEditorVisible, setIsEditorVisible] = useState(true)
-  const [isResultsVisible, setIsResultsVisible] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
   const [pendingRestoration, setPendingRestoration] = useState<{
     savedQueryId?: string
@@ -70,37 +58,27 @@ export function QueryPageContent({}: {}) {
     previewMode?: ResultViewMode
   } | null>(null)
 
-  const selectedEngine = useMemo(() => activeTab?.engine, [activeTab])
-  const selectedSavedQuery = activeTab?.savedQueryId
-  const parameterValues = activeTab?.parameterValues || {}
-  const previewMode = activeTab?.previewMode || ResultViewMode.RAW_TABLE
   const [apiLatency, setApiLatency] = useState(0)
-  const [resultsByTab, setResultsByTab] = useState<
-    Record<string, QueryResult | null>
-  >({})
+  const [results, setResults] = useState<QueryResult | null>(null)
   const [showDocumentation, setShowDocumentation] = useState(false)
-  const [savedQueryParams, setSavedQueryParams] = useState<any>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [apiExplanation, setApiExplanation] = useState<any>(null)
-  const { organization } = useOrganization()
-  const { data: savedQueriesData, isLoading: isLoadingQueries } =
-    useSavedQueries(selectedEngine)
 
-  const selectedSavedQueryObject = selectedSavedQuery
-    ? savedQueriesData?.queries?.find((q: SavedQuery) => q.id === selectedSavedQuery) ||
-      null
-    : null
-
-  // Fetch saved query details when a saved query is selected
-  const { data: savedQueryDetails, isLoading: isLoadingQueryDetails } =
-    useSavedQueryDetails(selectedEngine, selectedSavedQueryObject?.name)
+  const selectedSavedQueryObject = useMemo(() => {
+    if (!savedQueryId || !engine) return null
+    const demoEngine = DEMO_ENGINES.find((e) => e.id === engine)
+    if (!demoEngine?.saved_queries) return null
+    const queries = demoEngine.saved_queries as SavedQuery[]
+    const found = queries.find((q: SavedQuery) => q.id === savedQueryId)
+    return found || null
+  }, [savedQueryId, engine])
 
   const {
     data: engineDetails,
     isLoading: isLoadingEngineDetails,
     isError,
     error: organizationError,
-  } = useEngineDetails(selectedEngine, {
+  } = useEngineDetails(engine, {
     isDemoModel: false,
   })
 
@@ -112,138 +90,65 @@ export function QueryPageContent({}: {}) {
     }
   }, [])
 
-  // Update editor content when saved query details are fetched
   useEffect(() => {
-    if (
-      savedQueryDetails?.query &&
-      selectedSavedQueryObject &&
-      activeTab?.savedQueryId === selectedSavedQueryObject.id
-    ) {
-      updateTab(activeTabId, {
-        content: savedQueryDetails.query,
-      })
-    }
-  }, [
-    savedQueryDetails,
-    selectedSavedQueryObject,
-    activeTab?.savedQueryId,
-    activeTabId,
-    updateTab,
-  ])
-
-  useEffect(() => {
-    if (!pendingRestoration || !savedQueriesData?.queries || isLoadingQueries)
-      return
-
-    const updates: Partial<QueryTabState> = {}
+    if (!pendingRestoration) return
 
     if (pendingRestoration.savedQueryId) {
-      const query = savedQueriesData.queries.find(
+      // Verify the query exists in DEMO_ENGINES
+      const demoEngine = DEMO_ENGINES.find((e) => e.id === engine)
+      const query = demoEngine?.saved_queries?.find(
         (q: SavedQuery) => q.id === pendingRestoration.savedQueryId
       )
       if (query) {
-        updates.savedQueryId = query.id
+        setSavedQueryId(query.id)
       }
     }
 
     if (pendingRestoration.parameterValues) {
-      updates.parameterValues = pendingRestoration.parameterValues
+      setParameterValues(pendingRestoration.parameterValues)
     }
 
     if (pendingRestoration.previewMode) {
-      updates.previewMode = pendingRestoration.previewMode
-    }
-
-    if (Object.keys(updates).length > 0) {
-      updateTab(activeTabId, updates)
+      setPreviewMode(pendingRestoration.previewMode)
     }
 
     setPendingRestoration(null)
-  }, [
-    pendingRestoration,
-    savedQueriesData,
-    isLoadingQueries,
-    activeTabId,
-    updateTab,
-  ])
+  }, [pendingRestoration, engine])
   const { mutate: executeQuery, isPending, error } = useExecuteQuery()
-  const { mutate: executeSavedQuery, error: savedQueryError } =
-    useExecuteSavedQuery()
 
   const getCurrentState = useCallback((): QueryPageState => {
     return {
-      tabs: tabs.map((tab) => ({
-        id: tab.id,
-        name: tab.name,
-        content: tab.content,
-        language: tab.language,
-        editorMode: tab.editorMode,
-        // Preserve engine value, default to empty string only if truly undefined/null
-        engine: tab.engine ?? "",
-        savedQueryId: tab.savedQueryId,
-        parameterValues: tab.parameterValues,
-        previewMode: tab.previewMode,
-        // Results are NOT included in URL state - they remain in localStorage only
-      })),
-      activeTabId,
+      content,
+      language,
+      editorMode,
+      engine: engine ?? "",
+      savedQueryId,
+      parameterValues,
+      previewMode,
     }
-  }, [tabs, activeTabId])
+  }, [content, language, editorMode, engine, savedQueryId, parameterValues, previewMode])
 
   const applyState = useCallback(
     (state: QueryPageState) => {
-      // Try to get existing tabs from localStorage to preserve results
-      let existingTabs: QueryTab[] = []
-      try {
-        const stored = localStorage.getItem("query-tabs")
-        if (stored) {
-          const parsed = JSON.parse(stored)
-          existingTabs = parsed.tabs || []
-        }
-      } catch (error) {
-        // Ignore localStorage errors
-      }
+      setContent(state.content || DEFAULT_SQL_QUERY)
+      setLanguage(state.language || "sql")
+      setEditorMode(state.editorMode || EditorMode.SQL)
+      setEngine(state.engine ?? "")
+      setSavedQueryId(state.savedQueryId)
+      setParameterValues(state.parameterValues || {})
+      setPreviewMode(state.previewMode || ResultViewMode.RAW_TABLE)
 
-      const restoredTabs = state.tabs.map((tabState) => {
-        // Find matching existing tab by ID to preserve results from localStorage
-        const existingTab = existingTabs.find((t) => t.id === tabState.id)
-
-        return {
-          id: tabState.id,
-          name: tabState.name,
-          content: tabState.content,
-          language: tabState.language,
-          editorMode: tabState.editorMode,
-          // Preserve engine value from state, including empty strings
-          engine: tabState.engine ?? "",
-          savedQueryId: tabState.savedQueryId,
-          parameterValues: tabState.parameterValues,
-          previewMode: tabState.previewMode,
-          // Preserve results from localStorage (not in URL state)
-          results: existingTab?.results,
-          isExecuting: false,
-        }
-      })
-
-      setTabs(restoredTabs)
-      setActiveTabId(state.activeTabId)
-
-      const activeTabState = state.tabs.find((t) => t.id === state.activeTabId)
-      if (
-        activeTabState &&
-        (activeTabState.savedQueryId ||
-          activeTabState.parameterValues ||
-          activeTabState.previewMode)
-      ) {
+      if (state.savedQueryId || state.parameterValues || state.previewMode) {
         setPendingRestoration({
-          savedQueryId: activeTabState.savedQueryId,
-          parameterValues: activeTabState.parameterValues,
-          previewMode: activeTabState.previewMode,
+          savedQueryId: state.savedQueryId,
+          parameterValues: state.parameterValues,
+          previewMode: state.previewMode,
         })
       }
 
       setIsInitialized(true)
     },
-    [setTabs, setActiveTabId, updateTab]
+    []
   )
 
   const { pushStateToHistory: pushToHistory } = useQueryStateSync(
@@ -255,7 +160,7 @@ export function QueryPageContent({}: {}) {
   const searchParams = useSearchParams()
   const hasProcessedEngineName = useRef(false)
 
-  // Handle engineName query param - create a new tab with the specified engine
+  // Handle engineName query param - set the engine on the single query
   // Only process if there's no 'q' param (which means URL state restoration)
   useEffect(() => {
     // Skip if we've already processed engineName or if URL state exists
@@ -264,52 +169,26 @@ export function QueryPageContent({}: {}) {
     if (hasUrlState) return
 
     const engineName = searchParams?.get("engineName")
-    if (engineName && tabs.length > 0 && isInitialized) {
+    if (engineName && isInitialized) {
       hasProcessedEngineName.current = true
-
-      const newTabId = `engine-${engineName}-${Date.now()}`
-      const newTab: QueryTab = {
-        id: newTabId,
-        name: `Query ${tabs.length + 1}`,
-        content: DEFAULT_SQL_QUERY,
-        language: "sql",
-        editorMode: EditorMode.SQL,
-        engine: engineName,
-      }
-      setTabs((prevTabs) => [...prevTabs, newTab])
-      setActiveTabId(newTabId)
+      setEngine(engineName)
 
       // Clean up the engineName param from URL
       const url = new URL(window.location.href)
       url.searchParams.delete("engineName")
       window.history.replaceState({}, "", url.toString())
     }
-  }, [searchParams, tabs, isInitialized, setTabs, setActiveTabId])
+  }, [searchParams, isInitialized])
 
   useEffect(() => {
     setIsInitialized(true)
   }, [])
 
-  const handleTabClick = useCallback(
-    (tabId: string) => {
-      setActiveTabId(tabId)
-      if (isInitialized) {
-        setTimeout(() => {
-          const state = getCurrentState()
-          pushToHistory(state)
-        }, 100)
-      }
-    },
-    [setActiveTabId, isInitialized, getCurrentState, pushToHistory]
-  )
-
   const handleEngineChange = useCallback(
-    (engine: string) => {
-      updateTab(activeTabId, {
-        engine,
-        savedQueryId: undefined,
-        parameterValues: {},
-      })
+    (engineValue: string) => {
+      setEngine(engineValue)
+      setSavedQueryId(undefined)
+      setParameterValues({})
 
       if (isInitialized) {
         setTimeout(() => {
@@ -318,36 +197,15 @@ export function QueryPageContent({}: {}) {
         }, 100)
       }
     },
-    [activeTabId, updateTab, isInitialized, getCurrentState, pushToHistory]
+    [isInitialized, getCurrentState, pushToHistory]
   )
 
-  useEffect(() => {
-    const getSelectedSavedQueryDetails = async () => {
-      if (activeTab?.savedQueryId && selectedEngine) {
-        const savedQueryDetails = await axios.get(
-          `/api/query/saved/query-details`,
-          {
-            headers: {
-              "x-api-key": `${organization?.apiKey}`,
-            },
-            params: {
-              engineName: selectedEngine,
-              queryName: activeTab?.savedQueryId,
-            },
-          }
-        )
-        updateTab(activeTabId, { content: savedQueryDetails.data.query })
-      }
-    }
-    getSelectedSavedQueryDetails()
-  }, [activeTab?.savedQueryId, savedQueriesData?.queries, selectedEngine])
-
-  const handleContentChange = (content: string) => {
-    updateTab(activeTabId, { content })
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent)
   }
 
   const handleEditorModeChange = (mode: EditorMode) => {
-    updateTab(activeTabId, { editorMode: mode })
+    setEditorMode(mode)
   }
 
   const parameterValuesEqual = (
@@ -363,49 +221,80 @@ export function QueryPageContent({}: {}) {
     return keysA.every((key) => valuesA[key] === valuesB[key])
   }
 
-  const handleSavedQuerySelect = (query: string | null) => {
-    // const nextSavedQueryId = query?.id || null
-    const nextSavedQueryId = query ?? null
+  // Detect parameter references in query content
+  // Supports: $query, $parameters.query, $params.key, :key patterns
+  const detectParametersInContent = useCallback((content: string): string[] => {
+    if (!content) return []
+    const parameters = new Set<string>()
+    
+    // Match $query, $parameters.query, $params.key patterns
+    const dollarPattern = /\$(?:parameters?\.)?(\w+)/g
+    const dollarMatches = content.matchAll(dollarPattern)
+    for (const match of dollarMatches) {
+      if (match[1]) {
+        parameters.add(match[1])
+      }
+    }
+    
+    // Match :key patterns (colon prefix)
+    const colonPattern = /:(\w+)\b/g
+    const colonMatches = content.matchAll(colonPattern)
+    for (const match of colonMatches) {
+      if (match[1]) {
+        parameters.add(match[1])
+      }
+    }
+    
+    return Array.from(parameters)
+  }, [])
+
+  // Get detected parameters from current editor content
+  const detectedParameters = useMemo(() => {
+    return detectParametersInContent(content ?? "")
+  }, [content, detectParametersInContent])
+
+  // Check if parameters pane should be shown
+  const shouldShowParametersPane = useMemo(() => {
+    // Show if saved query has parameters OR if content has parameter references
+    return (
+      (selectedSavedQueryObject?.parameters.length ?? 0) > 0 ||
+      detectedParameters.length > 0
+    )
+  }, [selectedSavedQueryObject, detectedParameters])
+
+  const handleSavedQuerySelect = (query: SavedQuery | null) => {
+    const nextSavedQueryId = query?.id ?? null
     const nextParameterValues: ParameterValue = {}
-    // if (query) {
-    //   query.parameters.forEach((param) => {
-    //     if (param.defaultValue !== undefined) {
-    //       nextParameterValues[param.name] = param.defaultValue
-    //     }
-    //   })
-    // }
+    
+    // Set default parameter values if query has parameters
+    if (query) {
+      query.parameters.forEach((param) => {
+        // Use value if present, otherwise fall back to defaultValue
+        if (param.value !== undefined) {
+          nextParameterValues[param.name] = param.value
+        } else if (param.defaultValue !== undefined) {
+          nextParameterValues[param.name] = param.defaultValue
+        }
+      })
+    }
 
     if (
-      activeTab?.savedQueryId === nextSavedQueryId &&
-      parameterValuesEqual(activeTab?.parameterValues, nextParameterValues)
+      savedQueryId === nextSavedQueryId &&
+      parameterValuesEqual(parameterValues, nextParameterValues)
     ) {
       return
     }
 
-    updateTab(activeTabId, {
-      savedQueryId: nextSavedQueryId ?? undefined,
-      parameterValues: nextParameterValues,
-    })
-    setSavedQueryParams(nextParameterValues)
+    // Update state with saved query ID, parameters, and immediately update editor content
+    setSavedQueryId(nextSavedQueryId ?? undefined)
+    setParameterValues(nextParameterValues)
+    setContent(query?.template ?? content ?? "")
   }
 
-  const handleToggleEditor = () => {
-    setIsEditorVisible((prev) => !prev)
-    if (!isEditorVisible) {
-      setIsResultsVisible(true)
-    }
-  }
-
-  const handleToggleResults = () => {
-    setIsResultsVisible((prev) => !prev)
-    if (!isResultsVisible) {
-      setIsEditorVisible(true)
-    }
-  }
 
   const handlePreviewModeChange = useCallback(
     (mode: ResultViewMode) => {
-      updateTab(activeTabId, { previewMode: mode })
+      setPreviewMode(mode)
 
       if (isInitialized) {
         setTimeout(() => {
@@ -414,100 +303,38 @@ export function QueryPageContent({}: {}) {
         }, 100)
       }
     },
-    [activeTabId, updateTab, isInitialized, getCurrentState, pushToHistory]
+    [isInitialized, getCurrentState, pushToHistory]
   )
 
   const handleParameterValuesChange = useCallback(
     (values: ParameterValue) => {
-      updateTab(activeTabId, { parameterValues: values })
-      setSavedQueryParams(values)
+      setParameterValues(values)
     },
-
-    [activeTabId, updateTab]
+    []
   )
 
   const handleRun = () => {
-    if (!activeTab) return
     const startTime = performance.now()
 
-    updateTab(activeTabId, { isExecuting: true })
-    if (selectedSavedQueryObject?.name) {
-      executeSavedQuery(
-        {
-          engineName: selectedEngine ?? "",
-          queryName: selectedSavedQueryObject?.name ?? "",
-          parameters: savedQueryParams,
-        },
-        {
-          onSuccess: (results) => {
-            console.log("[DEBUG] Saved query API response:", results)
-            // Handle both wrapped { data: { results: [...] } } and unwrapped { results: [...] } structures
-            const resultsArray = Array.isArray(results?.data?.results)
-              ? results.data.results
-              : Array.isArray((results as any)?.results)
-              ? (results as any).results
-              : []
-            const rawResults = { results: resultsArray }
-            const responseData = results?.data || results
-            console.log("[DEBUG] Raw results after check:", rawResults)
-            console.log("[DEBUG] Results array length:", resultsArray.length)
+    // On first run (when results is null), default to Masonry preview mode
+    if (results === null) {
+      setPreviewMode(ResultViewMode.PREVIEW_MASONRY)
+    }
 
-            const hasScore = resultsArray?.some(
-              (item: any) => item.score !== undefined
-            )
-            const normalizedResults: QueryResult = {
-              data: resultsArray.map((item: any) => ({
-                id: item.id,
-                ...(hasScore ? { score: item.score } : {}),
-                ...(item.metadata ?? {}),
-              })),
-              executionTime: (responseData as any)?.executionTime ?? 0,
-              rowCount: resultsArray.length,
-              columns: resultsArray.length
-                ? Object.keys({
-                    id: resultsArray[0]?.id,
-                    score: resultsArray[0]?.score,
-                    ...(resultsArray[0]?.metadata ?? {}),
-                  })
-                : [],
-              entity_type: (responseData as any)?.entity_type,
-            }
-            console.log("[DEBUG] Normalized results (saved query):", normalizedResults)
-            console.log("[DEBUG] Normalized results data length:", normalizedResults.data?.length)
-            setResultsByTab((prev) => ({
-              ...prev,
-              [activeTabId]: normalizedResults,
-            }))
-            updateTab(activeTabId, {
-              isExecuting: false,
-            })
-
-            if (isInitialized) {
-              setTimeout(() => {
-                const state = getCurrentState()
-                pushToHistory(state)
-              }, 100)
-            }
-          },
-          onError: (error) => {
-            updateTab(activeTabId, { isExecuting: false })
-          },
-        }
-      )
-    } else
-      executeQuery(
-        {
-          engine: selectedEngine ?? "",
-          query:
-            activeTab.language == EditorMode.YAML
-              ? YAML.parse(savedQueryDetails?.query ?? "")
-              : activeTab?.content ?? "",
-          parameters: parameterValues,
-        },
+    setIsExecuting(true)
+    executeQuery(
+      {
+        engine: engine ?? "",
+        query:
+          language === "yaml"
+            ? YAML.parse(content ?? "")
+            : content ?? "",
+        parameters: parameterValues,
+      },
         {
           onSuccess: (results) => {
             console.log("[DEBUG] Regular query API response:", results)
-            // Handle both wrapped { data: { results: [...] } } and unwrapped { results: [...] } structures
+            // Handle both wrapped { data: { results: [...] ] } and unwrapped { results: [...] } structures
             const resultsArray = Array.isArray(results?.data?.results)
               ? results.data.results
               : Array.isArray((results as any)?.results)
@@ -541,13 +368,8 @@ export function QueryPageContent({}: {}) {
             }
             console.log("[DEBUG] Normalized results (regular query):", normalizedResults)
             console.log("[DEBUG] Normalized results data length:", normalizedResults.data?.length)
-            setResultsByTab((prev) => ({
-              ...prev,
-              [activeTabId]: normalizedResults,
-            }))
-            updateTab(activeTabId, {
-              isExecuting: false,
-            })
+            setResults(normalizedResults)
+            setIsExecuting(false)
 
             if (isInitialized) {
               setTimeout(() => {
@@ -557,7 +379,7 @@ export function QueryPageContent({}: {}) {
             }
           },
           onError: (error) => {
-            updateTab(activeTabId, { isExecuting: false })
+            setIsExecuting(false)
           },
         }
       )
@@ -618,54 +440,33 @@ export function QueryPageContent({}: {}) {
     return result
   }
 
-  // Debug logging - must be before early return to follow Rules of Hooks
-  useEffect(() => {
-    const currentResults = resultsByTab[activeTabId] ?? null
-    console.log("[DEBUG QueryPageContent] Active tab ID:", activeTabId)
-    console.log("[DEBUG QueryPageContent] Results by tab:", resultsByTab)
-    console.log("[DEBUG QueryPageContent] Current results:", currentResults)
-    console.log("[DEBUG QueryPageContent] Results data:", currentResults?.data)
-    console.log("[DEBUG QueryPageContent] Results data length:", currentResults?.data?.length)
-  }, [activeTabId, resultsByTab])
-
-  if (!activeTab) return null
-
-  // Get results for the active tab
-  const results = resultsByTab[activeTabId] ?? null
-
-  const currentEditorMode = activeTab.editorMode || EditorMode.PLAIN
-  const isReadOnly = selectedSavedQueryObject !== null
-  // Use saved query details query if available, otherwise fall back to template or tab content
-  const editorContent =
-    selectedSavedQueryObject && savedQueryDetails?.query
-      ? savedQueryDetails.query
-      : selectedSavedQueryObject
-      ? selectedSavedQueryObject.template
-      : activeTab.content
-
-  const isSplitView = isEditorVisible && isResultsVisible
+  const currentEditorMode = editorMode || EditorMode.PLAIN
+  // Selecting a saved query should only replace the editor content (not lock the UI)
+  const isReadOnly = false
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <QueryTabs
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onTabClick={handleTabClick}
-        onTabClose={closeTab}
-        onTabAdd={() => {
-          addTab()
-          setIsEditorVisible(true)
-          setIsResultsVisible(true)
-        }}
-        onTabRename={renameTab}
-        modelDetails={engineDetails}
-        isReadOnly={isReadOnly}
-      />
+    <div className="flex h-screen flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-border bg-background-base px-6 py-4">
+        <h1 className="text-xl font-semibold text-foreground">
+          ShapedQL Playground
+        </h1>
+        <p className="text-sm text-foreground-muted">
+          
+          <a
+            href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-brand-purple hover:underline inline-flex items-center gap-1"
+          >
+            Read the docs
+            <ArrowUpRight className="size-3" />
+          </a>
+        </p>
+      </div>
 
       {isLoadingEngineDetails ? (
         <div
-          className="flex h-full items-center justify-center bg-background-solid"
-          style={{ height: "calc(100vh - 65px)" }}
+          className="flex min-h-0 flex-1 items-center justify-center bg-background-solid"
         >
           <Loader2
             className="size-4 animate-spin text-foreground"
@@ -677,7 +478,7 @@ export function QueryPageContent({}: {}) {
           <div className="flex shrink-0 items-center gap-2 px-3 py-1.5">
             <span className="text-sm font-bold text-foreground">Engine</span>
             <EngineSelector
-              selectedEngine={selectedEngine}
+              selectedEngine={engine}
               onEngineChange={handleEngineChange}
             />
           </div>
@@ -712,259 +513,141 @@ export function QueryPageContent({}: {}) {
             </div>
             <div className="p-4">
               <p className="text-sm text-foreground">
-                {engineDetails?.error_message}
+                {(engineDetails as any)?.error_message || "An error occurred with this engine."}
               </p>
             </div>
           </div>
         </div>
       ) : (
         <div className="relative min-h-0 flex-1 overflow-hidden">
-          {isSplitView ? (
-            <ResizablePanelGroup
-              {...({ direction: "horizontal" } as any)}
-              className="bg-red-600"
-              style={{ height: "calc(100vh - 65px)" }}
+          <ResizablePanelGroup
+            {...({ direction: "horizontal" } as any)}
+            className="flex h-full min-h-0 flex-1"
+          >
+            <ResizablePanel
+              defaultSize={50}
+              minSize={20}
+              maxSize={80}
+              className="bg-background-solid"
             >
-              <ResizablePanel
-                defaultSize={50}
-                minSize={20}
-                maxSize={80}
-                className="bg-background-solid"
-              >
-                <div className="flex h-full flex-col bg-background-solid px-4 py-2">
-                  <div className="shrink-0">
-                    <QueryControls
-                      engineDetails={engineDetails}
-                      selectedEngine={selectedEngine ?? ""}
-                      onEngineChange={handleEngineChange}
-                      selectedQueryId={selectedSavedQuery}
-                      onSavedQuerySelect={handleSavedQuerySelect}
-                      onRun={handleRun}
-                      isExecuting={activeTab.isExecuting}
-                      showRunButton={!selectedSavedQueryObject}
-                      savedQueries={savedQueriesData?.queries || []}
-                      isLoadingQueries={isLoadingQueries}
-                      isResultsVisible={isResultsVisible}
-                      onToggleResults={handleToggleResults}
-                    />
+              <div className="flex h-full flex-col bg-background-solid px-4 py-2">
+                <div className="shrink-0">
+                  <QueryControls
+                    engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
+                    selectedEngine={engine ?? ""}
+                    onEngineChange={handleEngineChange}
+                    selectedQueryId={savedQueryId}
+                    onSavedQuerySelect={handleSavedQuerySelect}
+                    onRun={handleRun}
+                    isExecuting={isExecuting}
+                  />
 
-                    {/* {!selectedSavedQueryObject && (
-                    <EditorModeSelector
-                      mode={currentEditorMode}
-                      onChange={handleEditorModeChange}
-                    />
-                  )} */}
-                  </div>
-
-                  {!selectedEngine ? (
-                    <div
-                      className="flex flex-1 items-center justify-center"
-                      style={{ height: "calc(100vh - 55px)" }}
-                    >
-                      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-border bg-background-base p-6">
-                        <BrainCircuit className="size-10 text-accent-brand-purple" />
-                        <h2 className="text-sm font-semibold text-foreground">
-                          No engines avalable to ingest data
-                        </h2>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex min-h-0 flex-1 flex-col ">
-                      {(engineDetails?.status == ModelStatus.ACTIVE ||
-                        engineDetails?.status == ModelStatus.IDLE) && (
-                        <div
-                          className={
-                            selectedSavedQueryObject &&
-                            selectedSavedQueryObject.parameters.length > 0
-                              ? "h-[400px] shrink-0"
-                              : "min-h-0 flex-1"
-                          }
-                        >
-                          <QueryEditor
-                            value={editorContent}
-                            onChange={handleContentChange}
-                            mode={currentEditorMode}
-                            readOnly={isReadOnly}
-                            onRun={handleRunWithConditions}
-                          />
-                        </div>
-                      )}
-                      {((engineDetails?.status != ModelStatus.ACTIVE &&
-                        engineDetails?.status != ModelStatus.IDLE &&
-                        engineDetails?.status != ModelStatus.ERROR) ||
-                        !selectedEngine) && (
-                        <div className="flex flex-1 flex-col items-center justify-center p-4">
-                          <ShapedLogo className="size-10 mb-4" />
-                          <p className="text-sm font-medium text-foreground">
-                            Your engine is scheduling and will be ready to
-                            query soon.
-                          </p>
-                          <p className="text-sm font-medium text-foreground">
-                            Please check again in a little bit.
-                          </p>
-                        </div>
-                      )}
-
-                      {selectedSavedQueryObject &&
-                        selectedSavedQueryObject.parameters.length > 0 && (
-                          <div className="shrink-0">
-                            <QueryParametersEditor
-                              parameters={selectedSavedQueryObject.parameters}
-                              values={parameterValues}
-                              onChange={handleParameterValuesChange}
-                              onRun={handleRun}
-                              isExecuting={activeTab.isExecuting}
-                              engineDetails={engineDetails}
-                            />
-                          </div>
-                        )}
-                    </div>
-                  )}
+                  {/* {!selectedSavedQueryObject && (
+                  <EditorModeSelector
+                    mode={currentEditorMode}
+                    onChange={handleEditorModeChange}
+                  />
+                )} */}
                 </div>
-              </ResizablePanel>
 
-              <ResizableHandle withHandle className="border-0 bg-border" />
-
-              {(results ||
-                showDocumentation ||
-                activeTab.isExecuting ||
-                error ||
-                savedQueryError) &&
-                (engineDetails?.status == ModelStatus.ACTIVE ||
-                  engineDetails?.status == ModelStatus.IDLE) && (
-                  <ResizablePanel
-                    defaultSize={50}
-                    minSize={20}
-                    maxSize={80}
-                    className="h-full overflow-y-auto"
-                  >
-                    <QueryResults
-                      results={results || null}
-                      isExecuting={activeTab.isExecuting}
-                      error={error || savedQueryError}
-                      isEditorVisible={isEditorVisible}
-                      onToggleEditor={handleToggleEditor}
-                      previewMode={previewMode}
-                      onPreviewModeChange={handlePreviewModeChange}
-                      engineDetails={engineDetails}
-                      engineName={selectedEngine ?? ""}
-                      apiLatency={apiExplanation?.total_execution_time_ms}
-                      showDocumentation={showDocumentation}
-                    />
-                  </ResizablePanel>
-                )}
-            </ResizablePanelGroup>
-          ) : (
-            <div className="relative h-full overflow-hidden">
-              <div
-                className={`bg-background absolute inset-0 transition-all duration-500 ease-in-out ${
-                  isEditorVisible
-                    ? "translate-x-0 opacity-100"
-                    : "pointer-events-none -translate-x-full opacity-0"
-                }`}
-              >
-                <div className="flex h-full flex-col bg-background-base">
-                  <div className="shrink-0">
-                    <QueryControls
-                      selectedEngine={selectedEngine ?? ""}
-                      onEngineChange={handleEngineChange}
-                      selectedQueryId={selectedSavedQuery}
-                      onSavedQuerySelect={handleSavedQuerySelect}
-                      onRun={handleRun}
-                      isExecuting={
-                        activeTab.isExecuting || isLoadingEngineDetails
-                      }
-                      showRunButton={!selectedSavedQueryObject}
-                      savedQueries={savedQueriesData?.queries || []}
-                      isLoadingQueries={isLoadingQueries}
-                      isResultsVisible={isResultsVisible}
-                      onToggleResults={handleToggleResults}
-                      engineDetails={engineDetails}
-                    />
-
-                    {/* {!selectedSavedQueryObject && (
-                    <EditorModeSelector
-                      mode={currentEditorMode}
-                      onChange={handleEditorModeChange}
-                    />
-                  )} */}
+                {!engine ? (
+                  <div className="flex flex-1 items-center justify-center">
+                    <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-border bg-background-base p-6">
+                      <BrainCircuit className="size-10 text-accent-brand-purple" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        No engines avalable to ingest data
+                      </h2>
+                    </div>
                   </div>
-
-                  <div className="flex min-h-0 flex-1 flex-col space-y-2 overflow-y-auto">
-                    {selectedSavedQueryObject && (
-                      <div className="bg-background-muted mb-2 shrink-0 border-b px-4 py-2">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          {selectedSavedQueryObject.name}
-                          <span className="ml-2 text-xs">
-                            (Read-only template)
-                          </span>
+                ) : (
+                  <div className="flex min-h-0 flex-1 flex-col ">
+                    {(engineDetails?.status == ModelStatus.ACTIVE ||
+                      engineDetails?.status == ModelStatus.IDLE) && (
+                      <div
+                        className={
+                          shouldShowParametersPane
+                            ? "h-[400px] shrink-0"
+                            : "min-h-0 flex-1"
+                        }
+                      >
+                        <QueryEditor
+                          value={content}
+                          onChange={handleContentChange}
+                          mode={currentEditorMode}
+                          readOnly={isReadOnly}
+                          onRun={handleRunWithConditions}
+                        />
+                      </div>
+                    )}
+                    {((engineDetails?.status != ModelStatus.ACTIVE &&
+                      engineDetails?.status != ModelStatus.IDLE) ||
+                      !engine) && (
+                      <div className="flex flex-1 flex-col items-center justify-center p-4">
+                        <ShapedLogo className="size-10 mb-4" />
+                        <p className="text-sm font-medium text-foreground">
+                          Your engine is scheduling and will be ready to
+                          query soon.
                         </p>
-                        {selectedSavedQueryObject.description && (
-                          <p className="mt-0.5 text-xs text-muted-foreground">
-                            {selectedSavedQueryObject.description}
-                          </p>
-                        )}
+                        <p className="text-sm font-medium text-foreground">
+                          Please check again in a little bit.
+                        </p>
                       </div>
                     )}
 
-                    <div
-                      className={cn(
-                        "",
-                        selectedSavedQueryObject &&
-                          selectedSavedQueryObject.parameters.length > 0
-                          ? "h-[400px] shrink-0"
-                          : "min-h-0 flex-1"
-                      )}
-                    >
-                      <QueryEditor
-                        value={editorContent}
-                        onChange={handleContentChange}
-                        mode={currentEditorMode}
-                        readOnly={isReadOnly}
-                        onRun={handleRunWithConditions}
-                      />
-                    </div>
-
-                    {selectedSavedQueryObject &&
-                      selectedSavedQueryObject.parameters.length > 0 && (
-                        <div className="shrink-0 ">
-                          <QueryParametersEditor
-                            parameters={selectedSavedQueryObject.parameters}
-                            values={parameterValues}
-                            onChange={handleParameterValuesChange}
-                            onRun={handleRun}
-                            isExecuting={activeTab.isExecuting}
-                            engineDetails={engineDetails}
-                          />
-                        </div>
-                      )}
+                    {shouldShowParametersPane && (
+                      <div className="shrink-0">
+                        <QueryParametersEditor
+                          parameters={
+                            selectedSavedQueryObject &&
+                            selectedSavedQueryObject.parameters.length > 0
+                              ? selectedSavedQueryObject.parameters
+                              : detectedParameters.map((name) => ({
+                                  name,
+                                  type: "string" as const,
+                                  required: false,
+                                }))
+                          }
+                          values={parameterValues}
+                          onChange={handleParameterValuesChange}
+                          onRun={handleRun}
+                          isExecuting={isExecuting}
+                          engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
+            </ResizablePanel>
 
-              <div
-                className={`absolute inset-0 overflow-hidden transition-all duration-500 ease-in-out ${
-                  isResultsVisible
-                    ? "translate-x-0 opacity-100"
-                    : "pointer-events-none translate-x-full opacity-0"
-                }`}
-              >
-                <QueryResults
-                  results={results || null}
-                  apiLatency={apiExplanation?.total_execution_time_ms}
-                  isExecuting={activeTab.isExecuting || isLoadingEngineDetails}
-                  error={error || savedQueryError}
-                  isEditorVisible={isEditorVisible}
-                  onToggleEditor={handleToggleEditor}
-                  previewMode={previewMode}
-                  onPreviewModeChange={handlePreviewModeChange}
-                  engineName={selectedEngine ?? ""}
-                  engineDetails={engineDetails}
-                  showDocumentation={showDocumentation}
-                />
-              </div>
-            </div>
-          )}
+            <ResizableHandle className="border-0 bg-border" />
+
+            {(results ||
+              showDocumentation ||
+              isExecuting ||
+              error) &&
+              (engineDetails?.status == ModelStatus.ACTIVE ||
+                engineDetails?.status == ModelStatus.IDLE) && (
+                <ResizablePanel
+                  defaultSize={50}
+                  minSize={20}
+                  maxSize={80}
+                  className="h-full overflow-y-auto"
+                >
+                  <QueryResults
+                    results={results || null}
+                    isExecuting={isExecuting}
+                    error={error}
+                    previewMode={previewMode}
+                    onPreviewModeChange={handlePreviewModeChange}
+                    engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
+                    engineName={engine ?? ""}
+                    apiLatency={apiExplanation?.total_execution_time_ms}
+                    showDocumentation={showDocumentation}
+                  />
+                </ResizablePanel>
+              )}
+          </ResizablePanelGroup>
         </div>
       )}
     </div>

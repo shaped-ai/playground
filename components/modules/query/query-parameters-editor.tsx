@@ -73,7 +73,7 @@ export function QueryParametersEditor({
               <Input
                 id={param.name}
                 type={param.type === "number" ? "number" : "text"}
-                value={values[param.name] ?? param.defaultValue ?? ""}
+                value={values[param.name] ?? param.value ?? param.defaultValue ?? ""}
                 onChange={(e) => {
                   const val =
                     param.type === "number"
@@ -82,7 +82,7 @@ export function QueryParametersEditor({
                   handleChange(param.name, val)
                 }}
                 placeholder={
-                  param.defaultValue?.toString() || `Enter ${param.name}`
+                  (param.value ?? param.defaultValue)?.toString() || `Enter ${param.name}`
                 }
                 className="h-8 focus:ring-0 focus:ring-offset-0"
               />

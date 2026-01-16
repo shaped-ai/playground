@@ -168,6 +168,7 @@ export function ResultsPreviewHorizontal({
   const renderField = (row: QueryResultRow, field: any) => {
     const value = row[field.dataKey]
     if (!value || !field.visible) return null
+    const displayLabel = field.label?.trim() || field.dataKey
 
     switch (field.type) {
       case "image":
@@ -180,7 +181,7 @@ export function ResultsPreviewHorizontal({
           >
             <Image
               src={value || "/placeholder.svg"}
-              alt={field.label || ""}
+              alt={displayLabel}
               fill
               className="object-cover"
               unoptimized
@@ -197,14 +198,14 @@ export function ResultsPreviewHorizontal({
             : "text-xs text-muted-foreground"
         return (
           <p key={field.id} className={`${textSize} truncate`}>
-            <span>{field.label ? `${field.label}: ` : ""}</span> &nbsp;
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <span>{Array.isArray(value) ? value.join(", ") : value}</span>
           </p>
         )
       default:
         return (
           <span key={field.id} className="text-xs text-muted-foreground">
-            <span>{field.label ? `${field.label}: ` : ""}</span> &nbsp;
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <span>{Array.isArray(value) ? value.join(", ") : value}</span>
           </span>
         )

@@ -27,7 +27,7 @@ import {
   X,
 } from "lucide-react"
 import CloseModalButton from "@/components/ui/close-modal-button"
-import { EditorMode, QueryTab } from "@/lib/types/query.types"
+import { EditorMode } from "@/lib/types/query.types"
 import {
   ItemRecommendationTab,
   UserRecommendationTab,
@@ -36,7 +36,9 @@ import {
 
 export interface QueryRequestDetailsProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  activeTab: QueryTab
+  engine?: string
+  content?: string
+  editorMode?: EditorMode
   currentQueryTab: QueryTabEnum
   currentRankTab: UserRecommendationTab | ItemRecommendationTab
   modelDetails: ModelDetails
@@ -202,7 +204,9 @@ const getMonacoThemeConfig = (
 }
 
 export function QueryRequestDetails({
-  activeTab,
+  engine,
+  content = "",
+  editorMode: propEditorMode,
   currentQueryTab,
   currentRankTab,
   modelDetails,
@@ -216,8 +220,7 @@ export function QueryRequestDetails({
     {} as Organization
   )
   const { theme } = useTheme()
-  console.log("activeTab", activeTab)
-  const editorMode = activeTab?.editorMode ?? EditorMode.PLAIN
+  const editorMode = propEditorMode ?? EditorMode.PLAIN
   const { themeName, backgroundColor } = getMonacoThemeConfig(
     editorMode,
     theme,
@@ -229,13 +232,13 @@ export function QueryRequestDetails({
       requestType == "cURL"
         ? getCurlCodeSnippet(
             "<apiKey>",
-            `${getApiBaseUrl()}/v2/engines/${activeTab?.engine}/query`,
+            `${getApiBaseUrl()}/v2/engines/${engine || ""}/query`,
             "POST",
-            { query: activeTab?.content, return_metadata: true }
+            { query: content, return_metadata: true }
           )
         : requestType == "CLI"
-        ? getCLICodeSnippet("POST", `${activeTab?.engine}`, {
-            query: activeTab?.content,
+        ? getCLICodeSnippet("POST", `${engine || ""}`, {
+            query: content,
           })
         : requestType == "Python"
         ? getPythonCodeSnippet(
@@ -290,13 +293,13 @@ export function QueryRequestDetails({
       requestType == "cURL"
         ? getCurlCodeSnippet(
             organization.apiKey,
-            `${getApiBaseUrl()}/v2/engines/${activeTab?.engine}/query`,
+            `${getApiBaseUrl()}/v2/engines/${engine || ""}/query`,
             "POST",
-            { query: activeTab?.content, return_metadata: true }
+            { query: content, return_metadata: true }
           )
         : requestType == "CLI"
-        ? getCLICodeSnippet("POST", `${activeTab?.engine}`, {
-            query: activeTab?.content,
+        ? getCLICodeSnippet("POST", `${engine || ""}`, {
+            query: content,
           })
         : requestType == "Python"
         ? getPythonCodeSnippet(
@@ -438,10 +441,10 @@ export function QueryRequestDetails({
                 <h2 className="mb-2 text-lg font-bold text-foreground">URI</h2>
                 <div className="mb-4 flex items-center gap-2 rounded border bg-background-base px-3 py-2.5">
                   <div className="flex-1 truncate text-sm font-normal text-foreground">
-                    {`${getApiBaseUrl()}/v2/engines/${activeTab?.engine}/query`}
+                    {`${getApiBaseUrl()}/v2/engines/${engine || ""}/query`}
                   </div>
                   <CopyTextIcon
-                    text={`${getApiBaseUrl()}/v2/engines/${activeTab?.engine}/query`}
+                    text={`${getApiBaseUrl()}/v2/engines/${engine || ""}/query`}
                   />
                 </div>
                 <div className="mb-2 flex items-center justify-between">
@@ -477,7 +480,7 @@ export function QueryRequestDetails({
                   </div>
 
                   <MonacoCodeEditor
-                    key={`${requestType}-${activeTab?.id}-${activeTab?.engine}`}
+                    key={`${requestType}-${engine || ""}`}
                     initialDoc={getCodeSnippet(requestType)}
                     language={
                       requestType == "Python"

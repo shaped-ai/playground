@@ -7,7 +7,6 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import {
   Navigation,
   Pagination,
-  Autoplay,
   EffectCoverflow,
 } from "swiper/modules"
 import type { QueryResultRow } from "@/lib/types/query.types"
@@ -79,21 +78,22 @@ export function ResultsPreviewCarousel({
   const renderField = (row: QueryResultRow, field: any) => {
     const value = row[field.dataKey]
     if (!value || !field.visible) return null
+    const displayLabel = field.label?.trim() || field.dataKey
 
     switch (field.type) {
       case "image":
         return (
           <div
             key={field.id}
-            className={`relative overflow-hidden bg-muted ${
+            className={`relative overflow-hidden bg-background-base ${
               heightClasses[(field.size || "full") as keyof typeof heightClasses]
             } ${heightClasses[(field.size || "large") as keyof typeof heightClasses]}`}
           >
             <Image
               src={value || "/placeholder.svg"}
-              alt={field.label}
+              alt={displayLabel}
               fill
-              className="object-cover"
+              className="object-contain"
               unoptimized
               onError={() => handleImageError(0)}
             />
@@ -102,7 +102,7 @@ export function ResultsPreviewCarousel({
       case "rating":
         return (
           <div key={field.id} className="flex items-center">
-            <span>{field.label ? `${field.label}: ` : ""}</span> &nbsp;
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <span className="text-sm font-medium">{value}</span>
           </div>
         )
@@ -112,14 +112,14 @@ export function ResultsPreviewCarousel({
             key={field.id}
             className="flex items-center text-sm text-muted-foreground"
           >
-            <span>{field.label ? `${field.label}: ` : ""}</span> &nbsp;
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <span>{value}</span>
           </div>
         )
       case "badge":
         return (
           <div key={field.id} className="flex items-center">
-            <span>{field.label ? `${field.label}: ` : ""}</span> &nbsp;
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <Badge variant="secondary">
               <span>{value}</span>
             </Badge>
@@ -135,7 +135,7 @@ export function ResultsPreviewCarousel({
             : "text-sm text-muted-foreground"
         return (
           <p key={field.id} className={textSize}>
-            <span>{field.label ? `${field.label}: ` : ""}</span> &nbsp;
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <span>{Array.isArray(value) ? value.join(", ") : value}</span>
           </p>
         )
@@ -147,16 +147,12 @@ export function ResultsPreviewCarousel({
       <div className="w-full max-w-5xl">
         <Swiper
           onSwiper={(swiper) => (swiperRef.current = swiper)}
-          modules={[Navigation, Pagination, Autoplay, EffectCoverflow]}
+          modules={[Navigation, Pagination, EffectCoverflow]}
           effect="coverflow"
           grabCursor={true}
           centeredSlides={true}
           slidesPerView={3.5}
           spaceBetween={28}
-          autoplay={{
-            delay: 2000,
-            disableOnInteraction: false,
-          }}
           coverflowEffect={{
             rotate: 0,
             stretch: 0,
@@ -171,8 +167,6 @@ export function ResultsPreviewCarousel({
           navigation={false}
           loop={true}
           className="pb-12! "
-          onMouseEnter={() => swiperRef.current?.autoplay?.stop()}
-          onMouseLeave={() => swiperRef.current?.autoplay?.start()}
         >
           {data.map((row, idx) => (
             <SwiperSlide key={row.item_id || idx}>

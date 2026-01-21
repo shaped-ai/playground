@@ -28,16 +28,19 @@ export const DEMO_ENGINES = [
         engine: "movielens_demo_v2",
         template: `SELECT *
 FROM text_search(
+  name='semantic',
   query='$query',  
   mode='vector',  
   text_embedding_ref='description_content_embedding', 
   limit=50), 
 text_search(
+  name='text_match',
   query='$query', 
   mode='lexical', 
   fuzziness=0, 
   limit=50)
-LIMIT 20`,
+ORDER BY score(expression= '1.5 * retrieval.get_score("semantic") + 0.01 * retrieval.get_score("text_match")')
+LIMIT 200`,
         parameters: [{
           name: "query",
           type: "string" as const,
@@ -76,7 +79,7 @@ LIMIT 50`,
 
   -- choose a user_id between 1 and 100  
   -- to see personalized results for different people
-  input_user_id='144' 
+  input_user_id='105' 
 )`,
         parameters: [],
       },
@@ -92,7 +95,7 @@ LIMIT 50`,
   encoder='precomputed_user',
   -- choose a user_id between 1 and 150  
   -- to see personalized results for different people
-  input_user_id='213sdf2' 
+  input_user_id='120' 
 ),
 filter(
   -- cold start: return popular items 

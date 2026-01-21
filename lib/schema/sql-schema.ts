@@ -31,7 +31,6 @@ export const SQL_KEYWORDS = [
   "BY",
   "GROUP",
   "HAVING",
-  "LIMIT",
   "OFFSET",
   "DISTINCT",
   "COUNT",

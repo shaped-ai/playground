@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import Editor, { type OnMount } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
 import {
@@ -22,11 +22,17 @@ export function SqlMonacoEditor({
   readOnly = false,
   onRun,
 }: SqlMonacoEditorProps) {
-  const { theme } = useTheme()
+  const { resolvedTheme, theme } = useTheme()
   const editorRef = useRef<any>(null)
+  const monacoRef = useRef<any>(null)
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const MonacoSqlEditorComponent = Editor as unknown as React.FC<any>
   const onRunRef = useRef(onRun)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Keep onRun ref updated
   useEffect(() => {
@@ -50,10 +56,33 @@ export function SqlMonacoEditor({
     return () => window.removeEventListener("error", errorHandler, true)
   }, [])
 
-  const handleEditorDidMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor
+  // Helper to get theme synchronously with fallbacks
+  // This must work on initial render before next-themes hydrates
+  const getCurrentTheme = () => {
+    // First try the theme from useTheme hook (works after hydration)
+    if (theme === "dark" || theme === "light") {
+      return theme
+    }
+    // Fallback: check localStorage directly (next-themes stores it as "theme")
+    // This is critical for initial render before next-themes hydrates
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("theme")
+      if (stored === "dark" || stored === "light") {
+        return stored
+      }
+    }
+    // Final fallback: check if dark class is on html element
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light"
+    }
+    return "light" // Default to light since defaultTheme is "light"
+  }
 
+  // beforeMount callback - set theme BEFORE editor is created
+  // This is critical to prevent Monaco from initializing with default light theme
+  const handleBeforeMount = (monaco: any) => {
     try {
+      // Define themes first
       // Define custom SQL themes
       monaco.editor.defineTheme("sql-custom-light", {
         base: "vs",
@@ -143,8 +172,40 @@ export function SqlMonacoEditor({
         },
       })
 
-      // Note: Don't call monaco.editor.setTheme() here as it affects all Monaco instances globally
-      // Each editor uses its own theme via the theme prop on the Editor component
+      // Set the theme immediately after defining themes
+      // This is critical to prevent Monaco from initializing with default light theme
+      const currentTheme = getCurrentTheme()
+      const initialThemeName = readOnly
+        ? currentTheme === "dark"
+          ? "sql-custom-dark-readonly"
+          : "sql-custom-light-readonly"
+        : currentTheme === "dark"
+        ? "sql-custom-dark"
+        : "sql-custom-light"
+
+      monaco.editor.setTheme(initialThemeName)
+    } catch (error) {
+      // Silently fail
+    }
+  }
+
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
+    editorRef.current = editor
+    monacoRef.current = monaco
+
+    try {
+      // Themes are already defined in beforeMount, so we don't need to redefine them here
+      // Just ensure the theme is set correctly as a safety measure
+      const currentTheme = getCurrentTheme()
+      const initialThemeName = readOnly
+        ? currentTheme === "dark"
+          ? "sql-custom-dark-readonly"
+          : "sql-custom-light-readonly"
+        : currentTheme === "dark"
+        ? "sql-custom-dark"
+        : "sql-custom-light"
+
+      monaco.editor.setTheme(initialThemeName)
     } catch (error) {
       // Silently fail
     }
@@ -335,14 +396,33 @@ export function SqlMonacoEditor({
     }
   }
 
-  // Calculate theme name based on current theme and readOnly state
+  // Calculate theme name - this must be synchronous and not depend on mounted state
+  // so Monaco gets the correct theme prop from the start
+  const currentTheme = getCurrentTheme()
   const themeName = readOnly
-    ? theme === "dark"
+    ? currentTheme === "dark"
       ? "sql-custom-dark-readonly"
       : "sql-custom-light-readonly"
-    : theme === "dark"
+    : currentTheme === "dark"
     ? "sql-custom-dark"
     : "sql-custom-light"
+
+  // Manually update Monaco editor theme when it changes
+  // This handles theme changes after initial mount (e.g., user toggles theme)
+  useEffect(() => {
+    if (editorRef.current && monacoRef.current && themeName && mounted) {
+      try {
+        // Get the current theme from the editor to avoid unnecessary updates
+        const currentEditorTheme = monacoRef.current.editor.getTheme()
+        if (currentEditorTheme !== themeName) {
+          // Update the theme when it changes
+          monacoRef.current.editor.setTheme(themeName)
+        }
+      } catch (error) {
+        // Silently fail if theme update fails
+      }
+    }
+  }, [themeName, mounted])
 
   return (
     <div className={`h-full w-full ${readOnly ? "bg-muted/30" : ""}`}>
@@ -351,6 +431,7 @@ export function SqlMonacoEditor({
         language="sql"
         value={value}
         onChange={(newValue: string | undefined) => onChange(newValue || "")}
+        beforeMount={handleBeforeMount}
         onMount={handleEditorDidMount}
         theme={themeName}
         options={{

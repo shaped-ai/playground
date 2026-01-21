@@ -522,7 +522,7 @@ export function QueryPageContent({}: {}) {
         <div className="relative min-h-0 flex-1 overflow-hidden">
           <ResizablePanelGroup
             {...({ direction: "horizontal" } as any)}
-            className="flex h-full min-h-0 flex-1"
+            className="flex-1 h-full w-full"
           >
             <ResizablePanel
               defaultSize={50}
@@ -620,33 +620,39 @@ export function QueryPageContent({}: {}) {
               </div>
             </ResizablePanel>
 
-            <ResizableHandle className="border-0 bg-border" />
+            <ResizableHandle />
 
-            {(results ||
-              showDocumentation ||
-              isExecuting ||
-              error) &&
-              (engineDetails?.status == ModelStatus.ACTIVE ||
-                engineDetails?.status == ModelStatus.IDLE) && (
-                <ResizablePanel
-                  defaultSize={50}
-                  minSize={20}
-                  maxSize={80}
-                  className="h-full overflow-y-auto"
-                >
-                  <QueryResults
-                    results={results || null}
-                    isExecuting={isExecuting}
-                    error={error}
-                    previewMode={previewMode}
-                    onPreviewModeChange={handlePreviewModeChange}
-                    engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
-                    engineName={engine ?? ""}
-                    apiLatency={apiExplanation?.total_execution_time_ms}
-                    showDocumentation={showDocumentation}
-                  />
-                </ResizablePanel>
+            <ResizablePanel
+              defaultSize={50}
+              minSize={20}
+              maxSize={80}
+              className="h-full overflow-y-auto"
+            >
+              {engineDetails?.status == ModelStatus.ACTIVE ||
+              engineDetails?.status == ModelStatus.IDLE ? (
+                <QueryResults
+                  results={results || null}
+                  isExecuting={isExecuting}
+                  error={error}
+                  previewMode={previewMode}
+                  onPreviewModeChange={handlePreviewModeChange}
+                  engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
+                  engineName={engine ?? ""}
+                  apiLatency={apiExplanation?.total_execution_time_ms}
+                  showDocumentation={showDocumentation}
+                />
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center bg-background-solid p-4">
+                  <ShapedLogo className="size-10 mb-4" />
+                  <p className="text-sm font-medium text-foreground">
+                    Your engine is scheduling and will be ready to query soon.
+                  </p>
+                  <p className="text-sm font-medium text-foreground">
+                    Please check again in a little bit.
+                  </p>
+                </div>
               )}
+            </ResizablePanel>
           </ResizablePanelGroup>
         </div>
       )}

@@ -34,32 +34,11 @@ export function QueryParametersEditor({
   if (parameters.length === 0) return null
 
   return (
-    <Card className="mt-2 p-4">
+    <Card className="mt-2 p-4 rounded-none">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Query Parameters</h3>
-          {onRun && (
-            <div className="flex justify-end pt-2">
-              <Button
-                onClick={onRun}
-                disabled={
-                  isExecuting ||
-                  (engineDetails?.status != ModelStatus.ACTIVE &&
-                    engineDetails?.status != ModelStatus.IDLE)
-                }
-                className={cn(
-                  "ml-auto flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active",
-                  engineDetails?.status != ModelStatus.ACTIVE &&
-                    engineDetails?.status != ModelStatus.IDLE &&
-                    "border-[rgba(0,0,0,0.15)] bg-accent-brand-off-white text-accent-brand-light-gray hover:bg-accent-brand-off-white"
-                )}
-                variant="default"
-              >
-                <Play className="mr-2 h-4 w-4" />
-                Run
-              </Button>
-            </div>
-          )}
+
         </div>
         <div className="grid grid-cols-2 gap-4">
           {parameters.map((param) => (

@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /.pnp
+/.gradle
 .pnp.*
 .yarn/*
 !.yarn/patches

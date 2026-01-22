@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react"
 import Editor, { type OnMount } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 import {
   SQL_KEYWORDS,
   SQL_FUNCTIONS,
@@ -23,6 +24,7 @@ export function SqlMonacoEditor({
   onRun,
 }: SqlMonacoEditorProps) {
   const { resolvedTheme, theme } = useTheme()
+  const isMobile = useIsMobile()
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -303,13 +305,13 @@ export function SqlMonacoEditor({
     }
 
     const editorOptions: any = {
-      minimap: { enabled: false },
-      fontSize: 14,
+      minimap: { enabled: isMobile },
+      fontSize: isMobile ? 16 : 14,
       lineNumbers: "on",
       glyphMargin: false,
       folding: true,
-      lineDecorationsWidth: 10,
-      lineNumbersMinChars: 3,
+      lineDecorationsWidth: isMobile ? 5 : 10,
+      lineNumbersMinChars: isMobile ? 2 : 3,
       renderLineHighlight: "all",
       scrollBeyondLastLine: false,
       automaticLayout: true,
@@ -317,6 +319,14 @@ export function SqlMonacoEditor({
       wordWrap: "on",
       wrappingIndent: "indent",
       readOnly,
+      scrollbar: {
+        vertical: isMobile ? "visible" : "auto",
+        verticalScrollbarSize: isMobile ? 16 : 12,
+        horizontal: isMobile ? "visible" : "auto",
+        horizontalScrollbarSize: isMobile ? 16 : 12,
+        useShadows: true,
+        alwaysConsumeMouseWheel: isMobile,
+      },
       // suggest: {
       //   showKeywords: !readOnly,
       //   showSnippets: !readOnly,
@@ -559,8 +569,25 @@ export function SqlMonacoEditor({
       .monaco-editor[data-editor-type="sql"] .monaco-scrollable-element {
         background-color: ${backgroundColor} !important;
       }
+      ${
+        isMobile
+          ? `
+        .monaco-editor[data-editor-type="sql"] .monaco-scrollable-element > .scrollbar {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        .monaco-editor[data-editor-type="sql"] .monaco-scrollable-element > .scrollbar > .slider {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        .monaco-editor[data-editor-type="sql"] .monaco-scrollable-element > .scrollbar:hover {
+          opacity: 1 !important;
+        }
+      `
+          : ""
+      }
     `
-  }, [themeName, backgroundColor, mounted, readOnly])
+  }, [themeName, backgroundColor, mounted, readOnly, isMobile])
 
   return (
     <div className={`h-full w-full ${readOnly ? "bg-muted/30" : ""}`}>

@@ -7,6 +7,7 @@ import type { QueryResultRow } from "@/lib/types/query.types"
 import type { CardTemplate } from "@/lib/types/template.types"
 import { Badge } from "@/components/ui/badge"
 import { getTemplate } from "@/lib/utils/template-storage"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
 interface ResultsPreviewFeedProps {
   data: QueryResultRow[]
@@ -23,6 +24,7 @@ export function ResultsPreviewFeed({
   rankFeatures,
   rankImageFeatures,
 }: ResultsPreviewFeedProps) {
+  const isMobile = useIsMobile()
   const [customTemplate, setCustomTemplate] = useState<CardTemplate | null>(
     template || null
   )
@@ -206,6 +208,8 @@ export function ResultsPreviewFeed({
                 style={{
                   animationDelay:
                     index < 5 ? `${index * 0.2}s` : `${(index - 5) * 0.08}s`,
+                  transform: isMobile ? "scale(0.5)" : "scale(1)",
+                  transformOrigin: "top center",
                 }}
               >
                 {customTemplate &&

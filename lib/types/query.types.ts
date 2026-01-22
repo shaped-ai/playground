@@ -56,6 +56,8 @@ export interface SavedQuery {
   engine: string
   template: string
   parameters: QueryParameter[]
+  defaultViewMode?: ResultViewMode
+  defaultFeatures?: string[]
 }
 
 export interface QueryParameter {

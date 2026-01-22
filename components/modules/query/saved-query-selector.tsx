@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { ModelStatus } from "@/types/enums"
 import { ModelDetails } from "@/types"
 import { useMemo } from "react"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
 interface SavedQuerySelectorProps {
   engine: string
@@ -22,6 +23,7 @@ export function SavedQuerySelector({
   onQuerySelect,
   engineDetails,
 }: SavedQuerySelectorProps) {
+  const isMobile = useIsMobile()
   const savedQueries = useMemo(() => {
     if (!engine) return []
     const demoEngine = DEMO_ENGINES.find((e) => e.id === engine)
@@ -35,16 +37,19 @@ export function SavedQuerySelector({
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-1 items-center gap-2 border-border-muted px-4 py-2",
+        "flex min-w-0 flex-1 items-center border-border-muted",
+        isMobile ? "gap-1 px-2 py-1" : "gap-2 px-4 py-2",
         engineDetails?.status != ModelStatus.ACTIVE &&
           engineDetails?.status != ModelStatus.IDLE &&
           engineDetails?.status != ModelStatus.ERROR &&
           "border-b border-border"
       )}
     >
-      <div className="flex shrink-0 items-center gap-1">
-        <span className="text-xs font-bold text-foreground">Try a query</span>
-      </div>
+      {!isMobile && (
+        <div className="flex shrink-0 items-center gap-1">
+          <span className="text-xs font-bold text-foreground">Try a query</span>
+        </div>
+      )}
 
       <div
         className={cn(

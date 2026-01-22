@@ -62,12 +62,7 @@ export function ResultsHeader({
       },
     ]
 
-    // On mobile, only show Raw Table and JSON (no UI View)
-    if (isMobile) {
-      return baseModes
-    }
-
-    // On desktop, show UI View option when there are results
+    // Show UI View option when there are results (on both mobile and desktop)
     return [
       ...baseModes,
       ...(hasNoResults
@@ -79,28 +74,28 @@ export function ResultsHeader({
                 viewMode != ResultViewMode.SUMMARY_TABLE &&
                 viewMode != ResultViewMode.JSON
                   ? viewMode
-                  : ResultViewMode.PREVIEW_GRID,
+                  : ResultViewMode.PREVIEW_MASONRY,
               label: "UI View",
               icon: MonitorSmartphone,
             },
           ]),
     ]
-  }, [isMobile, hasNoResults, viewMode])
+  }, [hasNoResults, viewMode])
 
   return (
     <div
       ref={resultsHeaderRef}
       className="border-b border-border bg-background-base"
     >
-      <div className="flex items-center justify-between gap-4 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <span className="text-nowrap text-lg font-semibold text-foreground">
+      <div className="flex items-center justify-between gap-2 md:gap-4 px-2 md:px-4 py-1 md:py-3">
+        <div className="flex items-center gap-2 md:gap-3">
+          <span className="text-nowrap text-xs md:text-lg font-semibold text-foreground">
             {rowCount} Results in {Math.round(executionTime)} ms
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {isPreviewMode && !hasNoResults && (
+        <div className="flex items-center gap-1 md:gap-2">
+          {isPreviewMode && !hasNoResults && !isMobile && (
             <div
               className={cn(
                 "thin-scrollbar flex flex-1 items-center justify-start gap-2 overflow-x-auto",
@@ -112,7 +107,7 @@ export function ResultsHeader({
                   variant="outline"
                   size="sm"
                   onClick={onEditTemplate}
-                  className="shadow-xs h-auto gap-2 rounded-lg bg-background-primary py-1.5 px-2 text-xs font-medium hover:bg-background-secondary"
+                  className="shadow-xs h-8 gap-2 rounded-lg bg-background-primary px-2 text-xs font-medium hover:bg-background-secondary"
                 >
                   <Settings2 className="size-4 text-accent-brand-purple" />
                   <span className="text-nowrap text-xs">Edit Template</span>
@@ -127,11 +122,17 @@ export function ResultsHeader({
               onValueChange={(value: ResultViewMode) => onViewModeChange(value)}
             >
               <SelectTrigger
-                className="h-auto w-auto cursor-pointer gap-1 rounded-lg border px-2 py-1.5 text-xs font-medium hover:bg-background-secondary focus:ring-0 focus:ring-offset-0"
+                size="sm"
+                className={cn(
+                  "w-auto cursor-pointer rounded-lg border text-xs font-medium hover:bg-background-secondary focus:ring-0 focus:ring-offset-0",
+                  isMobile ? "gap-0.5 px-1.5 py-1" : "gap-1 px-2"
+                )}
                 showIcon={false}
               >
                 <SelectValue />
-                <ChevronsUpDown className="h-4 w-4" />
+                <ChevronsUpDown
+                  className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")}
+                />
               </SelectTrigger>
               <SelectContent className="z-9999 border-border bg-background-primary text-foreground">
                 {dataViewModes.map((mode) => {

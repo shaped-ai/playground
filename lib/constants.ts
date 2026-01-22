@@ -1,4 +1,5 @@
 import { ModelStatus } from "@/types/enums"
+import { ResultViewMode } from "@/lib/types/query.types"
 
 export const PLAYGROUND_VIEWER_EMAIL = "demo@shaped.ai"
 export const MOVIELENS_MODEL_NAME = "movie_recommendations"
@@ -108,6 +109,8 @@ filter(
   where='interaction_count > 200' 
 )`,
         parameters: [],
+        defaultViewMode: ResultViewMode.PREVIEW_LIST,
+        defaultFeatures: ["interaction_count"],
       },
     ],
   },

@@ -9,6 +9,7 @@ import { EngineSelector } from "@/components/selector/engine-selector"
 import { ModelStatus } from "@/types/enums"
 import { ModelDetails } from "@/types/index"
 import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
 interface QueryControlsProps {
   selectedEngine: string
@@ -35,6 +36,7 @@ export function QueryControls({
   onToggleResults,
   engineDetails,
 }: QueryControlsProps) {
+  const isMobile = useIsMobile()
   const handleSavedQuerySelect = useCallback(
     (query: SavedQuery | null) => {
       onSavedQuerySelect(query)
@@ -47,14 +49,27 @@ export function QueryControls({
       {/* First row: Engine selector with Run button */}
       <div
         className={cn(
-          "flex h-auto shrink-0 items-center justify-between gap-2 border-b border-l-0 border-r-0 border-t-0 border-border-muted px-4 pb-2 pt-0",
+          "flex h-auto shrink-0 items-center justify-between border-b border-l-0 border-r-0 border-t-0 border-border-muted pt-0",
+          isMobile ? "gap-1 px-2 pb-1" : "gap-2 px-4 pb-2",
           engineDetails?.status != ModelStatus.ACTIVE &&
             engineDetails?.status != ModelStatus.IDLE &&
             "border-0"
         )}
       >
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="text-sm font-bold text-foreground">Engine</span>
+        <div
+          className={cn(
+            "flex shrink-0 items-center",
+            isMobile ? "gap-1" : "gap-2"
+          )}
+        >
+          <span
+            className={cn(
+              "font-bold text-foreground",
+              isMobile ? "text-xs" : "text-sm"
+            )}
+          >
+            Engine
+          </span>
           <EngineSelector
             selectedEngine={selectedEngine}
             onEngineChange={onEngineChange}
@@ -72,13 +87,16 @@ export function QueryControls({
                 engineDetails?.status != ModelStatus.IDLE)
             }
             className={cn(
-              "ml-auto flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active",
+              "ml-auto flex h-auto shrink-0 cursor-pointer items-center rounded-lg border border-border-active bg-background-accent text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active",
+              isMobile ? "gap-0.5 px-1.5 py-1" : "gap-1 px-2 py-1.5",
               engineDetails?.status != ModelStatus.ACTIVE &&
                 engineDetails?.status != ModelStatus.IDLE &&
                 "border-[rgba(0,0,0,0.15)] bg-accent-brand-off-white text-accent-brand-light-gray hover:bg-accent-brand-off-white"
             )}
           >
-            <Play className="h-4 w-4 shrink-0" />
+            <Play
+              className={cn("shrink-0", isMobile ? "h-3 w-3" : "h-4 w-4")}
+            />
             Run
           </Button>
         )}

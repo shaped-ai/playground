@@ -59,7 +59,7 @@ export function QueryPageContent({}: {}) {
   )
   const [parameterValues, setParameterValues] = useState<ParameterValue>({})
   const [previewMode, setPreviewMode] = useState<ResultViewMode>(
-    ResultViewMode.RAW_TABLE
+    ResultViewMode.PREVIEW_MASONRY
   )
   const [isExecuting, setIsExecuting] = useState<boolean>(false)
 
@@ -160,7 +160,7 @@ export function QueryPageContent({}: {}) {
     setEngine(state.engine ?? "")
     setSavedQueryId(state.savedQueryId)
     setParameterValues(state.parameterValues || {})
-    setPreviewMode(state.previewMode || ResultViewMode.RAW_TABLE)
+    setPreviewMode(state.previewMode || ResultViewMode.PREVIEW_MASONRY)
 
     if (state.savedQueryId || state.parameterValues || state.previewMode) {
       setPendingRestoration({
@@ -344,6 +344,11 @@ export function QueryPageContent({}: {}) {
     setSavedQueryId(nextSavedQueryId ?? undefined)
     setParameterValues(nextParameterValues)
     setContent(query?.template ?? content ?? "")
+
+    // Apply defaultViewMode if specified in the query configuration
+    if (query?.defaultViewMode) {
+      setPreviewMode(query.defaultViewMode)
+    }
   }
 
   const handlePreviewModeChange = useCallback(
@@ -368,7 +373,8 @@ export function QueryPageContent({}: {}) {
     const startTime = performance.now()
 
     // On first run (when results is null), default to Masonry preview mode
-    if (results === null) {
+    // But only if the selected query doesn't have a defaultViewMode configured
+    if (results === null && !selectedSavedQueryObject?.defaultViewMode) {
       setPreviewMode(ResultViewMode.PREVIEW_MASONRY)
     }
 
@@ -506,12 +512,12 @@ export function QueryPageContent({}: {}) {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-border bg-background-base px-6 py-4 flex flex-row items-center justify-between">
+      <div className="shrink-0 border-b border-border bg-background-base px-3 py-2 md:px-6 md:py-4 flex flex-row items-center justify-between">
         <div className="flex flex-col">
-          <h1 className="text-xl font-semibold text-foreground">
+          <h1 className="text-sm md:text-xl font-semibold text-foreground">
             ShapedQL Playground
           </h1>
-          <p className="text-sm text-foreground-muted">
+          <p className="hidden md:block text-sm text-foreground-muted">
             <a
               href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
               target="_blank"
@@ -523,29 +529,30 @@ export function QueryPageContent({}: {}) {
             </a>
           </p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 md:gap-2">
           {mounted && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="h-8 w-8 shrink-0 rounded-lg border border-border-active bg-background-accent hover:border-border-active hover:bg-accent-active"
+              className="h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-lg"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
-                <Sun className="size-4 text-accent-brand-off-white" />
+                <Sun className="size-3 md:size-4 text-foreground" />
               ) : (
-                <Moon className="size-4 text-accent-brand-off-white" />
+                <Moon className="size-3 md:size-4 text-foreground" />
               )}
             </Button>
           )}
           <Button
             asChild
-            className="flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
+            className="flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-1.5 py-1 md:px-2 md:py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
             variant="default"
           >
             <Link href="https://console.shaped.ai/register" target="_blank">
-              Try with your own data
+              <span className="md:hidden">Add your own data</span>
+              <span className="hidden md:inline">Try with your data</span>
             </Link>
           </Button>
         </div>
@@ -725,6 +732,7 @@ export function QueryPageContent({}: {}) {
                   engineName={engine ?? ""}
                   apiLatency={apiExplanation?.total_execution_time_ms}
                   showDocumentation={showDocumentation}
+                  savedQueryId={savedQueryId}
                 />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center bg-background-solid p-4">

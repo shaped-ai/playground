@@ -5,6 +5,7 @@ import Editor, { type OnMount } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
 import YAML from "yaml"
 import { registerYAMLCompletionProvider } from "@/lib/utils/yaml-autocomplete"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
 interface PlainMonacoEditorProps {
   value: string
@@ -21,6 +22,7 @@ export function PlainMonacoEditor({
 }: PlainMonacoEditorProps) {
   const MonacoEditorComponent = Editor as unknown as React.FC<any>
   const { theme, resolvedTheme } = useTheme()
+  const isMobile = useIsMobile()
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -180,13 +182,13 @@ export function PlainMonacoEditor({
     }
 
     editor.updateOptions({
-      minimap: { enabled: false },
-      fontSize: 14,
+      minimap: { enabled: isMobile },
+      fontSize: isMobile ? 16 : 14,
       lineNumbers: "on",
       glyphMargin: false,
       folding: true,
-      lineDecorationsWidth: 10,
-      lineNumbersMinChars: 3,
+      lineDecorationsWidth: isMobile ? 5 : 10,
+      lineNumbersMinChars: isMobile ? 2 : 3,
       renderLineHighlight: "all",
       scrollBeyondLastLine: false,
       tabSize: 2,
@@ -210,6 +212,14 @@ export function PlainMonacoEditor({
       suggestOnTriggerCharacters: !readOnly,
       acceptSuggestionOnCommitCharacter: !readOnly,
       parameterHints: { enabled: false },
+      scrollbar: {
+        vertical: isMobile ? "visible" : "auto",
+        verticalScrollbarSize: isMobile ? 16 : 12,
+        horizontal: isMobile ? "visible" : "auto",
+        horizontalScrollbarSize: isMobile ? 16 : 12,
+        useShadows: true,
+        alwaysConsumeMouseWheel: isMobile,
+      },
     })
 
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
@@ -394,6 +404,37 @@ export function PlainMonacoEditor({
       }
     }
   }, [theme, resolvedTheme, mounted, readOnly])
+
+  // Force scrollbar to always be visible on mobile
+  useEffect(() => {
+    if (!mounted || !isMobile) return
+
+    const styleId = `monaco-plain-editor-scrollbar-mobile`
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement
+
+    if (!styleElement) {
+      styleElement = document.createElement("style")
+      styleElement.id = styleId
+      document.head.appendChild(styleElement)
+    }
+
+    styleElement.textContent = `
+      .monaco-editor .monaco-scrollable-element > .scrollbar {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      .monaco-editor .monaco-scrollable-element > .scrollbar > .slider {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    `
+
+    return () => {
+      if (styleElement && styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement)
+      }
+    }
+  }, [mounted, isMobile])
 
   // Calculate theme name based on current theme and readOnly state
   const themeName = readOnly

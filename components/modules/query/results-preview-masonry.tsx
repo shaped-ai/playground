@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import type { CardTemplate, TemplateField } from "@/lib/types/template.types"
 import { getTemplate } from "@/lib/utils/template-storage"
 import { cn } from "@/lib/utils"
-import { useMediaQuery } from "@/hooks/shared/use-media-query"
+import { useMediaQuery, useIsMobile } from "@/hooks/shared/use-media-query"
 
 interface ResultsPreviewMasonryProps {
   data: QueryResultRow[]
@@ -128,6 +128,7 @@ function MasonryCard({
   positionInReorderedArray: number
   columnCount: number
 }) {
+  const isMobile = useIsMobile()
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null)
@@ -228,19 +229,34 @@ function MasonryCard({
   // Calculate marginTop based on final column position in the layout
   // The positionInReorderedArray determines which column this item ends up in
   const columnPosition = positionInReorderedArray % columnCount
-  const marginTop = `${
-    columnPosition === 0
-      ? 0
-      : columnPosition === 1
-        ? 12
-        : columnPosition === 2
-          ? 25
-          : columnPosition === 3
-            ? 15
-            : columnPosition === 4
-              ? 40
-              : 45
-  }px`
+  // Use smaller offsets on mobile to account for smaller card size
+  const marginTop = isMobile
+    ? `${
+        columnPosition === 0
+          ? 0
+          : columnPosition === 1
+            ? 6
+            : columnPosition === 2
+              ? 12
+              : columnPosition === 3
+                ? 8
+                : columnPosition === 4
+                  ? 20
+                  : 22
+      }px`
+    : `${
+        columnPosition === 0
+          ? 0
+          : columnPosition === 1
+            ? 12
+            : columnPosition === 2
+              ? 25
+              : columnPosition === 3
+                ? 15
+                : columnPosition === 4
+                  ? 40
+                  : 45
+      }px`
 
   return (
     <div
@@ -249,6 +265,8 @@ function MasonryCard({
         marginTop,
         animationDelay: `${originalIndex * 20}ms`,
         animationFillMode: "both",
+        transform: isMobile ? "scale(0.5)" : "scale(1)",
+        transformOrigin: "top left",
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

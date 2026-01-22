@@ -34,6 +34,8 @@ import { ResultsTable } from "@/components/results-table"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/shared/use-media-query"
+import { DEMO_ENGINES } from "@/lib/constants"
+import type { SavedQuery } from "@/lib/types/query.types"
 
 const allPreviewViewModes = [
   {
@@ -56,6 +58,7 @@ interface JsonMonacoViewerProps {
 
 function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
   const { theme } = useTheme()
+  const isMobile = useIsMobile()
   const editorRef = useRef<any>(null)
   const [mounted, setMounted] = useState(false)
 
@@ -163,8 +166,8 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
       minimap: { enabled: false },
       fontSize: 13,
       lineHeight: 20,
-      lineNumbers: "on",
-      glyphMargin: true,
+      lineNumbers: isMobile ? "off" : "on",
+      glyphMargin: false,
       folding: true,
       foldingStrategy: "indentation",
       showFoldingControls: "always",
@@ -249,6 +252,7 @@ interface QueryResultsProps {
   engineDetails?: ModelDetails
   apiLatency?: number
   showDocumentation?: boolean
+  savedQueryId?: string
 }
 
 export function QueryResults({
@@ -261,17 +265,35 @@ export function QueryResults({
   engineDetails,
   apiLatency,
   showDocumentation,
+  savedQueryId,
 }: QueryResultsProps) {
   const isMobile = useIsMobile()
+  const { theme } = useTheme()
   const [viewMode, setViewMode] = useState<ResultViewMode>(
-    externalPreviewMode || ResultViewMode.RAW_TABLE
+    externalPreviewMode || ResultViewMode.PREVIEW_MASONRY
   )
+
+  // Sync viewMode with externalPreviewMode when it changes
+  useEffect(() => {
+    if (externalPreviewMode) {
+      setViewMode(externalPreviewMode)
+    }
+  }, [externalPreviewMode])
   const [isTemplateEditorOpen, setIsTemplateEditorOpen] = useState(false)
   const [currentTemplate, setCurrentTemplate] = useState<CardTemplate | null>(
     null
   )
   const [templateRevision, setTemplateRevision] = useState(0)
   const hasCreatedDefaultTemplateRef = useRef<string>("")
+
+  // Get the selected saved query to access defaultFeatures
+  const selectedSavedQuery = useMemo<SavedQuery | null>(() => {
+    if (!savedQueryId || !engineName) return null
+    const demoEngine = DEMO_ENGINES.find((e) => e.id === engineName)
+    if (!demoEngine?.saved_queries) return null
+    const queries = demoEngine.saved_queries as SavedQuery[]
+    return queries.find((q: SavedQuery) => q.id === savedQueryId) || null
+  }, [savedQueryId, engineName])
 
   // Filter preview modes based on screen size
   const previewViewModes = useMemo(() => {
@@ -346,6 +368,23 @@ export function QueryResults({
             const keys = Object.keys(results.data[0] || {})
             const defaultFields: TemplateField[] = []
 
+            // Add defaultFeatures from saved query configuration if available
+            const defaultFeatures = selectedSavedQuery?.defaultFeatures || []
+            defaultFeatures.forEach((featureName) => {
+              if (keys.includes(featureName)) {
+                defaultFields.push({
+                  id: crypto.randomUUID(),
+                  type: "text",
+                  label: "",
+                  dataKey: featureName,
+                  size: "small",
+                  width: "full",
+                  position: defaultFields.length,
+                  visible: true,
+                })
+              }
+            })
+
             // Try to find common field names
             const imageKey = keys.find(
               (k) =>
@@ -363,6 +402,9 @@ export function QueryResults({
                 k.includes("summary")
             )
 
+            // Adjust positions for defaultFeatures that were already added
+            let nextPosition = defaultFields.length
+
             if (imageKey) {
               defaultFields.push({
                 id: crypto.randomUUID(),
@@ -371,7 +413,7 @@ export function QueryResults({
                 dataKey: imageKey,
                 size: "medium",
                 width: "full",
-                position: 0,
+                position: nextPosition++,
                 visible: true,
               })
             }
@@ -384,7 +426,7 @@ export function QueryResults({
                 dataKey: titleKey,
                 size: "medium",
                 width: "full",
-                position: 1,
+                position: nextPosition++,
                 visible: true,
               })
             } else if (descKey) {
@@ -395,10 +437,13 @@ export function QueryResults({
                 dataKey: descKey,
                 size: "small",
                 width: "full",
-                position: 2,
+                position: nextPosition++,
                 visible: true,
               })
-            } else {
+            } else if (
+              keys.length > 0 &&
+              !defaultFields.some((f) => f.dataKey === keys[0])
+            ) {
               defaultFields.push({
                 id: crypto.randomUUID(),
                 type: "text",
@@ -406,7 +451,7 @@ export function QueryResults({
                 dataKey: keys[0],
                 size: "small",
                 width: "full",
-                position: imageKey ? 1 : 0,
+                position: nextPosition++,
                 visible: true,
               })
             }
@@ -437,7 +482,7 @@ export function QueryResults({
       setCurrentTemplate(null)
       hasCreatedDefaultTemplateRef.current = ""
     }
-  }, [viewMode, engineName, results])
+  }, [viewMode, engineName, results, selectedSavedQuery])
 
   const [rankFeatures, rankImageFeatures] = [
     [
@@ -593,13 +638,18 @@ export function QueryResults({
         </div>
       </div>
     )
-  ) : !results && showDocumentation ? (
-    <div className="flex h-full w-full bg-background-solid">
+  ) : (!results && !isExecuting && !error) || showDocumentation ? (
+    <div className="flex h-full w-full overflow-auto bg-background-solid">
       <iframe
-        src="https://docs.shaped.ai/docs/v2/query_reference/shapedql/?hide-nav=true"
+        src={`https://docs.shaped.ai/docs/v2/query_reference/shapedql/?hide-nav=true&docusaurus-theme=${theme === "dark" ? "dark" : "light"}`}
         className="h-full w-full border-0"
         title="Query Documentation"
         allowFullScreen
+        allow="clipboard-write"
+        scrolling="yes"
+        style={{
+          WebkitOverflowScrolling: "touch",
+        }}
       />
     </div>
   ) : (
@@ -630,13 +680,14 @@ export function QueryResults({
                   size="sm"
                   onClick={() => handleViewModeChange(mode.value)}
                   className={cn(
-                    "text-nowrap relative h-auto w-auto shrink-0 cursor-pointer gap-1 rounded-[32px] border px-3 py-1.5 transition-all",
+                    "text-nowrap relative h-auto w-auto shrink-0 cursor-pointer rounded-[32px] border transition-all",
+                    isMobile ? "gap-0 px-2 py-1" : "gap-1 px-3 py-1.5",
                     isActive
                       ? "border-border-active bg-background-accent text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
                       : " border-transparent text-foreground hover:bg-background-secondary hover:text-foreground"
                   )}
                 >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  {!isMobile && <Icon className="h-3.5 w-3.5 shrink-0" />}
                   <span className="text-nowrap shrink-0 text-xs font-medium">
                     {mode.label}
                   </span>

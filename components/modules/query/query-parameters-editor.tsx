@@ -9,6 +9,7 @@ import type { QueryParameter, ParameterValue } from "@/lib/types/query.types"
 import { cn } from "@/lib/utils"
 import { ModelStatus } from "@/types/enums"
 import { ModelDetails } from "@/types"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
 interface QueryParametersEditorProps {
   parameters: QueryParameter[]
@@ -27,6 +28,7 @@ export function QueryParametersEditor({
   isExecuting,
   engineDetails,
 }: QueryParametersEditorProps) {
+  const isMobile = useIsMobile()
   const handleChange = (name: string, value: any) => {
     onChange({ ...values, [name]: value })
   }
@@ -34,14 +36,24 @@ export function QueryParametersEditor({
   if (parameters.length === 0) return null
 
   return (
-    <Card className="mt-2 p-4 rounded-none">
-      <div className="space-y-3">
+    <Card className={cn("mt-2 rounded-none", isMobile ? "p-2" : "p-4")}>
+      <div className={cn("space-y-3", isMobile && "space-y-2")}>
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Query Parameters</h3>
+          <h3 className={cn("font-semibold", isMobile ? "text-xs" : "text-sm")}>
+            Query Parameters
+          </h3>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div
+          className={cn(
+            "grid gap-4",
+            isMobile ? "grid-cols-1 gap-2" : "grid-cols-2"
+          )}
+        >
           {parameters.map((param) => (
-            <div key={param.name} className="space-y-1.5">
+            <div
+              key={param.name}
+              className={cn("space-y-1.5", isMobile && "space-y-1")}
+            >
               <Label htmlFor={param.name} className="text-xs font-medium">
                 {param.name}
                 {param.required && (
@@ -65,7 +77,10 @@ export function QueryParametersEditor({
                   (param.value ?? param.defaultValue)?.toString() ||
                   `Enter ${param.name}`
                 }
-                className="h-8 focus:ring-0 focus:ring-offset-0"
+                className={cn(
+                  "focus:ring-0 focus:ring-offset-0",
+                  isMobile ? "h-7" : "h-8"
+                )}
               />
             </div>
           ))}

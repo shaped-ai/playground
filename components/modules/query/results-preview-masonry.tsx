@@ -9,6 +9,7 @@ import type { CardTemplate, TemplateField } from "@/lib/types/template.types"
 import { getTemplate } from "@/lib/utils/template-storage"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/shared/use-media-query"
+import { useTheme } from "next-themes"
 
 interface ResultsPreviewMasonryProps {
   data: QueryResultRow[]
@@ -79,6 +80,7 @@ function MasonryCard({
   originalIndex: number
 }) {
   const isMobile = useIsMobile()
+  const { theme } = useTheme()
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null)
@@ -106,7 +108,6 @@ function MasonryCard({
             key={field.id}
             className={cn(sizeClasses[field.size], "flex items-center")}
           >
-            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
             <span
               className={`${
                 field.size === "large"
@@ -218,7 +219,9 @@ function MasonryCard({
               isHovered ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className="absolute bottom-0 left-0 right-0 transform space-y-2 p-6 text-white transition-transform duration-500">
+            <div className={`absolute bottom-0 left-0 right-0 transform space-y-2 p-6 transition-transform duration-500 ${
+              theme === "dark" ? "text-black" : "text-white"
+            }`}>
               {otherFields.map((field) => (
                 <div key={field.id}>{renderField(field)}</div>
               ))}

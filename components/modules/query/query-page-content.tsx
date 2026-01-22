@@ -564,7 +564,7 @@ export function QueryPageContent({}: {}) {
               variant="outline"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-lg"
+              className="h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-lg cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
@@ -646,7 +646,7 @@ export function QueryPageContent({}: {}) {
             className="flex-1 h-full w-full"
           >
             <ResizablePanel
-              defaultSize={50}
+              defaultSize={60}
               minSize={20}
               maxSize={80}
               className="bg-background-solid"
@@ -748,8 +748,9 @@ export function QueryPageContent({}: {}) {
               maxSize={80}
               className="h-full overflow-y-auto"
             >
-              {engineDetails?.status == ModelStatus.ACTIVE ||
-              engineDetails?.status == ModelStatus.IDLE ? (
+              {(engineDetails?.status == ModelStatus.ACTIVE ||
+                engineDetails?.status == ModelStatus.IDLE) ||
+              showDocumentation ? (
                 <QueryResults
                   results={results || null}
                   isExecuting={isExecuting}

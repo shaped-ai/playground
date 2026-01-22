@@ -132,9 +132,11 @@ export function ResultsPreviewCarousel({
               ? "text-base font-semibold"
               : "text-sm text-muted-foreground"
         return (
-          <p key={field.id} className={textSize}>
-            <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;
-            <span>{Array.isArray(value) ? value.join(", ") : value}</span>
+          <p key={field.id} className={`${textSize} truncate`}>
+            <span>{displayLabel ? `${displayLabel}: ` : ""}</span>
+            <span className="truncate">
+              {Array.isArray(value) ? value.join(", ") : value}
+            </span>
           </p>
         )
     }

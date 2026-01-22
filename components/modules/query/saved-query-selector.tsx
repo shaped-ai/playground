@@ -83,7 +83,7 @@ export function SavedQuerySelector({
                   size="sm"
                   onClick={() => handleQueryClick(query)}
                   className={cn(
-                    "h-auto shrink-0 rounded-[38px] px-2 py-1 text-xs font-medium transition-all",
+                    "h-auto shrink-0 rounded-[38px] px-2 py-1 text-xs font-medium transition-all cursor-pointer",
                     "border-border-muted bg-background-primary text-foreground hover:bg-background-secondary",
                     "active:scale-95 active:transition-transform"
                   )}

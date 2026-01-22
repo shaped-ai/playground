@@ -279,11 +279,13 @@ export function QueryResults({
       setViewMode(externalPreviewMode)
     }
   }, [externalPreviewMode])
+
   const [isTemplateEditorOpen, setIsTemplateEditorOpen] = useState(false)
   const [currentTemplate, setCurrentTemplate] = useState<CardTemplate | null>(
     null
   )
   const [templateRevision, setTemplateRevision] = useState(0)
+  const [isIframeReady, setIsIframeReady] = useState(false)
   const hasCreatedDefaultTemplateRef = useRef<string>("")
 
   // Get the selected saved query to access defaultFeatures
@@ -639,14 +641,25 @@ export function QueryResults({
       </div>
     )
   ) : (!results && !isExecuting && !error) || showDocumentation ? (
-    <div className="flex h-full w-full overflow-auto bg-background-solid">
+    <div className="relative flex h-full w-full overflow-hidden bg-background-solid">
+      <div
+        className={`absolute inset-0 z-50 bg-background-solid transition-opacity duration-300 ${
+          isIframeReady ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      />
       <iframe
+        key={theme}
         src={`https://docs.shaped.ai/docs/v2/query_reference/shapedql/?hide-nav=true&docusaurus-theme=${theme === "dark" ? "dark" : "light"}`}
-        className="h-full w-full border-0"
+        className={`h-full w-full border-0 transition-opacity duration-300 ${
+          isIframeReady ? "opacity-100" : "opacity-0"
+        }`}
         title="Query Documentation"
         allowFullScreen
         allow="clipboard-write"
         scrolling="yes"
+        onLoad={() => {
+          setTimeout(() => setIsIframeReady(true), 100)
+        }}
         style={{
           WebkitOverflowScrolling: "touch",
         }}

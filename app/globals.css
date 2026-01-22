@@ -23,33 +23,37 @@
      ☀️ LIGHT THEME
      ------------------------------------------------------------------- */
   :root {
-
     /* ------------------------------ 🧱 Background Colors ------------------------------ */
     --background-solid: hsla(0, 0%, 100%, 1);
     /* Use this to set the color for the entire page. This is black or white.  */
 
-	 --background-base: hsla(260, 60%, 98%, 1);
+    --background-base: hsla(260, 60%, 98%, 1);
     /* This is the base color for our sidebar, top nav, table headers, headers, and dialogs. */
 
-	 --background-primary: hsla(260, 50%, 99%, 1);
+    --background-primary: hsla(260, 50%, 99%, 1);
     /* This is the typical base color for buttons and some backgrounds to dialogues and content views */
-	 
+
     --background-secondary: hsla(260, 61.9%, 96%, 1);
     /* For hover states or secondary background states that contrast with the primary background color. */
-	 
+
     --background-accent: hsla(260, 69%, 61%, 1);
     /* This is used to act as the background for active states and buttons, drop-downs, and other UI components. It's also meant to give occasional background accents to specific UI elements that need them */
-    
-   --gradient-subtle: linear-gradient(180deg, hsla(260, 54%, 48%, 0) 0%, hsla(260, 54%, 48%, 0.04) 100%), hsla(260, 60%, 98%, 1);
-   /*  This is an optional gradient to apply to the top nav used in most views for contrast if needed. */
 
-   
+    --gradient-subtle:
+      linear-gradient(
+        180deg,
+        hsla(260, 54%, 48%, 0) 0%,
+        hsla(260, 54%, 48%, 0.04) 100%
+      ),
+      hsla(260, 60%, 98%, 1);
+    /*  This is an optional gradient to apply to the top nav used in most views for contrast if needed. */
+
     /* ------------------------------ ✍️ Foreground (Text) Colors ------------------------------ */
-	 --foreground: hsla(0, 0%, 10%, 1);
+    --foreground: hsla(0, 0%, 10%, 1);
     /* Default text and icon color */
 
-	 --foreground-inverse: hsla(60, 14%, 93%, 1);
-    /*  For rare use where inverting foreground color is necessary. */  
+    --foreground-inverse: hsla(60, 14%, 93%, 1);
+    /*  For rare use where inverting foreground color is necessary. */
 
     --foreground-muted: hsla(60, 0.56%, 35%, 1);
     /* Secondary copy such as sublines. Inactive and disabled button and UI text color.  */
@@ -57,44 +61,42 @@
     --foreground-subtle: hsla(60, 1%, 60%, 1);
     /* Tertiary color used for inactive and disabled states.  */
 
-
     /* ------------------------------ 🧱 Border & Divider Colors ------------------------------ */
     --border: hsla(259, 68%, 90%, 1);
     /* Default border for containers, inputs, UI controls, and dividers.  */
 
-	 --border-inverse: hsla(0, 0%, 83%, 1);
+    --border-inverse: hsla(0, 0%, 83%, 1);
     /* Use to leverage the opposite themes default border color*/
 
-	 --border-muted: hsla(259, 11%, 91%, 1);
+    --border-muted: hsla(259, 11%, 91%, 1);
     /* Table cell border colors, inactive and disabled states of UI containers and inputs, and more gray-toned dividers. */
-	 
+
     --border-subtle: hsla(259, 50%, 96%, 1);
     /* Secondary option for disabled states of UI containers and inputs. Mostly used for very soft boundaries. */
 
-	 --border-accent: hsla(260, 69%, 61%, 1);
-   /* Occasionally used for purple-hued soft borders and boundaries where necessary.  */
+    --border-accent: hsla(260, 69%, 61%, 1);
+    /* Occasionally used for purple-hued soft borders and boundaries where necessary.  */
 
-	 --border-active: hsla(261, 43%, 50%, 1);
+    --border-active: hsla(261, 43%, 50%, 1);
     /* For UI controls that need active border states. Pairs with --background-accent.  */
-
 
     /* ------------------------------ 🎨 Accent & Brand Colors ------------------------------ */
     --accent-primary: hsla(260, 69%, 61%, 1);
-   /* Primary brand accent for icons and links in place of --foreground. Can be alternatively used to --background-accent */
+    /* Primary brand accent for icons and links in place of --foreground. Can be alternatively used to --background-accent */
 
     --accent-subtle: hsla(25, 62%, 96%, 1);
     /* For a tint on a dark background such as a purple button */
 
     --accent-active: hsla(261, 43%, 50%, 1);
     /* Active accent color used in --border-active. Can be applied to UI if needed   */
-    
-   /* ---- Our primary brand color pallete ----*/
+
+    /* ---- Our primary brand color pallete ----*/
     --accent-brand-purple: hsla(260, 69%, 61%, 1);
     --accent-brand-fuschia: hsla(285, 97%, 71%, 1);
     --accent-brand-blue: hsla(203, 58%, 52%, 1);
 
     --accent-brand-green: hsla(129, 72%, 25%, 1);
-   /* Use this accent of green to have enough contrast in either light or dark themes */
+    /* Use this accent of green to have enough contrast in either light or dark themes */
 
     --accent-brand-light-green: hsla(134, 42%, 56%, 1);
     --accent-brand-dark-green: hsla(129, 72%, 25%, 1);
@@ -108,8 +110,8 @@
     /* ------------------------------ 🧭 Status Colors ------------------------------ */
     /* Status colors using our brand accent colors, which can alternatively be used in place of these */
     --success: hsla(129, 71%, 25%, 1);
-	 --warning: hsla(42, 94%, 56%, 1);
-	 --error: hsla(1, 88%, 60%, 1);
+    --warning: hsla(42, 94%, 56%, 1);
+    --error: hsla(1, 88%, 60%, 1);
   }
 
   /* -------------------------------------------------------------------
@@ -119,96 +121,103 @@
     --background-solid: hsla(0, 0%, 6%, 1);
     /* Use this to set the color for the entire page. This is black or white.  */
 
-	 --background-base: hsla(0, 0%, 10%, 1);
-	/* This is the base color for our sidebar, top nav, table headers, headers, and dialogs. */
+    --background-base: hsla(0, 0%, 10%, 1);
+    /* This is the base color for our sidebar, top nav, table headers, headers, and dialogs. */
 
     --background-primary: hsla(0, 0%, 15%, 1);
     /* This is the typical base color for buttons and some backgrounds to dialogues and content views */
 
-	 --background-secondary: hsla(60, 1%, 25%, 1);
+    --background-secondary: hsla(60, 1%, 25%, 1);
     /*  For hover states or secondary background states that contrast with the primary background color. */
 
-	 --background-accent: hsla(260, 69%, 61%, 1);
+    --background-accent: hsla(260, 69%, 61%, 1);
     /* Background for active states and buttons, drop-downs, and other UI components. It's also meant to give occasional background accents to specific UI elements that need them */
 
-    --gradient-subtle: linear-gradient(180deg, hsla(270, 50%, 99%, 0.04) 0%, hsla(270, 50%, 99%, 0) 100%), hsla(0, 0%, 15%, 1);
+    --gradient-subtle:
+      linear-gradient(
+        180deg,
+        hsla(270, 50%, 99%, 0.04) 0%,
+        hsla(270, 50%, 99%, 0) 100%
+      ),
+      hsla(0, 0%, 15%, 1);
     /*  This is an optional gradient to apply to the top nav used in most views for contrast if needed. */
-
 
     /* ------------------------------ ✍️ Foreground (Text) Colors ------------------------------ */
     --foreground: hsla(60, 14%, 93%, 1);
     /* Default text and icon color */
 
-	 --foreground-inverse: hsla(0, 0%, 10%, 1);
+    --foreground-inverse: hsla(0, 0%, 10%, 1);
     /* Use to leverage the opposite themes default border color*/
 
     --foreground-muted: hsla(60, 1%, 35%, 1);
     /* Secondary copy such as sublines. Inactive button and UI text color.  */
 
-	 --foreground-subtle: hsla(60, 1%, 60%, 1);
+    --foreground-subtle: hsla(60, 1%, 60%, 1);
     /* Tertiary color used for inactive and disabled states.  */
-
 
     /* ------------------------------ 🧱 Border & Divider Colors ------------------------------ */
     --border: hsla(60, 1%, 25%, 1);
-        /* Default border for containers, inputs, UI controls, and dividers.  */
+    /* Default border for containers, inputs, UI controls, and dividers.  */
 
-	 --border-inverse: hsla(259, 68%, 90%, 1);
+    --border-inverse: hsla(259, 68%, 90%, 1);
     /* Use to leverage the opposite themes default border color*/
-    
+
     --border-muted: hsla(60, 1%, 20%, 1);
     /* Table cell border colors, inactive and disabled states of UI containers and inputs, and more gray-toned dividers. */
-	 
+
     --border-subtle: hsla(0, 0%, 15%, 1);
     /* Secondary option for disabled states of UI containers and inputs. Mostly used for very soft boundaries. */
 
     --border-accent: hsla(260, 69%, 61%, 1);
     /* Occasionally used for purple-hued soft borders and boundaries where necessary.  */
 
-	 --border-active: hsla(260, 69%, 72%, 1);
-   /* For UI controls that need active border states. Pairs with --background-accent.  */
-
+    --border-active: hsla(260, 69%, 72%, 1);
+    /* For UI controls that need active border states. Pairs with --background-accent.  */
 
     /* ------------------------------ 🎨 Accent & Brand Colors ------------------------------ */
     --accent-primary: hsla(285, 97%, 71%, 1);
     /* Primary brand accent for icons and links in place of --foreground. Can be alternatively used to --background-accent */
 
-	 --accent-subtle: hsla(258, 62%, 96%, 1);
+    --accent-subtle: hsla(258, 62%, 96%, 1);
     /* For a tint on a dark background such as a purple button */
 
-	 --accent-active: hsla(261, 43%, 50%, 1);
+    --accent-active: hsla(261, 43%, 50%, 1);
     /* Active accent color used in --border-active. Can be applied to UI if needed   */
-      
-      /* ---- Our primary brand color pallete ----*/
-	 --accent-brand-purple: hsla(260, 69%, 61%, 1);
-	 --accent-brand-fuschia: hsla(285, 97%, 71%, 1);
-	 --accent-brand-blue: hsla(203, 58%, 52%, 1);
 
-	 --accent-brand-green: hsla(134, 42%, 56%, 1);
-      /* Use this accent of green to have enough contrast in either light or dark themes */
+    /* ---- Our primary brand color pallete ----*/
+    --accent-brand-purple: hsla(260, 69%, 61%, 1);
+    --accent-brand-fuschia: hsla(285, 97%, 71%, 1);
+    --accent-brand-blue: hsla(203, 58%, 52%, 1);
+
+    --accent-brand-green: hsla(134, 42%, 56%, 1);
+    /* Use this accent of green to have enough contrast in either light or dark themes */
 
     --accent-brand-light-green: hsla(134, 42%, 56%, 1);
-	 --accent-brand-dark-green: hsla(129, 72%, 25%, 1);
-	 --accent-brand-orange: hsla(16, 98%, 56%, 1);
-	 --accent-brand-yellow: hsla(42, 94%, 56%, 1);
-	 --accent-brand-red: hsla(1, 88%, 60%, 1);
-	 --accent-brand-off-white: hsla(60, 14%, 93%, 1);
-	 --accent-brand-light-gray: hsla(60, 2%, 60%, 1);
- 	 --accent-brand-dark-gray: hsla(60, 1%, 35%, 1);
+    --accent-brand-dark-green: hsla(129, 72%, 25%, 1);
+    --accent-brand-orange: hsla(16, 98%, 56%, 1);
+    --accent-brand-yellow: hsla(42, 94%, 56%, 1);
+    --accent-brand-red: hsla(1, 88%, 60%, 1);
+    --accent-brand-off-white: hsla(60, 14%, 93%, 1);
+    --accent-brand-light-gray: hsla(60, 2%, 60%, 1);
+    --accent-brand-dark-gray: hsla(60, 1%, 35%, 1);
 
     /* ------------------------------ 🧭 Status Colors ------------------------------ */
-      /* Status colors using our brand accent colors, which can alternatively be used in place of these */
+    /* Status colors using our brand accent colors, which can alternatively be used in place of these */
     --success: hsla(134, 42%, 56%, 1);
-	 --warning: hsla(42, 94%, 56%, 1);
-	 --error: hsla(1, 88%, 60%, 1);
+    --warning: hsla(42, 94%, 56%, 1);
+    --error: hsla(1, 88%, 60%, 1);
   }
 }
 
 @theme inline {
   /* Fonts */
-  --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  
+  --font-sans:
+    "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:
+    "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+
   /* Background colors - use as bg-background-solid, bg-background-base, etc. */
   --color-background-solid: var(--background-solid);
   --color-background-base: var(--background-base);
@@ -216,13 +225,13 @@
   --color-background-secondary: var(--background-secondary);
   --color-background-accent: var(--background-accent);
   --color-gradient-subtle: var(--gradient-subtle);
-  
+
   /* Foreground colors - use as text-foreground, text-foreground-muted, etc. */
   --color-foreground: var(--foreground);
   --color-foreground-inverse: var(--foreground-inverse);
   --color-foreground-muted: var(--foreground-muted);
   --color-foreground-subtle: var(--foreground-subtle);
-  
+
   /* Border colors - use as border-border, border-border-muted, etc. */
   --color-border: var(--border);
   --color-border-inverse: var(--border-inverse);
@@ -230,12 +239,12 @@
   --color-border-subtle: var(--border-subtle);
   --color-border-accent: var(--border-accent);
   --color-border-active: var(--border-active);
-  
+
   /* Accent colors - use as bg-accent-primary, bg-accent-subtle, etc. */
   --color-accent-primary: var(--accent-primary);
   --color-accent-subtle: var(--accent-subtle);
   --color-accent-active: var(--accent-active);
-  
+
   /* Brand accent colors - use as bg-accent-brand-red, bg-accent-brand-purple, etc. */
   --color-accent-brand-purple: var(--accent-brand-purple);
   --color-accent-brand-fuschia: var(--accent-brand-fuschia);
@@ -249,7 +258,7 @@
   --color-accent-brand-off-white: var(--accent-brand-off-white);
   --color-accent-brand-light-gray: var(--accent-brand-light-gray);
   --color-accent-brand-dark-gray: var(--accent-brand-dark-gray);
-  
+
   /* Status colors - use as bg-success, bg-warning, bg-error */
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -394,7 +403,6 @@ input[type="number"] {
   background: #3d3d3d;
 } */
 
-
 .date-picker .react-datepicker__header {
   background-color: #fff;
 }
@@ -409,8 +417,8 @@ input[type="number"] {
   pointer-events: none;
 }
 
- /* Added syntax highlighting styles for YAML and SQL */
- .yaml-key {
+/* Added syntax highlighting styles for YAML and SQL */
+.yaml-key {
   color: oklch(0.55 0.22 285); /* Purple for keys */
   font-weight: 500;
 }
@@ -522,11 +530,19 @@ input[type="number"] {
 }
 
 /* Ensure content area has proper padding and spacing */
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label {
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row
+  .monaco-icon-label {
   padding-left: 4px !important;
 }
 
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label-container {
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row
+  .monaco-icon-label-container {
   padding: 0 4px !important;
 }
 
@@ -548,7 +564,11 @@ input[type="number"] {
 }
 
 /* Ensure selected items have white text for all children */
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected * {
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused.selected
+  * {
   color: white !important;
 }
 
@@ -561,14 +581,26 @@ input[type="number"] {
   color: oklch(0.55 0.22 285) !important;
 }
 
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .codicon {
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused.selected
+  .codicon {
   color: white !important;
 }
 
 /* Explicit styling for suggestion labels and spans */
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-highlighted-label,
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row
+  .monaco-highlighted-label,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row .label-name,
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row .monaco-icon-label-container,
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row
+  .monaco-icon-label-container,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row .label,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row span {
   color: var(--foreground) !important;
@@ -576,18 +608,42 @@ input[type="number"] {
 }
 
 /* Override for focused state */
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .monaco-highlighted-label,
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .label-name,
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused
+  .monaco-highlighted-label,
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused
+  .label-name,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .label,
 .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused span {
   color: var(--accent-foreground) !important;
 }
 
 /* Override for selected state */
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .monaco-highlighted-label,
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .label-name,
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected .label,
-.monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected span {
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused.selected
+  .monaco-highlighted-label,
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused.selected
+  .label-name,
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused.selected
+  .label,
+.monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused.selected
+  span {
   color: white !important;
 }
 
@@ -625,15 +681,26 @@ input[type="number"] {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
-.dark .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused.selected {
-  background: oklch(0.68 0.24 285) !important; /* Brighter purple for dark mode */
+.dark
+  .monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused.selected {
+  background: oklch(
+    0.68 0.24 285
+  ) !important; /* Brighter purple for dark mode */
 }
 
 .dark .monaco-editor .suggest-widget .monaco-list .monaco-list-row .codicon {
   color: oklch(0.68 0.24 285) !important;
 }
 
-.dark .monaco-editor .suggest-widget .monaco-list .monaco-list-row.focused .codicon {
+.dark
+  .monaco-editor
+  .suggest-widget
+  .monaco-list
+  .monaco-list-row.focused
+  .codicon {
   color: oklch(0.68 0.24 285) !important;
 }
 
@@ -641,8 +708,8 @@ input[type="number"] {
   color: oklch(0.68 0.24 285) !important;
 }
 
- /* Adding masonry layout CSS for Pinterest-style columns */
- .masonry-grid {
+/* Adding masonry layout CSS for Pinterest-style columns */
+.masonry-grid {
   column-count: 2;
   column-gap: 1.5rem;
 }
@@ -672,25 +739,24 @@ input[type="number"] {
   width: 100%;
 }
 
-
-  /* Adding masonry drop animation keyframes */
-  @keyframes masonryDrop {
-    from {
-      opacity: 0;
-      transform: translateY(-30px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+/* Adding masonry drop animation keyframes */
+@keyframes masonryDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
   }
-
-  .animate-masonry-drop {
-    animation: masonryDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
+}
 
- /* Adding fadeScaleIn animation class for grid view */
- @keyframes fadeScaleIn {
+.animate-masonry-drop {
+  animation: masonryDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Adding fadeScaleIn animation class for grid view */
+@keyframes fadeScaleIn {
   from {
     opacity: 0;
     transform: scale(0.9) translateY(10px);

@@ -34,8 +34,7 @@ import {
   QueryTab as QueryTabEnum,
 } from "@/types/enums"
 
-export interface QueryRequestDetailsProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface QueryRequestDetailsProps extends React.HTMLAttributes<HTMLDivElement> {
   engine?: string
   content?: string
   editorMode?: EditorMode
@@ -195,10 +194,10 @@ const getMonacoThemeConfig = (
       ? "#0f0f0f"
       : "#1E1E1E"
     : readOnly
-    ? editorMode === EditorMode.PLAIN
-      ? "#FFFFFF"
-      : "#F9FAFB"
-    : "#FFFFFF"
+      ? editorMode === EditorMode.PLAIN
+        ? "#FFFFFF"
+        : "#F9FAFB"
+      : "#FFFFFF"
 
   return { themeName, backgroundColor }
 }
@@ -237,54 +236,54 @@ export function QueryRequestDetails({
             { query: content, return_metadata: true }
           )
         : requestType == "CLI"
-        ? getCLICodeSnippet("POST", `${engine || ""}`, {
-            query: content,
-          })
-        : requestType == "Python"
-        ? getPythonCodeSnippet(
-            "<apiKey>",
-            getRankApiUriFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails.model_uri,
-              Number(queryStep)
-            ),
-            getRankApiMethodFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab
-            ),
-            getRankAPIConfigFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails,
-              Number(queryStep)
-            )
-          )
-        : getNodeCodeSnippet(
-            "<apiKey>",
-            getRankApiUriFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails.model_uri,
-              Number(queryStep)
-            ),
-            getRankApiMethodFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab
-            ),
-            getRankAPIConfigFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails,
-              Number(queryStep)
-            )
-          )
+          ? getCLICodeSnippet("POST", `${engine || ""}`, {
+              query: content,
+            })
+          : requestType == "Python"
+            ? getPythonCodeSnippet(
+                "<apiKey>",
+                getRankApiUriFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails.model_uri,
+                  Number(queryStep)
+                ),
+                getRankApiMethodFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab
+                ),
+                getRankAPIConfigFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails,
+                  Number(queryStep)
+                )
+              )
+            : getNodeCodeSnippet(
+                "<apiKey>",
+                getRankApiUriFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails.model_uri,
+                  Number(queryStep)
+                ),
+                getRankApiMethodFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab
+                ),
+                getRankAPIConfigFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails,
+                  Number(queryStep)
+                )
+              )
     return codeSnippet
   }
 
@@ -298,54 +297,54 @@ export function QueryRequestDetails({
             { query: content, return_metadata: true }
           )
         : requestType == "CLI"
-        ? getCLICodeSnippet("POST", `${engine || ""}`, {
-            query: content,
-          })
-        : requestType == "Python"
-        ? getPythonCodeSnippet(
-            organization.apiKey,
-            getRankApiUriFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails.model_uri,
-              Number(queryStep)
-            ),
-            getRankApiMethodFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab
-            ),
-            getRankAPIConfigFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails,
-              Number(queryStep)
-            )
-          )
-        : getNodeCodeSnippet(
-            organization.apiKey,
-            getRankApiUriFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails.model_uri,
-              Number(queryStep)
-            ),
-            getRankApiMethodFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab
-            ),
-            getRankAPIConfigFromConfig(
-              configuration,
-              currentQueryTab,
-              currentRankTab,
-              modelDetails,
-              Number(queryStep)
-            )
-          )
+          ? getCLICodeSnippet("POST", `${engine || ""}`, {
+              query: content,
+            })
+          : requestType == "Python"
+            ? getPythonCodeSnippet(
+                organization.apiKey,
+                getRankApiUriFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails.model_uri,
+                  Number(queryStep)
+                ),
+                getRankApiMethodFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab
+                ),
+                getRankAPIConfigFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails,
+                  Number(queryStep)
+                )
+              )
+            : getNodeCodeSnippet(
+                organization.apiKey,
+                getRankApiUriFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails.model_uri,
+                  Number(queryStep)
+                ),
+                getRankApiMethodFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab
+                ),
+                getRankAPIConfigFromConfig(
+                  configuration,
+                  currentQueryTab,
+                  currentRankTab,
+                  modelDetails,
+                  Number(queryStep)
+                )
+              )
     return getCopyContent
   }
 
@@ -486,10 +485,10 @@ export function QueryRequestDetails({
                       requestType == "Python"
                         ? "python"
                         : requestType == "Node"
-                        ? "javascript"
-                        : requestType == "cURL" || requestType == "CLI"
-                        ? "shell"
-                        : "python"
+                          ? "javascript"
+                          : requestType == "cURL" || requestType == "CLI"
+                            ? "shell"
+                            : "python"
                     }
                     themeName={themeName}
                     backgroundColor={backgroundColor}

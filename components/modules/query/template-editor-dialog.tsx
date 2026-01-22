@@ -497,9 +497,7 @@ export function TemplateEditorDialog({
                               updateField(field.id, { type: value })
                             }
                           >
-                            <SelectTrigger
-                              className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground"
-                            >
+                            <SelectTrigger className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="z-500 max-h-40 overflow-y-auto bg-background-primary text-foreground">
@@ -518,9 +516,7 @@ export function TemplateEditorDialog({
                               updateField(field.id, { type: value })
                             }
                           >
-                            <SelectTrigger
-                              className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground"
-                            >
+                            <SelectTrigger className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="z-500 bg-background-primary text-foreground">
@@ -539,9 +535,7 @@ export function TemplateEditorDialog({
                               updateField(field.id, { type: value })
                             }
                           >
-                            <SelectTrigger
-                              className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground"
-                            >
+                            <SelectTrigger className="shadow-xs h-auto w-fit gap-2 border border-border bg-background-solid px-2 py-1.5 text-xs font-medium text-foreground">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="z-500 bg-background-primary text-foreground">
@@ -634,9 +628,7 @@ export function TemplateEditorDialog({
                                 updateField(field.id, { dataKey: value })
                               }
                             >
-                              <SelectTrigger
-                                className="h-9 rounded-none border-0 bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0"
-                              >
+                              <SelectTrigger className="h-9 rounded-none border-0 bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="z-500 max-h-40 overflow-y-auto bg-background-primary text-foreground">
@@ -665,9 +657,7 @@ export function TemplateEditorDialog({
                                   updateField(field.id, { dataKey: value })
                                 }
                               >
-                                <SelectTrigger
-                                  className="h-9 rounded-none border-0 border-r border-border-inverse bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0"
-                                >
+                                <SelectTrigger className="h-9 rounded-none border-0 border-r border-border-inverse bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="z-500 max-h-40 overflow-y-auto bg-background-primary text-foreground">
@@ -684,9 +674,7 @@ export function TemplateEditorDialog({
                                   updateField(field.id, { size: value })
                                 }
                               >
-                                <SelectTrigger
-                                  className="h-9 rounded-none border-0 bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0"
-                                >
+                                <SelectTrigger className="h-9 rounded-none border-0 bg-background-solid px-3 py-2 text-foreground focus:ring-0 focus:ring-offset-0">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="z-500 bg-background-primary text-foreground">
@@ -786,9 +774,7 @@ export function TemplateEditorDialog({
                         handleViewModeChange(value)
                       }
                     >
-                      <SelectTrigger
-                        className="shadow-xs h-auto w-fit gap-1 rounded-md border border-border bg-background-primary px-2 py-1.5 text-xs font-medium"
-                      >
+                      <SelectTrigger className="shadow-xs h-auto w-fit gap-1 rounded-md border border-border bg-background-primary px-2 py-1.5 text-xs font-medium">
                         {(() => {
                           const currentMode = previewViewModes.find(
                             (mode) => mode.value === viewMode

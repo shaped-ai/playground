@@ -40,23 +40,47 @@ export function StatusChip({ status, className }: StatusChipProps) {
             strokeWidth={1.25}
           />
         ) : status == ModelStatus.INACTIVE ? (
-          <CircleMinus className="size-4 text-foreground-muted" strokeWidth={1.25} />
+          <CircleMinus
+            className="size-4 text-foreground-muted"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.IDLE ? (
-          <CircleDotDashed className="size-4 text-foreground-subtle" strokeWidth={1.25} />
+          <CircleDotDashed
+            className="size-4 text-foreground-subtle"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.ERROR ? (
-          <TriangleAlert className="size-4 text-accent-brand-red" strokeWidth={1.25} />
+          <TriangleAlert
+            className="size-4 text-accent-brand-red"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.SCHEDULING ? (
-          <CalendarClock className="size-4 text-accent-brand-orange" strokeWidth={1.25} />
+          <CalendarClock
+            className="size-4 text-accent-brand-orange"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.FETCHING ? (
-          <ReplaceAll className="size-4 text-accent-brand-blue" strokeWidth={1.25} />
+          <ReplaceAll
+            className="size-4 text-accent-brand-blue"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.TUNING ? (
-          <SlidersHorizontal className="size-4 text-accent-brand-blue" strokeWidth={1.25} />
+          <SlidersHorizontal
+            className="size-4 text-accent-brand-blue"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.TRAINING ? (
           <Cog className="size-4 text-accent-brand-blue" strokeWidth={1.25} />
         ) : status == ModelStatus.BACKFILLING ? (
-          <ArrowDownUp className="size-4 text-accent-brand-blue" strokeWidth={1.25} />
+          <ArrowDownUp
+            className="size-4 text-accent-brand-blue"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.DEPLOYING ? (
-          <Rocket className="size-4 text-accent-brand-blue" strokeWidth={1.25} />
+          <Rocket
+            className="size-4 text-accent-brand-blue"
+            strokeWidth={1.25}
+          />
         ) : status == ModelStatus.DESTROYING ? (
           <Trash2 className="size-4 text-accent-brand-red" strokeWidth={1.25} />
         ) : (

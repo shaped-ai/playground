@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import axios from "axios"
 import { getApiBaseUrl } from "@/lib/utils"
 
-const SHAPED_API_KEY = process.env.SHAPED_API_KEY ?? ''
+const SHAPED_API_KEY = process.env.SHAPED_API_KEY ?? ""
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,10 +12,9 @@ export async function POST(req: NextRequest) {
       "x-api-key": SHAPED_API_KEY,
       "Content-Type": "application/json",
     }
-    
+
     let resp: any = null
     console.log("inside execute query", engine, query, language, parameters)
-
 
     // Build request body with parameters if provided
     const requestBody: any = {
@@ -35,10 +34,9 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     // If axios error, return the error response
     if (error.response) {
-      return NextResponse.json(
-        error.response.data,
-        { status: error.response.status }
-      )
+      return NextResponse.json(error.response.data, {
+        status: error.response.status,
+      })
     }
     // Otherwise, return a generic error
     return NextResponse.json(

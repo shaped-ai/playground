@@ -4,11 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Film, Star, Calendar } from "lucide-react"
 import { Swiper, SwiperSlide } from "swiper/react"
-import {
-  Navigation,
-  Pagination,
-  EffectCoverflow,
-} from "swiper/modules"
+import { Navigation, Pagination, EffectCoverflow } from "swiper/modules"
 import type { QueryResultRow } from "@/lib/types/query.types"
 import type { CardTemplate } from "@/lib/types/template.types"
 import { getTemplate } from "@/lib/utils/template-storage"
@@ -86,7 +82,9 @@ export function ResultsPreviewCarousel({
           <div
             key={field.id}
             className={`relative overflow-hidden bg-background-base ${
-              heightClasses[(field.size || "full") as keyof typeof heightClasses]
+              heightClasses[
+                (field.size || "full") as keyof typeof heightClasses
+              ]
             } ${heightClasses[(field.size || "large") as keyof typeof heightClasses]}`}
           >
             <Image
@@ -131,8 +129,8 @@ export function ResultsPreviewCarousel({
           field.size === "large"
             ? "text-lg font-semibold"
             : field.size === "medium"
-            ? "text-base font-semibold"
-            : "text-sm text-muted-foreground"
+              ? "text-base font-semibold"
+              : "text-sm text-muted-foreground"
         return (
           <p key={field.id} className={textSize}>
             <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;

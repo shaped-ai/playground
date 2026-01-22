@@ -29,8 +29,7 @@ import {
   UsersRound,
 } from "lucide-react"
 
-export interface BasicSelectorProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface BasicSelectorProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string
   items: string[]
   onValueChange: (value: string) => void
@@ -149,8 +148,7 @@ const Selector = ({
   )
 }
 
-export interface EntityFeatureSelectorProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface EntityFeatureSelectorProps extends React.HTMLAttributes<HTMLDivElement> {
   selectedItem: {
     featureName: string
     featureType: string
@@ -403,8 +401,7 @@ const SelectorLabeled = ({
   )
 }
 
-export interface DistributedSelectorProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface DistributedSelectorProps extends React.HTMLAttributes<HTMLDivElement> {
   placeholder: string
   onValueChange: (value: string) => void
   features: any

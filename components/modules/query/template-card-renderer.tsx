@@ -112,8 +112,8 @@ export function TemplateCardRenderer({
                 field.size === "large" || field.size === "full"
                   ? "font-bold"
                   : field.size === "medium"
-                  ? "font-semibold"
-                  : ""
+                    ? "font-semibold"
+                    : ""
               }
             >
               {String(value)}

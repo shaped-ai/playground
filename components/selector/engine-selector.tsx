@@ -88,25 +88,20 @@ export function EngineSelector({
       ),
   })
 
-  const engineOptions: EngineOption[] = useMemo(
-    () => {
-      const mapped = engines.map((engine: any) => ({
-        id: engine.id,
-        label: engine.model_name,
-        createdAt: engine.created_at,
-        status: engine.status,
-      }))
-      
-      if (filterByStatus && filterByStatus.length > 0) {
-        return mapped.filter((engine) =>
-          filterByStatus.includes(engine.status)
-        )
-      }
-      
-      return mapped
-    },
-    [engines, filterByStatus]
-  )
+  const engineOptions: EngineOption[] = useMemo(() => {
+    const mapped = engines.map((engine: any) => ({
+      id: engine.id,
+      label: engine.model_name,
+      createdAt: engine.created_at,
+      status: engine.status,
+    }))
+
+    if (filterByStatus && filterByStatus.length > 0) {
+      return mapped.filter((engine) => filterByStatus.includes(engine.status))
+    }
+
+    return mapped
+  }, [engines, filterByStatus])
 
   const comboItems: Item[] = useMemo(
     () =>
@@ -124,7 +119,11 @@ export function EngineSelector({
       return comboItems
     }
     // Check if selectedEngine matches either the id or the label
-    if (comboItems.some((item) => item.id === selectedEngine || item.label === selectedEngine)) {
+    if (
+      comboItems.some(
+        (item) => item.id === selectedEngine || item.label === selectedEngine
+      )
+    ) {
       return comboItems
     }
     return [

@@ -122,35 +122,39 @@ export const getBucketizedCount = (
     headerType == FeatureType.TIMESTAMP
       ? moment.utc(targetFieldData[0]).unix()
       : headerType == FeatureType.TEXT ||
-        headerType == FeatureType.TEXT_SEQUENCE ||
-        headerType == FeatureType.TEXT_SET
-      ? targetFieldData[0].length
-      : Array.isArray(targetFieldData[0])
-      ? targetFieldData
-          .flatMap((d: any) => d)
-          .reduce((min: number, val: any) => {
-            return typeof val === "number" && !isNaN(val)
-              ? Math.min(min, val)
-              : min
-          }, Infinity)
-      : targetFieldData[0]
+          headerType == FeatureType.TEXT_SEQUENCE ||
+          headerType == FeatureType.TEXT_SET
+        ? targetFieldData[0].length
+        : Array.isArray(targetFieldData[0])
+          ? targetFieldData
+              .flatMap((d: any) => d)
+              .reduce((min: number, val: any) => {
+                return typeof val === "number" && !isNaN(val)
+                  ? Math.min(min, val)
+                  : min
+              }, Infinity)
+          : targetFieldData[0]
   )
 
   const maxValue = Number(
     headerType == FeatureType.TIMESTAMP
       ? moment.utc(targetFieldData[targetFieldData.length - 1]).unix()
       : headerType == FeatureType.TEXT ||
-        headerType == FeatureType.TEXT_SEQUENCE ||
-        headerType == FeatureType.TEXT_SET
-      ? targetFieldData[targetFieldData.length - 1].length
-      : Array.isArray(targetFieldData[targetFieldData.length - 1])
-      ? targetFieldData
-          .flatMap((d: any) => d)
-          .filter(
-            (val: any): val is number => typeof val === "number" && !isNaN(val)
-          )
-          .reduce((max: number, val: number) => Math.max(max, val), -Infinity)
-      : targetFieldData[targetFieldData.length - 1]
+          headerType == FeatureType.TEXT_SEQUENCE ||
+          headerType == FeatureType.TEXT_SET
+        ? targetFieldData[targetFieldData.length - 1].length
+        : Array.isArray(targetFieldData[targetFieldData.length - 1])
+          ? targetFieldData
+              .flatMap((d: any) => d)
+              .filter(
+                (val: any): val is number =>
+                  typeof val === "number" && !isNaN(val)
+              )
+              .reduce(
+                (max: number, val: number) => Math.max(max, val),
+                -Infinity
+              )
+          : targetFieldData[targetFieldData.length - 1]
   )
 
   const range: number = maxValue - minValue + 1
@@ -163,10 +167,10 @@ export const getBucketizedCount = (
       headerType == FeatureType.TIMESTAMP
         ? moment.utc(item[headerName]).unix()
         : headerType == FeatureType.TEXT ||
-          headerType == FeatureType.TEXT_SEQUENCE ||
-          headerType == FeatureType.TEXT_SET
-        ? item[headerName]?.length ?? 0
-        : item[headerName],
+            headerType == FeatureType.TEXT_SEQUENCE ||
+            headerType == FeatureType.TEXT_SET
+          ? (item[headerName]?.length ?? 0)
+          : item[headerName],
   }))
 
   const median = calculateMedian(targetFieldData, headerType)
@@ -189,8 +193,8 @@ export const getBucketizedCount = (
       i === bucketCount - 1
         ? maxValue
         : isBucketRangeTypeInteger
-        ? Math.floor(minValue + (i + 1) * bucketSize) - 1
-        : minValue + (i + 1) * bucketSize
+          ? Math.floor(minValue + (i + 1) * bucketSize) - 1
+          : minValue + (i + 1) * bucketSize
 
     const bucketData = parsedData.filter(
       (item: any) =>
@@ -234,14 +238,14 @@ export const getBucketizedCount = (
         minValue < 1
           ? Number(minValue.toFixed(6))
           : headerType == FeatureType.TIMESTAMP
-          ? moment.unix(minValue).format("YYYY-MM-DD")
-          : minValue,
+            ? moment.unix(minValue).format("YYYY-MM-DD")
+            : minValue,
       max_value:
         maxValue < 1
           ? Number(maxValue.toFixed(6))
           : headerType == FeatureType.TIMESTAMP
-          ? moment.unix(maxValue).format("YYYY-MM-DD")
-          : maxValue,
+            ? moment.unix(maxValue).format("YYYY-MM-DD")
+            : maxValue,
       median_value: median > 1 ? Math.floor(median) : median,
     },
   }

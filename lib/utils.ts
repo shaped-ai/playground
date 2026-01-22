@@ -38,17 +38,17 @@ export function formatNumber(v: number, precision?: number): string {
     return v < 10000
       ? formatValue(v)
       : v < 1000000
-      ? `${formatValue(v / 1000)}K`
-      : v < 1000000000
-      ? `${formatValue(v / 1000000)}M`
-      : `${formatValue(v / 1000000000)}B`
+        ? `${formatValue(v / 1000)}K`
+        : v < 1000000000
+          ? `${formatValue(v / 1000000)}M`
+          : `${formatValue(v / 1000000000)}B`
   } else {
     return v < 10000
       ? formatValue(v)
       : v < 1000000
-      ? `${v / 1000}K`
-      : v < 1000000000
-      ? `${v / 1000000}M`
-      : `${v / 1000000000}B`
+        ? `${v / 1000}K`
+        : v < 1000000000
+          ? `${v / 1000000}M`
+          : `${v / 1000000000}B`
   }
 }

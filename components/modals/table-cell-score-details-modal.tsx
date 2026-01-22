@@ -2,8 +2,7 @@ import { HTMLAttributes } from "react"
 import { cn, formatNumber } from "@/lib/utils"
 import { DiamondPlus } from "lucide-react"
 
-interface TableCellScoreDetailsModalProps
-  extends HTMLAttributes<HTMLDivElement> {
+interface TableCellScoreDetailsModalProps extends HTMLAttributes<HTMLDivElement> {
   colIdx: number
   index: number
   scores?: { model: string; value: number }[]

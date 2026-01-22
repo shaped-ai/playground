@@ -31,24 +31,36 @@ import {
   ArrowUpRight,
   BrainCircuit,
   Loader2,
+  Moon,
+  Sun,
   TriangleAlert,
 } from "lucide-react"
 import ShapedLogo from "@/components/logo/shaped-logo"
 import { AccountUpgradeModal } from "@/components/modals/account-upgrade-modal"
 import { TRIAL_CREDIT_LIMIT, DEMO_ENGINES } from "@/lib/constants"
 import { DEFAULT_SQL_QUERY } from "@/lib/constants/query.constants"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { useTheme } from "next-themes"
 
 export function QueryPageContent({}: {}) {
   const pathname = usePathname()
-  
+  const isMobile = useIsMobile()
+  const { theme, setTheme } = useTheme()
+
   // Direct state variables instead of tab-based state
   const [content, setContent] = useState<string>(DEFAULT_SQL_QUERY)
   const [engine, setEngine] = useState<string>("")
   const [editorMode, setEditorMode] = useState<EditorMode>(EditorMode.SQL)
   const [language, setLanguage] = useState<"yaml" | "sql">("sql")
-  const [savedQueryId, setSavedQueryId] = useState<string | undefined>(undefined)
+  const [savedQueryId, setSavedQueryId] = useState<string | undefined>(
+    undefined
+  )
   const [parameterValues, setParameterValues] = useState<ParameterValue>({})
-  const [previewMode, setPreviewMode] = useState<ResultViewMode>(ResultViewMode.RAW_TABLE)
+  const [previewMode, setPreviewMode] = useState<ResultViewMode>(
+    ResultViewMode.RAW_TABLE
+  )
   const [isExecuting, setIsExecuting] = useState<boolean>(false)
 
   const [isInitialized, setIsInitialized] = useState(false)
@@ -63,6 +75,7 @@ export function QueryPageContent({}: {}) {
   const [showDocumentation, setShowDocumentation] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [apiExplanation, setApiExplanation] = useState<any>(null)
+  const [mounted, setMounted] = useState(false)
 
   const selectedSavedQueryObject = useMemo(() => {
     if (!savedQueryId || !engine) return null
@@ -81,6 +94,10 @@ export function QueryPageContent({}: {}) {
   } = useEngineDetails(engine, {
     isDemoModel: false,
   })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const hasViewedDocs = localStorage.getItem("query-docs-viewed")
@@ -126,30 +143,35 @@ export function QueryPageContent({}: {}) {
       parameterValues,
       previewMode,
     }
-  }, [content, language, editorMode, engine, savedQueryId, parameterValues, previewMode])
+  }, [
+    content,
+    language,
+    editorMode,
+    engine,
+    savedQueryId,
+    parameterValues,
+    previewMode,
+  ])
 
-  const applyState = useCallback(
-    (state: QueryPageState) => {
-      setContent(state.content || DEFAULT_SQL_QUERY)
-      setLanguage(state.language || "sql")
-      setEditorMode(state.editorMode || EditorMode.SQL)
-      setEngine(state.engine ?? "")
-      setSavedQueryId(state.savedQueryId)
-      setParameterValues(state.parameterValues || {})
-      setPreviewMode(state.previewMode || ResultViewMode.RAW_TABLE)
+  const applyState = useCallback((state: QueryPageState) => {
+    setContent(state.content || DEFAULT_SQL_QUERY)
+    setLanguage(state.language || "sql")
+    setEditorMode(state.editorMode || EditorMode.SQL)
+    setEngine(state.engine ?? "")
+    setSavedQueryId(state.savedQueryId)
+    setParameterValues(state.parameterValues || {})
+    setPreviewMode(state.previewMode || ResultViewMode.RAW_TABLE)
 
-      if (state.savedQueryId || state.parameterValues || state.previewMode) {
-        setPendingRestoration({
-          savedQueryId: state.savedQueryId,
-          parameterValues: state.parameterValues,
-          previewMode: state.previewMode,
-        })
-      }
+    if (state.savedQueryId || state.parameterValues || state.previewMode) {
+      setPendingRestoration({
+        savedQueryId: state.savedQueryId,
+        parameterValues: state.parameterValues,
+        previewMode: state.previewMode,
+      })
+    }
 
-      setIsInitialized(true)
-    },
-    []
-  )
+    setIsInitialized(true)
+  }, [])
 
   const { pushStateToHistory: pushToHistory } = useQueryStateSync(
     getCurrentState,
@@ -226,25 +248,34 @@ export function QueryPageContent({}: {}) {
   const detectParametersInContent = useCallback((content: string): string[] => {
     if (!content) return []
     const parameters = new Set<string>()
-    
+
+    // Normalize content: remove invisible Unicode characters that might be introduced by copy-paste
+    // This includes zero-width spaces, non-breaking spaces, and other invisible characters
+    // but preserves the actual dollar sign and other visible characters
+    const normalizedContent = content
+      .replace(/[\u200B-\u200D\uFEFF]/g, "") // Remove zero-width spaces and BOM
+      .replace(/\u00A0/g, " ") // Replace non-breaking space with regular space
+      .replace(/[\u2028\u2029]/g, "\n") // Replace line/paragraph separators with newline
+
     // Match $query, $parameters.query, $params.key patterns
+    // Use explicit dollar sign character (U+0024) to avoid matching similar Unicode characters
     const dollarPattern = /\$(?:parameters?\.)?(\w+)/g
-    const dollarMatches = content.matchAll(dollarPattern)
+    const dollarMatches = normalizedContent.matchAll(dollarPattern)
     for (const match of dollarMatches) {
       if (match[1]) {
         parameters.add(match[1])
       }
     }
-    
+
     // Match :key patterns (colon prefix)
     const colonPattern = /:(\w+)\b/g
-    const colonMatches = content.matchAll(colonPattern)
+    const colonMatches = normalizedContent.matchAll(colonPattern)
     for (const match of colonMatches) {
       if (match[1]) {
         parameters.add(match[1])
       }
     }
-    
+
     return Array.from(parameters)
   }, [])
 
@@ -252,6 +283,28 @@ export function QueryPageContent({}: {}) {
   const detectedParameters = useMemo(() => {
     return detectParametersInContent(content ?? "")
   }, [content, detectParametersInContent])
+
+  // Get the parameters to display - prioritize saved query parameters if content matches template
+  const displayParameters = useMemo(() => {
+    // Check if content matches the saved query template
+    const contentMatchesSavedQuery =
+      selectedSavedQueryObject &&
+      content?.trim() === selectedSavedQueryObject.template?.trim()
+
+    // If we have a saved query with parameters AND content matches the template, use saved query parameters
+    if (
+      contentMatchesSavedQuery &&
+      selectedSavedQueryObject.parameters.length > 0
+    ) {
+      return selectedSavedQueryObject.parameters
+    }
+    // Otherwise, use detected parameters from content (including when content has been modified)
+    return detectedParameters.map((name) => ({
+      name,
+      type: "string" as const,
+      required: false,
+    }))
+  }, [selectedSavedQueryObject, detectedParameters, content])
 
   // Check if parameters pane should be shown
   const shouldShowParametersPane = useMemo(() => {
@@ -265,9 +318,9 @@ export function QueryPageContent({}: {}) {
   const handleSavedQuerySelect = (query: SavedQuery | null) => {
     const nextSavedQueryId = query?.id ?? null
     const nextParameterValues: ParameterValue = {}
-    
+
     // Set default parameter values if query has parameters
-    if (query) {
+    if (query && query.parameters) {
       query.parameters.forEach((param) => {
         // Use value if present, otherwise fall back to defaultValue
         if (param.value !== undefined) {
@@ -275,6 +328,7 @@ export function QueryPageContent({}: {}) {
         } else if (param.defaultValue !== undefined) {
           nextParameterValues[param.name] = param.defaultValue
         }
+        // If neither exists, don't set it - let the Input component handle the fallback
       })
     }
 
@@ -286,11 +340,11 @@ export function QueryPageContent({}: {}) {
     }
 
     // Update state with saved query ID, parameters, and immediately update editor content
+    // Use React.startTransition or ensure all state updates happen together
     setSavedQueryId(nextSavedQueryId ?? undefined)
     setParameterValues(nextParameterValues)
     setContent(query?.template ?? content ?? "")
   }
-
 
   const handlePreviewModeChange = useCallback(
     (mode: ResultViewMode) => {
@@ -306,12 +360,9 @@ export function QueryPageContent({}: {}) {
     [isInitialized, getCurrentState, pushToHistory]
   )
 
-  const handleParameterValuesChange = useCallback(
-    (values: ParameterValue) => {
-      setParameterValues(values)
-    },
-    []
-  )
+  const handleParameterValuesChange = useCallback((values: ParameterValue) => {
+    setParameterValues(values)
+  }, [])
 
   const handleRun = () => {
     const startTime = performance.now()
@@ -322,67 +373,76 @@ export function QueryPageContent({}: {}) {
     }
 
     setIsExecuting(true)
+    // Use model_uri from engineDetails if available (for demo engines),
+    // otherwise fall back to engine (for non-demo engines)
+    const actualEngineId = engineDetails?.model_uri ?? engine ?? ""
     executeQuery(
       {
-        engine: engine ?? "",
+        engine: actualEngineId,
         query:
-          language === "yaml"
-            ? YAML.parse(content ?? "")
-            : content ?? "",
+          language === "yaml" ? YAML.parse(content ?? "") : (content ?? ""),
         parameters: parameterValues,
       },
-        {
-          onSuccess: (results) => {
-            console.log("[DEBUG] Regular query API response:", results)
-            // Handle both wrapped { data: { results: [...] ] } and unwrapped { results: [...] } structures
-            const resultsArray = Array.isArray(results?.data?.results)
-              ? results.data.results
-              : Array.isArray((results as any)?.results)
+      {
+        onSuccess: (results) => {
+          console.log("[DEBUG] Regular query API response:", results)
+          // Handle both wrapped { data: { results: [...] ] } and unwrapped { results: [...] } structures
+          const resultsArray = Array.isArray(results?.data?.results)
+            ? results.data.results
+            : Array.isArray((results as any)?.results)
               ? (results as any).results
               : []
-            const responseData = results?.data || results
-            console.log("[DEBUG] Raw results after check:", { results: resultsArray })
-            console.log("[DEBUG] Results array length:", resultsArray.length)
-            if (responseData?.explanation) {
-              setApiExplanation(responseData.explanation)
-            }
-            const hasScore = resultsArray?.some(
-              (item: any) => item.score !== undefined
-            )
-            const normalizedResults: QueryResult = {
-              data: resultsArray.map((item: any) => ({
-                id: item.id,
-                ...(hasScore ? { score: item.score } : {}),
-                ...(item.metadata ?? {}),
-              })),
-              executionTime: (responseData as any)?.executionTime ?? 0,
-              rowCount: resultsArray.length,
-              columns: resultsArray.length
-                ? Object.keys({
-                    id: resultsArray[0]?.id,
-                    score: resultsArray[0]?.score,
-                    ...(resultsArray[0]?.metadata ?? {}),
-                  })
-                : [],
-              entity_type: (responseData as any)?.entity_type,
-            }
-            console.log("[DEBUG] Normalized results (regular query):", normalizedResults)
-            console.log("[DEBUG] Normalized results data length:", normalizedResults.data?.length)
-            setResults(normalizedResults)
-            setIsExecuting(false)
+          const responseData = results?.data || results
+          console.log("[DEBUG] Raw results after check:", {
+            results: resultsArray,
+          })
+          console.log("[DEBUG] Results array length:", resultsArray.length)
+          if (responseData?.explanation) {
+            setApiExplanation(responseData.explanation)
+          }
+          const hasScore = resultsArray?.some(
+            (item: any) => item.score !== undefined
+          )
+          const normalizedResults: QueryResult = {
+            data: resultsArray.map((item: any) => ({
+              id: item.id,
+              ...(hasScore ? { score: item.score } : {}),
+              ...(item.metadata ?? {}),
+            })),
+            executionTime: (responseData as any)?.executionTime ?? 0,
+            rowCount: resultsArray.length,
+            columns: resultsArray.length
+              ? Object.keys({
+                  id: resultsArray[0]?.id,
+                  score: resultsArray[0]?.score,
+                  ...(resultsArray[0]?.metadata ?? {}),
+                })
+              : [],
+            entity_type: (responseData as any)?.entity_type,
+          }
+          console.log(
+            "[DEBUG] Normalized results (regular query):",
+            normalizedResults
+          )
+          console.log(
+            "[DEBUG] Normalized results data length:",
+            normalizedResults.data?.length
+          )
+          setResults(normalizedResults)
+          setIsExecuting(false)
 
-            if (isInitialized) {
-              setTimeout(() => {
-                const state = getCurrentState()
-                pushToHistory(state)
-              }, 100)
-            }
-          },
-          onError: (error) => {
-            setIsExecuting(false)
-          },
-        }
-      )
+          if (isInitialized) {
+            setTimeout(() => {
+              const state = getCurrentState()
+              pushToHistory(state)
+            }, 100)
+          }
+        },
+        onError: (error) => {
+          setIsExecuting(false)
+        },
+      }
+    )
     const latency = ((performance.now() - startTime) / 1000).toFixed(4)
     setApiLatency(Number(latency))
   }
@@ -446,28 +506,53 @@ export function QueryPageContent({}: {}) {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-border bg-background-base px-6 py-4">
-        <h1 className="text-xl font-semibold text-foreground">
-          ShapedQL Playground
-        </h1>
-        <p className="text-sm text-foreground-muted">
-          
-          <a
-            href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent-brand-purple hover:underline inline-flex items-center gap-1"
+      <div className="shrink-0 border-b border-border bg-background-base px-6 py-4 flex flex-row items-center justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-xl font-semibold text-foreground">
+            ShapedQL Playground
+          </h1>
+          <p className="text-sm text-foreground-muted">
+            <a
+              href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent-brand-purple hover:underline inline-flex items-center gap-1"
+            >
+              Read the docs
+              <ArrowUpRight className="size-3" />
+            </a>
+          </p>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          {mounted && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="h-8 w-8 shrink-0 rounded-lg border border-border-active bg-background-accent hover:border-border-active hover:bg-accent-active"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="size-4 text-accent-brand-off-white" />
+              ) : (
+                <Moon className="size-4 text-accent-brand-off-white" />
+              )}
+            </Button>
+          )}
+          <Button
+            asChild
+            className="flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
+            variant="default"
           >
-            Read the docs
-            <ArrowUpRight className="size-3" />
-          </a>
-        </p>
+            <Link href="https://console.shaped.ai/register" target="_blank">
+              Try with your own data
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {isLoadingEngineDetails ? (
-        <div
-          className="flex min-h-0 flex-1 items-center justify-center bg-background-solid"
-        >
+        <div className="flex min-h-0 flex-1 items-center justify-center bg-background-solid">
           <Loader2
             className="size-4 animate-spin text-foreground"
             strokeWidth={1.25}
@@ -475,7 +560,7 @@ export function QueryPageContent({}: {}) {
         </div>
       ) : engineDetails?.status == ModelStatus.ERROR ? (
         <div>
-          <div className="flex shrink-0 items-center gap-2 px-3 py-1.5">
+          <div className="flex shrink-0 items-center gap-2">
             <span className="text-sm font-bold text-foreground">Engine</span>
             <EngineSelector
               selectedEngine={engine}
@@ -513,7 +598,8 @@ export function QueryPageContent({}: {}) {
             </div>
             <div className="p-4">
               <p className="text-sm text-foreground">
-                {(engineDetails as any)?.error_message || "An error occurred with this engine."}
+                {(engineDetails as any)?.error_message ||
+                  "An error occurred with this engine."}
               </p>
             </div>
           </div>
@@ -521,7 +607,7 @@ export function QueryPageContent({}: {}) {
       ) : (
         <div className="relative min-h-0 flex-1 overflow-hidden">
           <ResizablePanelGroup
-            {...({ direction: "horizontal" } as any)}
+            {...({ direction: isMobile ? "vertical" : "horizontal" } as any)}
             className="flex-1 h-full w-full"
           >
             <ResizablePanel
@@ -533,7 +619,9 @@ export function QueryPageContent({}: {}) {
               <div className="flex h-full flex-col bg-background-solid px-4 py-2">
                 <div className="shrink-0">
                   <QueryControls
-                    engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
+                    engineDetails={
+                      (engineDetails ?? undefined) as ModelDetails | undefined
+                    }
                     selectedEngine={engine ?? ""}
                     onEngineChange={handleEngineChange}
                     selectedQueryId={savedQueryId}
@@ -585,8 +673,8 @@ export function QueryPageContent({}: {}) {
                       <div className="flex flex-1 flex-col items-center justify-center p-4">
                         <ShapedLogo className="size-10 mb-4" />
                         <p className="text-sm font-medium text-foreground">
-                          Your engine is scheduling and will be ready to
-                          query soon.
+                          Your engine is scheduling and will be ready to query
+                          soon.
                         </p>
                         <p className="text-sm font-medium text-foreground">
                           Please check again in a little bit.
@@ -597,21 +685,16 @@ export function QueryPageContent({}: {}) {
                     {shouldShowParametersPane && (
                       <div className="shrink-0">
                         <QueryParametersEditor
-                          parameters={
-                            selectedSavedQueryObject &&
-                            selectedSavedQueryObject.parameters.length > 0
-                              ? selectedSavedQueryObject.parameters
-                              : detectedParameters.map((name) => ({
-                                  name,
-                                  type: "string" as const,
-                                  required: false,
-                                }))
-                          }
+                          parameters={displayParameters}
                           values={parameterValues}
                           onChange={handleParameterValuesChange}
                           onRun={handleRun}
                           isExecuting={isExecuting}
-                          engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
+                          engineDetails={
+                            (engineDetails ?? undefined) as
+                              | ModelDetails
+                              | undefined
+                          }
                         />
                       </div>
                     )}
@@ -636,7 +719,9 @@ export function QueryPageContent({}: {}) {
                   error={error}
                   previewMode={previewMode}
                   onPreviewModeChange={handlePreviewModeChange}
-                  engineDetails={(engineDetails ?? undefined) as ModelDetails | undefined}
+                  engineDetails={
+                    (engineDetails ?? undefined) as ModelDetails | undefined
+                  }
                   engineName={engine ?? ""}
                   apiLatency={apiExplanation?.total_execution_time_ms}
                   showDocumentation={showDocumentation}

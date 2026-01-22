@@ -8,8 +8,7 @@ import { cn } from "@/lib/utils"
 import ImageSkeleton from "@/components/loader/image-skeleton"
 import { CopyClipboard } from "@/components/ui/copy-clipboard"
 
-interface TableCellDetailsModalProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface TableCellDetailsModalProps extends React.HTMLAttributes<HTMLDivElement> {
   isImage?: boolean
   value: string
   colName?: string

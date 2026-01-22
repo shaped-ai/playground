@@ -14,16 +14,19 @@ An interactive environment for experimenting with ShapedQL, a query language for
 ## Getting started
 
 1. Create a `.env.local` file in the project root and add your Shaped API key:
+
    ```
    SHAPED_API_KEY=your_api_key_here
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the development server:
+
    ```bash
    npm run dev
    ```

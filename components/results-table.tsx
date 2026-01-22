@@ -230,9 +230,13 @@ export function ResultsTable({
   useEffect(() => {
     setHeaders([
       ...imageFeatures,
-      ...features.filter(({ name }: { name: string }) => !name.startsWith("_derived_")),
+      ...features.filter(
+        ({ name }: { name: string }) => !name.startsWith("_derived_")
+      ),
       ...(hasScore ? [{ name: "score", type: "Numerical" }] : []),
-      ...features.filter(({ name }: { name: string }) => name.startsWith("_derived_")),
+      ...features.filter(({ name }: { name: string }) =>
+        name.startsWith("_derived_")
+      ),
     ])
   }, [currentRankTab, features, imageFeatures])
 
@@ -360,7 +364,10 @@ export function ResultsTable({
 
       if (sortingOrder.order == "Ascending") {
         if (headerType == FeatureType.TEXT) {
-          tableData.sort((a: Record<string, any>, b: Record<string, any>) => a[headerName].length - b[headerName].length)
+          tableData.sort(
+            (a: Record<string, any>, b: Record<string, any>) =>
+              a[headerName].length - b[headerName].length
+          )
           setTableData([...tableData])
         } else if (headerType == FeatureType.TIMESTAMP) {
           tableData.sort((a, b) => {
@@ -370,12 +377,18 @@ export function ResultsTable({
           })
           setTableData([...tableData])
         } else {
-          tableData.sort((a: Record<string, any>, b: Record<string, any>) => a[headerName] - b[headerName])
+          tableData.sort(
+            (a: Record<string, any>, b: Record<string, any>) =>
+              a[headerName] - b[headerName]
+          )
           setTableData([...tableData])
         }
       } else {
         if (headerType == FeatureType.TEXT) {
-          tableData.sort((a: Record<string, any>, b: Record<string, any>) => b[headerName].length - a[headerName].length)
+          tableData.sort(
+            (a: Record<string, any>, b: Record<string, any>) =>
+              b[headerName].length - a[headerName].length
+          )
           setTableData([...tableData])
         } else if (headerType == FeatureType.TIMESTAMP) {
           tableData.sort((a: Record<string, any>, b: Record<string, any>) => {
@@ -385,7 +398,10 @@ export function ResultsTable({
           })
           setTableData([...tableData])
         } else {
-          tableData.sort((a: Record<string, any>, b: Record<string, any>) => b[headerName] - a[headerName])
+          tableData.sort(
+            (a: Record<string, any>, b: Record<string, any>) =>
+              b[headerName] - a[headerName]
+          )
           setTableData([...tableData])
         }
       }
@@ -715,10 +731,13 @@ export function ResultsTable({
       containerWidth - totalColumnWidth > 1 &&
       Object.keys(columnWidth).length !== 0
     ) {
-      const updatedWidths = headers.reduce((acc, { name }) => {
-        acc[name] = equalWidth
-        return acc
-      }, {} as Record<string, number>)
+      const updatedWidths = headers.reduce(
+        (acc, { name }) => {
+          acc[name] = equalWidth
+          return acc
+        },
+        {} as Record<string, number>
+      )
 
       const widthsAreSame = headers.every(
         ({ name }) => columnWidth[name] === equalWidth
@@ -778,13 +797,13 @@ export function ResultsTable({
               queryStep == 2 && containerHeight > 700
                 ? containerHeight
                 : path?.split("/").at(-1) == "simulate" &&
-                  configuration.interactions.length == 0
-                ? containerHeight
-                : path?.split("/").at(-1) == "simulate" &&
-                  configuration.interactions.length > 0 &&
-                  containerHeight > 1450
-                ? containerHeight - 700
-                : 700,
+                    configuration.interactions.length == 0
+                  ? containerHeight
+                  : path?.split("/").at(-1) == "simulate" &&
+                      configuration.interactions.length > 0 &&
+                      containerHeight > 1450
+                    ? containerHeight - 700
+                    : 700,
           }}
         >
           <div className="relative flex w-fit">
@@ -1045,15 +1064,15 @@ export function ResultsTable({
                                 Array.isArray(rowName)
                                   ? JSON.stringify(rowName)
                                   : typeof rowName === "object" &&
-                                    rowName !== null
-                                  ? JSON.stringify(rowName, null, 2)
-                                  : rowName == null
-                                  ? "null"
-                                  : rowName === true || rowName === false
-                                  ? rowName.toString()
-                                  : rowName == ""
-                                  ? '""'
-                                  : rowName
+                                      rowName !== null
+                                    ? JSON.stringify(rowName, null, 2)
+                                    : rowName == null
+                                      ? "null"
+                                      : rowName === true || rowName === false
+                                        ? rowName.toString()
+                                        : rowName == ""
+                                          ? '""'
+                                          : rowName
                               }
                               isHoverable={true}
                               width="calc(100% - 50px)"
@@ -1268,8 +1287,8 @@ export function ResultsTable({
                               {row[name] == null
                                 ? "null"
                                 : row[name] === true || row[name] === false
-                                ? row[name].toString()
-                                : row[name]}
+                                  ? row[name].toString()
+                                  : row[name]}
                             </span>
                           )}
                         </div>
@@ -1281,13 +1300,14 @@ export function ResultsTable({
                                 Array.isArray(row[name])
                                   ? JSON.stringify(row[name])
                                   : typeof row[name] === "object" &&
-                                    row[name] !== null
-                                  ? JSON.stringify(row[name], null, 2)
-                                  : row[name] == null
-                                  ? "null"
-                                  : row[name] === true || row[name] === false
-                                  ? row[name].toString()
-                                  : row[name]
+                                      row[name] !== null
+                                    ? JSON.stringify(row[name], null, 2)
+                                    : row[name] == null
+                                      ? "null"
+                                      : row[name] === true ||
+                                          row[name] === false
+                                        ? row[name].toString()
+                                        : row[name]
                               }
                               colName={name || ""}
                               iconName="maximize2"

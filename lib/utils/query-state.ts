@@ -1,4 +1,8 @@
-import type { EditorMode, ParameterValue, ResultViewMode } from "@/lib/types/query.types"
+import type {
+  EditorMode,
+  ParameterValue,
+  ResultViewMode,
+} from "@/lib/types/query.types"
 
 export interface QueryPageState {
   content: string

@@ -149,8 +149,8 @@ export function ModelSelector({
     const isDemoModel = selectedModel.endsWith(endStr)
     const actualModelName = isDemoModel
       ? selectedModel.slice(0, -endStr.length)
-      : playgroundDemoModels?.find((model) => model.alias == selectedModel)
-          ?.name ?? selectedModel
+      : (playgroundDemoModels?.find((model) => model.alias == selectedModel)
+          ?.name ?? selectedModel)
 
     setModelName?.(actualModelName)
     const pathElements = path?.split("/")
@@ -186,8 +186,8 @@ export function ModelSelector({
     accountType == AccountType.ADMIN &&
     !baseUrl.includes(SHAPED_PLAYGROUND_URL)
       ? `${modelName} (Demo)`
-      : playgroundDemoModels?.find((model) => model.name == modelName)?.alias ??
-        modelName
+      : (playgroundDemoModels?.find((model) => model.name == modelName)
+          ?.alias ?? modelName)
 
   return (
     <ComboSearchbox

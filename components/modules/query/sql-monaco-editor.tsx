@@ -29,6 +29,7 @@ export function SqlMonacoEditor({
   const MonacoSqlEditorComponent = Editor as unknown as React.FC<any>
   const onRunRef = useRef(onRun)
   const [mounted, setMounted] = useState(false)
+  const prevThemeRef = useRef<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -73,7 +74,9 @@ export function SqlMonacoEditor({
     }
     // Final fallback: check if dark class is on html element
     if (typeof document !== "undefined") {
-      return document.documentElement.classList.contains("dark") ? "dark" : "light"
+      return document.documentElement.classList.contains("dark")
+        ? "dark"
+        : "light"
     }
     return "light" // Default to light since defaultTheme is "light"
   }
@@ -180,8 +183,8 @@ export function SqlMonacoEditor({
           ? "sql-custom-dark-readonly"
           : "sql-custom-light-readonly"
         : currentTheme === "dark"
-        ? "sql-custom-dark"
-        : "sql-custom-light"
+          ? "sql-custom-dark"
+          : "sql-custom-light"
 
       monaco.editor.setTheme(initialThemeName)
     } catch (error) {
@@ -193,6 +196,16 @@ export function SqlMonacoEditor({
     editorRef.current = editor
     monacoRef.current = monaco
 
+    // Set data attribute for CSS selector
+    try {
+      const container = editor.getContainerDomNode()
+      if (container) {
+        container.setAttribute("data-editor-type", "sql")
+      }
+    } catch (error) {
+      // Silently fail
+    }
+
     try {
       // Themes are already defined in beforeMount, so we don't need to redefine them here
       // Just ensure the theme is set correctly as a safety measure
@@ -202,8 +215,8 @@ export function SqlMonacoEditor({
           ? "sql-custom-dark-readonly"
           : "sql-custom-light-readonly"
         : currentTheme === "dark"
-        ? "sql-custom-dark"
-        : "sql-custom-light"
+          ? "sql-custom-dark"
+          : "sql-custom-light"
 
       monaco.editor.setTheme(initialThemeName)
     } catch (error) {
@@ -396,6 +409,108 @@ export function SqlMonacoEditor({
     }
   }
 
+  // Helper function to define a theme (used for initial setup and dynamic updates)
+  const defineThemeIfNeeded = (
+    monaco: any,
+    themeName: string,
+    isDark: boolean,
+    isReadOnly: boolean
+  ) => {
+    if (isReadOnly) {
+      if (isDark) {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs-dark",
+          inherit: true,
+          rules: [
+            { token: "keyword", foreground: "569CD6", fontStyle: "bold" },
+            { token: "string", foreground: "CE9178" },
+            { token: "number", foreground: "B5CEA8" },
+            { token: "comment", foreground: "6A9955", fontStyle: "italic" },
+            { token: "operator", foreground: "D4D4D4" },
+            { token: "delimiter", foreground: "D4D4D4" },
+          ],
+          colors: {
+            "editor.background": "#0f0f0f",
+            "editor.foreground": "#D4D4D4",
+            "editor.lineHighlightBackground": "#1A1A1A",
+            "editor.selectionBackground": "#9A9A9A99",
+            "editorCursor.foreground": "#FFFFFF",
+            "editorLineNumber.foreground": "#858585",
+            "editorLineNumber.activeForeground": "#C6C6C6",
+          },
+        })
+      } else {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs",
+          inherit: true,
+          rules: [
+            { token: "keyword", foreground: "0000FF", fontStyle: "bold" },
+            { token: "string", foreground: "A31515" },
+            { token: "number", foreground: "098658" },
+            { token: "comment", foreground: "008000", fontStyle: "italic" },
+            { token: "operator", foreground: "000000" },
+            { token: "delimiter", foreground: "000000" },
+          ],
+          colors: {
+            "editor.background": "#F9FAFB",
+            "editor.foreground": "#000000",
+            "editor.lineHighlightBackground": "#E5E7EB",
+            "editor.selectionBackground": "#ADD6FF80",
+            "editorCursor.foreground": "#000000",
+            "editorLineNumber.foreground": "#858585",
+            "editorLineNumber.activeForeground": "#000000",
+          },
+        })
+      }
+    } else {
+      if (isDark) {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs-dark",
+          inherit: true,
+          rules: [
+            { token: "keyword", foreground: "569CD6", fontStyle: "bold" },
+            { token: "string", foreground: "CE9178" },
+            { token: "number", foreground: "B5CEA8" },
+            { token: "comment", foreground: "6A9955", fontStyle: "italic" },
+            { token: "operator", foreground: "D4D4D4" },
+            { token: "delimiter", foreground: "D4D4D4" },
+          ],
+          colors: {
+            "editor.background": "#1E1E1E",
+            "editor.foreground": "#D4D4D4",
+            "editor.lineHighlightBackground": "#2A2D2E",
+            "editor.selectionBackground": "#9A9A9A99",
+            "editorCursor.foreground": "#FFFFFF",
+            "editorLineNumber.foreground": "#858585",
+            "editorLineNumber.activeForeground": "#C6C6C6",
+          },
+        })
+      } else {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs",
+          inherit: true,
+          rules: [
+            { token: "keyword", foreground: "0000FF", fontStyle: "bold" },
+            { token: "string", foreground: "A31515" },
+            { token: "number", foreground: "098658" },
+            { token: "comment", foreground: "008000", fontStyle: "italic" },
+            { token: "operator", foreground: "000000" },
+            { token: "delimiter", foreground: "000000" },
+          ],
+          colors: {
+            "editor.background": "#FFFFFF",
+            "editor.foreground": "#000000",
+            "editor.lineHighlightBackground": "#F0F0F0",
+            "editor.selectionBackground": "#ADD6FF80",
+            "editorCursor.foreground": "#000000",
+            "editorLineNumber.foreground": "#858585",
+            "editorLineNumber.activeForeground": "#000000",
+          },
+        })
+      }
+    }
+  }
+
   // Calculate theme name - this must be synchronous and not depend on mounted state
   // so Monaco gets the correct theme prop from the start
   const currentTheme = getCurrentTheme()
@@ -404,29 +519,53 @@ export function SqlMonacoEditor({
       ? "sql-custom-dark-readonly"
       : "sql-custom-light-readonly"
     : currentTheme === "dark"
-    ? "sql-custom-dark"
-    : "sql-custom-light"
+      ? "sql-custom-dark"
+      : "sql-custom-light"
 
-  // Manually update Monaco editor theme when it changes
-  // This handles theme changes after initial mount (e.g., user toggles theme)
+  // Get background color for CSS override
+  const backgroundColor = readOnly
+    ? currentTheme === "dark"
+      ? "#0f0f0f"
+      : "#F9FAFB"
+    : currentTheme === "dark"
+      ? "#1E1E1E"
+      : "#FFFFFF"
+
+  // CSS override workaround for Monaco background bug
+  // Inject styles that override the background color with !important
   useEffect(() => {
-    if (editorRef.current && monacoRef.current && themeName && mounted) {
-      try {
-        // Get the current theme from the editor to avoid unnecessary updates
-        const currentEditorTheme = monacoRef.current.editor.getTheme()
-        if (currentEditorTheme !== themeName) {
-          // Update the theme when it changes
-          monacoRef.current.editor.setTheme(themeName)
-        }
-      } catch (error) {
-        // Silently fail if theme update fails
-      }
+    if (!mounted) return
+
+    const styleId = `monaco-sql-editor-theme-override`
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement
+
+    if (!styleElement) {
+      styleElement = document.createElement("style")
+      styleElement.id = styleId
+      document.head.appendChild(styleElement)
     }
-  }, [themeName, mounted])
+
+    // Update style content with current background color
+    styleElement.textContent = `
+      .monaco-editor[data-editor-type="sql"] {
+        background-color: ${backgroundColor} !important;
+      }
+      .monaco-editor[data-editor-type="sql"] .monaco-editor-background {
+        background-color: ${backgroundColor} !important;
+      }
+      .monaco-editor[data-editor-type="sql"] .margin {
+        background-color: ${backgroundColor} !important;
+      }
+      .monaco-editor[data-editor-type="sql"] .monaco-scrollable-element {
+        background-color: ${backgroundColor} !important;
+      }
+    `
+  }, [themeName, backgroundColor, mounted, readOnly])
 
   return (
     <div className={`h-full w-full ${readOnly ? "bg-muted/30" : ""}`}>
       <MonacoSqlEditorComponent
+        key={`sql-editor-${themeName}`}
         height="100%"
         language="sql"
         value={value}

@@ -11,7 +11,7 @@ import {
 export function useQueryStateSync(
   getCurrentState: () => QueryPageState,
   applyState: (state: QueryPageState) => void,
-  enabled = true,
+  enabled = true
 ) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -48,7 +48,7 @@ export function useQueryStateSync(
 
       window.history.replaceState({}, "", url.toString())
     },
-    [enabled],
+    [enabled]
   )
 
   const pushStateToHistory = useCallback(
@@ -61,7 +61,7 @@ export function useQueryStateSync(
 
       window.history.pushState({ queryState: state }, "", url.toString())
     },
-    [enabled],
+    [enabled]
   )
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export function useQueryStateSync(
       if (event.state?.queryState) {
         console.log(
           "[v0] Restoring state from browser history:",
-          event.state.queryState,
+          event.state.queryState
         )
         applyStateRef.current(event.state.queryState)
       } else {
@@ -91,4 +91,3 @@ export function useQueryStateSync(
 
   return { syncToUrl, pushStateToHistory }
 }
-

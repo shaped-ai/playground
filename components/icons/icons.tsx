@@ -2084,10 +2084,7 @@ const STRIPE = forwardRef<SVGSVGElement, LucideProps>((props, ref) => (
       d="M169.8 26.5L194.9 21.1V0.800049L169.8 6.10005V26.5Z"
       fill="currentColor"
     />
-    <path
-      d="M194.9 34.1001H169.8V121.6H194.9V34.1001Z"
-      fill="currentColor"
-    />
+    <path d="M194.9 34.1001H169.8V121.6H194.9V34.1001Z" fill="currentColor" />
     <path
       fillRule="evenodd"
       clipRule="evenodd"

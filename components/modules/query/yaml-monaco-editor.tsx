@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import Editor, { type OnMount } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
 import { registerYAMLCompletionProvider } from "@/lib/utils/yaml-autocomplete"
@@ -18,14 +18,21 @@ export function YamlMonacoEditor({
   readOnly = false,
   onRun,
 }: YamlMonacoEditorProps) {
-  const { theme } = useTheme()
+  const { theme, resolvedTheme } = useTheme()
   const editorRef = useRef<any>(null)
+  const monacoRef = useRef<any>(null)
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const completionProviderRef = useRef<ReturnType<
     typeof registerYAMLCompletionProvider
   > | null>(null)
   const MonacoYamlEditorComponent = Editor as unknown as React.FC<any>
   const onRunRef = useRef(onRun)
+  const [mounted, setMounted] = useState(false)
+  const prevThemeRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Keep onRun ref updated
   useEffect(() => {
@@ -51,6 +58,18 @@ export function YamlMonacoEditor({
 
   const handleEditorDidMount: OnMount = async (editor, monaco) => {
     editorRef.current = editor
+    monacoRef.current = monaco
+
+    // Set data attribute for CSS selector
+    try {
+      const container = editor.getContainerDomNode()
+      if (container) {
+        container.setAttribute("data-editor-type", "yaml")
+      }
+    } catch (error) {
+      // Silently fail
+    }
+    monacoRef.current = monaco
 
     try {
       await Promise.all([
@@ -238,18 +257,174 @@ export function YamlMonacoEditor({
     }
   }, [])
 
+  // Helper function to define a theme (used for dynamic updates)
+  // WORKAROUND: Redefining theme forces Monaco to re-apply all colors including background
+  const defineThemeIfNeeded = (
+    monaco: any,
+    themeName: string,
+    isDark: boolean,
+    isReadOnly: boolean
+  ) => {
+    if (isReadOnly) {
+      if (isDark) {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs-dark",
+          inherit: true,
+          rules: [
+            { token: "key", foreground: "A78BFA", fontStyle: "bold" },
+            { token: "string", foreground: "34D399" },
+            { token: "number", foreground: "FB923C" },
+            { token: "type", foreground: "A78BFA" },
+            { token: "comment", foreground: "9CA3AF", fontStyle: "italic" },
+          ],
+          colors: {
+            "editor.background": "#0f0f0f",
+          },
+        })
+      } else {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs",
+          inherit: true,
+          rules: [
+            { token: "key", foreground: "7C3AED", fontStyle: "bold" },
+            { token: "string", foreground: "059669" },
+            { token: "number", foreground: "EA580C" },
+            { token: "type", foreground: "7C3AED" },
+            { token: "comment", foreground: "6B7280", fontStyle: "italic" },
+          ],
+          colors: {
+            "editor.background": "#F9FAFB",
+          },
+        })
+      }
+    } else {
+      if (isDark) {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs-dark",
+          inherit: true,
+          rules: [
+            { token: "key", foreground: "A78BFA", fontStyle: "bold" },
+            { token: "string", foreground: "34D399" },
+            { token: "number", foreground: "FB923C" },
+            { token: "type", foreground: "A78BFA" },
+            { token: "comment", foreground: "9CA3AF", fontStyle: "italic" },
+          ],
+          colors: {
+            "editor.background": "#1E1E1E",
+          },
+        })
+      } else {
+        monaco.editor.defineTheme(themeName, {
+          base: "vs",
+          inherit: true,
+          rules: [
+            { token: "key", foreground: "7C3AED", fontStyle: "bold" },
+            { token: "string", foreground: "059669" },
+            { token: "number", foreground: "EA580C" },
+            { token: "type", foreground: "7C3AED" },
+            { token: "comment", foreground: "6B7280", fontStyle: "italic" },
+          ],
+          colors: {
+            "editor.background": "#FFFFFF",
+          },
+        })
+      }
+    }
+  }
+
+  // Manually update Monaco editor theme when it changes
+  // This handles theme changes after initial mount (e.g., user toggles theme)
+  // WORKAROUND: Multiple approaches to force background color update (Monaco bug)
+  useEffect(() => {
+    if (editorRef.current && monacoRef.current && mounted) {
+      // Calculate theme name based on current theme state
+      const currentTheme = resolvedTheme || theme || "light"
+      const isDark = currentTheme === "dark"
+      const currentThemeName = readOnly
+        ? isDark
+          ? "yaml-custom-dark-readonly"
+          : "yaml-custom-light-readonly"
+        : isDark
+          ? "yaml-custom-dark"
+          : "yaml-custom-light"
+
+      // Only update if theme actually changed
+      if (prevThemeRef.current !== currentThemeName) {
+        try {
+          // WORKAROUND 1: Redefine the theme to force Monaco to re-apply all colors
+          defineThemeIfNeeded(
+            monacoRef.current,
+            currentThemeName,
+            isDark,
+            readOnly
+          )
+
+          // WORKAROUND 2: Set the theme
+          monacoRef.current.editor.setTheme(currentThemeName)
+
+          // WORKAROUND 3: Manually update DOM styles after a brief delay to ensure theme is applied
+          // Get the background color from the theme definition
+          const backgroundColor = readOnly
+            ? isDark
+              ? "#0f0f0f"
+              : "#F9FAFB"
+            : isDark
+              ? "#1E1E1E"
+              : "#FFFFFF"
+
+          // Use requestAnimationFrame to ensure DOM is ready
+          requestAnimationFrame(() => {
+            if (editorRef.current) {
+              try {
+                // Get the editor container and background elements
+                const container = editorRef.current.getContainerDomNode()
+                const background = container?.querySelector(
+                  ".monaco-editor-background"
+                )
+
+                // Manually set background color on container and background elements
+                if (container) {
+                  container.style.backgroundColor = backgroundColor
+                }
+                if (background) {
+                  ;(background as HTMLElement).style.backgroundColor =
+                    backgroundColor
+                }
+
+                // Also update CSS variable if it exists
+                if (container) {
+                  container.style.setProperty(
+                    "--vscode-editor-background",
+                    backgroundColor
+                  )
+                }
+              } catch (error) {
+                // Silently fail if DOM update fails
+              }
+            }
+          })
+
+          prevThemeRef.current = currentThemeName
+        } catch (error) {
+          // Silently fail if theme update fails
+        }
+      }
+    }
+  }, [theme, resolvedTheme, mounted, readOnly])
+
   // Calculate theme name based on current theme and readOnly state
   const themeName = readOnly
     ? theme === "dark"
       ? "yaml-custom-dark-readonly"
       : "yaml-custom-light-readonly"
     : theme === "dark"
-    ? "yaml-custom-dark"
-    : "yaml-custom-light"
+      ? "yaml-custom-dark"
+      : "yaml-custom-light"
 
   return (
     <div className={`h-full w-full ${readOnly ? "bg-muted/30" : ""}`}>
       <MonacoYamlEditorComponent
+        key={`yaml-editor-${themeName}`}
         height="100%"
         language="yaml"
         value={value}

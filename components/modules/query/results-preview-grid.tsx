@@ -124,8 +124,8 @@ function TemplateCard({
                 field.size === "large"
                   ? "font-bold"
                   : field.size === "medium"
-                  ? "font-semibold"
-                  : ""
+                    ? "font-semibold"
+                    : ""
               }
             >
               {Array.isArray(value) ? value.join(", ") : value}

@@ -1,6 +1,12 @@
 "use client"
 
-import { Monitor, Settings2, ChevronsUpDown, MonitorSmartphone, FileCode } from "lucide-react"
+import {
+  Monitor,
+  Settings2,
+  ChevronsUpDown,
+  MonitorSmartphone,
+  FileCode,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -14,7 +20,8 @@ import {
 } from "@/components/ui/select"
 import { ResultViewMode } from "@/lib/types/query.types"
 import { cn } from "@/lib/utils"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
 interface ResultsHeaderProps {
   rowCount: number
@@ -35,6 +42,7 @@ export function ResultsHeader({
   onEditTemplate,
   hasNoResults = false,
 }: ResultsHeaderProps) {
+  const isMobile = useIsMobile()
   const resultsHeaderRef = useRef<HTMLDivElement>(null)
   const [resultsHeaderWidth, setResultsHeaderWidth] = useState(0)
 
@@ -44,29 +52,40 @@ export function ResultsHeader({
     }
   }, [resultsHeaderRef.current])
 
-  const dataViewModes = [
-    { value: ResultViewMode.RAW_TABLE, label: "Raw Table", icon: Monitor },
-    {
-      value: ResultViewMode.JSON,
-      label: "JSON",
-      icon: FileCode,
-    },
-    // Only show UI View option when there are results
-    ...(hasNoResults
-      ? []
-      : [
-          {
-            value:
-              viewMode != ResultViewMode.RAW_TABLE &&
-              viewMode != ResultViewMode.SUMMARY_TABLE &&
-              viewMode != ResultViewMode.JSON
-                ? viewMode
-                : ResultViewMode.PREVIEW_GRID,
-            label: "UI View",
-            icon: MonitorSmartphone,
-          },
-        ]),
-  ]
+  const dataViewModes = useMemo(() => {
+    const baseModes = [
+      { value: ResultViewMode.RAW_TABLE, label: "Raw Table", icon: Monitor },
+      {
+        value: ResultViewMode.JSON,
+        label: "JSON",
+        icon: FileCode,
+      },
+    ]
+
+    // On mobile, only show Raw Table and JSON (no UI View)
+    if (isMobile) {
+      return baseModes
+    }
+
+    // On desktop, show UI View option when there are results
+    return [
+      ...baseModes,
+      ...(hasNoResults
+        ? []
+        : [
+            {
+              value:
+                viewMode != ResultViewMode.RAW_TABLE &&
+                viewMode != ResultViewMode.SUMMARY_TABLE &&
+                viewMode != ResultViewMode.JSON
+                  ? viewMode
+                  : ResultViewMode.PREVIEW_GRID,
+              label: "UI View",
+              icon: MonitorSmartphone,
+            },
+          ]),
+    ]
+  }, [isMobile, hasNoResults, viewMode])
 
   return (
     <div

@@ -38,7 +38,6 @@ export function QueryParametersEditor({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Query Parameters</h3>
-
         </div>
         <div className="grid grid-cols-2 gap-4">
           {parameters.map((param) => (
@@ -52,7 +51,9 @@ export function QueryParametersEditor({
               <Input
                 id={param.name}
                 type={param.type === "number" ? "number" : "text"}
-                value={values[param.name] ?? param.value ?? param.defaultValue ?? ""}
+                value={
+                  values[param.name] ?? param.value ?? param.defaultValue ?? ""
+                }
                 onChange={(e) => {
                   const val =
                     param.type === "number"
@@ -61,7 +62,8 @@ export function QueryParametersEditor({
                   handleChange(param.name, val)
                 }}
                 placeholder={
-                  (param.value ?? param.defaultValue)?.toString() || `Enter ${param.name}`
+                  (param.value ?? param.defaultValue)?.toString() ||
+                  `Enter ${param.name}`
                 }
                 className="h-8 focus:ring-0 focus:ring-offset-0"
               />

@@ -1,4 +1,11 @@
-export type FieldType = "image" | "video" | "text" | "rating" | "date" | "badge" |"tag"
+export type FieldType =
+  | "image"
+  | "video"
+  | "text"
+  | "rating"
+  | "date"
+  | "badge"
+  | "tag"
 
 export interface TemplateField {
   id: string
@@ -14,7 +21,14 @@ export interface TemplateField {
 export interface CardTemplate {
   id: string
   name: string
-  previewMode:"feed" | "carousel" | "grid" | "editorial" | "ticker" | "list" | "masonry"
+  previewMode:
+    | "feed"
+    | "carousel"
+    | "grid"
+    | "editorial"
+    | "ticker"
+    | "list"
+    | "masonry"
   fields: TemplateField[]
 }
 

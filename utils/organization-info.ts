@@ -6,7 +6,7 @@ export async function getOrganizationInfo(
   updateCache: boolean = false
 ): Promise<Organization> {
   return {
-    apiKey: process.env.SHAPED_API_KEY ?? ''
+    apiKey: process.env.SHAPED_API_KEY ?? "",
   }
 }
 

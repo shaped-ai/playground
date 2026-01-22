@@ -2,12 +2,13 @@
 
 import type { QueryResultRow } from "@/lib/types/query.types"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Film, Star, Calendar } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import type { CardTemplate, TemplateField } from "@/lib/types/template.types"
 import { getTemplate } from "@/lib/utils/template-storage"
 import { cn } from "@/lib/utils"
+import { useMediaQuery } from "@/hooks/shared/use-media-query"
 
 interface ResultsPreviewMasonryProps {
   data: QueryResultRow[]
@@ -28,10 +29,65 @@ export function ResultsPreviewMasonry({
     template || null
   )
 
+  // Detect column count based on screen size
+  const isSm = useMediaQuery("(min-width: 640px)")
+  const isLg = useMediaQuery("(min-width: 1024px)")
+  const isXl = useMediaQuery("(min-width: 1536px)")
+
+  const columnCount = useMemo(() => {
+    if (isXl) return 5
+    if (isLg) return 4
+    if (isSm) return 3
+    return 2
+  }, [isSm, isLg, isXl])
+
   useEffect(() => {
     const loadedTemplate = getTemplate(engineName, "masonry")
     setCustomTemplate(loadedTemplate)
   }, [engineName, template])
+
+  // Reorder items for left-to-right, top-to-bottom layout
+  // CSS columns fill top-to-bottom first, so we need to reorder the array
+  // so that when CSS processes them, they appear left-to-right then top-to-bottom
+  const reorderedData = useMemo(() => {
+    if (!data || data.length === 0) return []
+
+    const totalItems = data.length
+    const rowsPerColumn = Math.ceil(totalItems / columnCount)
+
+    // Create a mapping array: for each position in the reordered array,
+    // determine which original item should go there
+    const reordered: Array<{
+      item: QueryResultRow
+      originalIndex: number
+      displayIndex: number
+    }> = []
+
+    // For each position in the final array, calculate which original item belongs there
+    for (let position = 0; position < totalItems; position++) {
+      // In CSS columns, position p goes to:
+      // column = p % columnCount
+      // row = Math.floor(p / columnCount)
+      const finalColumn = position % columnCount
+      const finalRow = Math.floor(position / columnCount)
+
+      // We want original item i to appear at row = floor(i / columnCount), column = i % columnCount
+      // So we need to find i such that:
+      // floor(i / columnCount) = finalRow AND i % columnCount = finalColumn
+      // This gives us: i = finalRow * columnCount + finalColumn
+      const originalIndex = finalRow * columnCount + finalColumn
+
+      if (originalIndex < totalItems) {
+        reordered.push({
+          item: data[originalIndex],
+          originalIndex,
+          displayIndex: originalIndex,
+        })
+      }
+    }
+
+    return reordered
+  }, [data, columnCount])
 
   if (!data || data.length === 0) {
     return (
@@ -44,12 +100,14 @@ export function ResultsPreviewMasonry({
   return (
     <div className="h-full overflow-auto px-6 pb-6 pt-3">
       <div className="masonry-grid">
-        {data.map((item, idx) => (
+        {reorderedData.map(({ item, displayIndex }, idx) => (
           <MasonryCard
-            key={`masonry-${item.item_id || idx}`}
+            key={`masonry-${item.item_id || displayIndex}`}
             item={item}
             template={customTemplate}
-            index={idx}
+            originalIndex={displayIndex}
+            positionInReorderedArray={idx}
+            columnCount={columnCount}
           />
         ))}
       </div>
@@ -60,11 +118,15 @@ export function ResultsPreviewMasonry({
 function MasonryCard({
   item,
   template,
-  index,
+  originalIndex,
+  positionInReorderedArray,
+  columnCount,
 }: {
   item: QueryResultRow
   template: CardTemplate | null
-  index: number
+  originalIndex: number
+  positionInReorderedArray: number
+  columnCount: number
 }) {
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -99,8 +161,8 @@ function MasonryCard({
                 field.size === "large"
                   ? "font-bold"
                   : field.size === "medium"
-                  ? "font-semibold"
-                  : ""
+                    ? "font-semibold"
+                    : ""
               } line-clamp-2`}
             >
               {Array.isArray(value) ? value.join(", ") : value}
@@ -163,18 +225,21 @@ function MasonryCard({
   const imageValue = imageField ? item[imageField.dataKey] : null
   const imageLabel = imageField?.label?.trim() || imageField?.dataKey || "Image"
 
+  // Calculate marginTop based on final column position in the layout
+  // The positionInReorderedArray determines which column this item ends up in
+  const columnPosition = positionInReorderedArray % columnCount
   const marginTop = `${
-    index % 5 === 0
+    columnPosition === 0
       ? 0
-      : index % 5 === 1
-      ? 12
-      : index % 5 === 2
-      ? 25
-      : index % 5 === 3
-      ? 15
-      : index % 5 === 4
-      ? 40
-      : 45
+      : columnPosition === 1
+        ? 12
+        : columnPosition === 2
+          ? 25
+          : columnPosition === 3
+            ? 15
+            : columnPosition === 4
+              ? 40
+              : 45
   }px`
 
   return (
@@ -182,7 +247,7 @@ function MasonryCard({
       className="masonry-item animate-masonry-drop group cursor-pointer"
       style={{
         marginTop,
-        animationDelay: `${index * 20}ms`,
+        animationDelay: `${originalIndex * 20}ms`,
         animationFillMode: "both",
       }}
       onMouseEnter={() => setIsHovered(true)}

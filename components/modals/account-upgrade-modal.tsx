@@ -101,7 +101,8 @@ export function AccountUpgradeModal({
               You’ve reached your Free Tier Limit
             </DialogTitle>
             <p className="text-sm text-foreground">
-              Please add a payment method to upgrade to a paid tier or contact sales.
+              Please add a payment method to upgrade to a paid tier or contact
+              sales.
             </p>
           </div>
         </DialogHeader>

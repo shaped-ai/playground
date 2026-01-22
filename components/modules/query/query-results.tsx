@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { ResultViewMode, type QueryResult } from "@/lib/types/query.types"
 import Editor, { type OnMount } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
@@ -33,8 +33,9 @@ import { ModelDetails } from "@/types"
 import { ResultsTable } from "@/components/results-table"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
-const previewViewModes = [
+const allPreviewViewModes = [
   {
     value: ResultViewMode.PREVIEW_MASONRY,
     label: "Masonry",
@@ -63,23 +64,23 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
   }, [])
 
   const isDark = theme === "dark"
-  
+
   // Handle error objects - convert to JSON-serializable format
   const getJsonString = () => {
     if (!data) return "{}"
-    
+
     if (data instanceof Error) {
       // Convert Error instance to a serializable object
       const errorObj: any = {
         name: data.name,
         message: data.message,
       }
-      
+
       // Add stack trace if available
       if (data.stack) {
         errorObj.stack = data.stack
       }
-      
+
       // Add any additional properties from the error
       const errorAny = data as any
       Object.keys(errorAny).forEach((key) => {
@@ -91,23 +92,19 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
           }
         }
       })
-      
+
       return JSON.stringify({ error: errorObj }, null, 2)
     }
-    
+
     // For plain objects, stringify directly
     try {
       return JSON.stringify(data, null, 2)
     } catch {
       // Fallback for non-serializable objects
-      return JSON.stringify(
-        { error: { message: String(data) } },
-        null,
-        2
-      )
+      return JSON.stringify({ error: { message: String(data) } }, null, 2)
     }
   }
-  
+
   const jsonString = getJsonString()
   const themeName = isDark ? "json-viewer-dark" : "json-viewer-light"
   const backgroundColor = isDark ? "#0f0f0f" : "#FFFFFF"
@@ -206,7 +203,9 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
         className="flex h-full items-center justify-center"
         style={{ backgroundColor }}
       >
-        <span className="text-sm text-foreground-muted">Loading JSON viewer...</span>
+        <span className="text-sm text-foreground-muted">
+          Loading JSON viewer...
+        </span>
       </div>
     )
   }
@@ -230,7 +229,9 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
             className="flex h-full items-center justify-center"
             style={{ backgroundColor }}
           >
-            <span className="text-sm text-foreground-muted">Loading JSON viewer...</span>
+            <span className="text-sm text-foreground-muted">
+              Loading JSON viewer...
+            </span>
           </div>
         }
       />
@@ -261,6 +262,7 @@ export function QueryResults({
   apiLatency,
   showDocumentation,
 }: QueryResultsProps) {
+  const isMobile = useIsMobile()
   const [viewMode, setViewMode] = useState<ResultViewMode>(
     externalPreviewMode || ResultViewMode.RAW_TABLE
   )
@@ -270,6 +272,21 @@ export function QueryResults({
   )
   const [templateRevision, setTemplateRevision] = useState(0)
   const hasCreatedDefaultTemplateRef = useRef<string>("")
+
+  // Filter preview modes based on screen size
+  const previewViewModes = useMemo(() => {
+    if (isMobile) {
+      // On mobile, only show feed, list, and masonry
+      return allPreviewViewModes.filter(
+        (mode) =>
+          mode.value === ResultViewMode.PREVIEW_FEED ||
+          mode.value === ResultViewMode.PREVIEW_LIST ||
+          mode.value === ResultViewMode.PREVIEW_MASONRY
+      )
+    }
+    // On desktop, show all modes
+    return allPreviewViewModes
+  }, [isMobile])
 
   // Load template from localStorage when viewMode is a preview mode
   useEffect(() => {
@@ -425,12 +442,16 @@ export function QueryResults({
   const [rankFeatures, rankImageFeatures] = [
     [
       ...(
-        (engineDetails?.model_schema as Record<string, Feature[]> | undefined)?.[results?.entity_type ?? "item"] ?? []
+        (
+          engineDetails?.model_schema as Record<string, Feature[]> | undefined
+        )?.[results?.entity_type ?? "item"] ?? []
       ).filter((d: Feature) => d.type != FeatureType.IMAGE),
     ],
     [
       ...(
-        (engineDetails?.model_schema as Record<string, Feature[]> | undefined)?.[results?.entity_type ?? "item"] ?? []
+        (
+          engineDetails?.model_schema as Record<string, Feature[]> | undefined
+        )?.[results?.entity_type ?? "item"] ?? []
       ).filter((d: Feature) => d.type == FeatureType.IMAGE),
     ],
   ]
@@ -479,6 +500,27 @@ export function QueryResults({
     ResultViewMode.PREVIEW_MASONRY,
   ].includes(viewMode)
 
+  // Mobile-supported view modes
+  const mobileSupportedModes = [
+    ResultViewMode.RAW_TABLE,
+    ResultViewMode.JSON,
+    ResultViewMode.PREVIEW_FEED,
+    ResultViewMode.PREVIEW_LIST,
+    ResultViewMode.PREVIEW_MASONRY,
+  ]
+
+  // Handle view mode fallback when switching to mobile with unsupported mode
+  useEffect(() => {
+    if (isMobile && !mobileSupportedModes.includes(viewMode)) {
+      // Switch to a supported mode (prefer masonry for preview modes, otherwise raw table)
+      const fallbackMode = isPreviewMode
+        ? ResultViewMode.PREVIEW_MASONRY
+        : ResultViewMode.RAW_TABLE
+      setViewMode(fallbackMode)
+      onPreviewModeChange?.(fallbackMode)
+    }
+  }, [isMobile, viewMode, isPreviewMode, onPreviewModeChange])
+
   const handleTemplateChange = (template: CardTemplate | null) => {
     setCurrentTemplate(template)
     setTemplateRevision((prev) => prev + 1)
@@ -488,7 +530,10 @@ export function QueryResults({
   useEffect(() => {
     console.log("[DEBUG QueryResults] Results prop:", results)
     console.log("[DEBUG QueryResults] Results data:", results?.data)
-    console.log("[DEBUG QueryResults] Results data length:", results?.data?.length)
+    console.log(
+      "[DEBUG QueryResults] Results data length:",
+      results?.data?.length
+    )
     console.log("[DEBUG QueryResults] Results rowCount:", results?.rowCount)
     console.log("[DEBUG QueryResults] Is executing:", isExecuting)
     console.log("[DEBUG QueryResults] Error:", error)
@@ -572,37 +617,35 @@ export function QueryResults({
           hasNoResults={!results?.data || results.data.length === 0}
         />
       </div>
-      {isPreviewMode &&
-        results?.data &&
-        results.data.length > 0 && (
-          <div className="m-4 flex items-center justify-center overflow-x-auto whitespace-nowrap">
-            <div className="flex w-fit shrink-0 items-center gap-0 rounded-[32px] border border-border bg-background-primary p-1">
-              {previewViewModes.map((mode) => {
-                const Icon = mode.icon
-                const isActive = viewMode === mode.value
-                return (
-                  <Button
-                    key={mode.value}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleViewModeChange(mode.value)}
-                    className={cn(
-                      "text-nowrap relative h-auto w-auto shrink-0 cursor-pointer gap-1 rounded-[32px] border px-3 py-1.5 transition-all",
-                      isActive
-                        ? "border-border-active bg-background-accent text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
-                        : " border-transparent text-foreground hover:bg-background-secondary hover:text-foreground"
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5 shrink-0" />
-                    <span className="text-nowrap shrink-0 text-xs font-medium">
-                      {mode.label}
-                    </span>
-                  </Button>
-                )
-              })}
-            </div>
+      {isPreviewMode && results?.data && results.data.length > 0 && (
+        <div className="m-4 flex items-center justify-center overflow-x-auto whitespace-nowrap">
+          <div className="flex w-fit shrink-0 items-center gap-0 rounded-[32px] border border-border bg-background-primary p-1">
+            {previewViewModes.map((mode) => {
+              const Icon = mode.icon
+              const isActive = viewMode === mode.value
+              return (
+                <Button
+                  key={mode.value}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleViewModeChange(mode.value)}
+                  className={cn(
+                    "text-nowrap relative h-auto w-auto shrink-0 cursor-pointer gap-1 rounded-[32px] border px-3 py-1.5 transition-all",
+                    isActive
+                      ? "border-border-active bg-background-accent text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
+                      : " border-transparent text-foreground hover:bg-background-secondary hover:text-foreground"
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="text-nowrap shrink-0 text-xs font-medium">
+                    {mode.label}
+                  </span>
+                </Button>
+              )
+            })}
           </div>
-        )}
+        </div>
+      )}
       {!results?.data || results.data.length === 0 ? (
         <div
           className="min-h-0 flex-1 bg-background-solid"

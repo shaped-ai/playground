@@ -1,4 +1,4 @@
-import type * as Monaco from "monaco-editor" 
+import type * as Monaco from "monaco-editor"
 import { QUERY_YAML_SCHEMA } from "@/lib/schema/yaml-schema"
 
 function getYAMLPath(content: string, position: Monaco.Position): string[] {
@@ -17,7 +17,10 @@ function getYAMLPath(content: string, position: Monaco.Position): string[] {
     const indent = line.length - line.trimStart().length
 
     // Pop stack if we're at a lower indentation level
-    while (indentStack.length > 0 && indentStack[indentStack.length - 1].indent >= indent) {
+    while (
+      indentStack.length > 0 &&
+      indentStack[indentStack.length - 1].indent >= indent
+    ) {
       indentStack.pop()
     }
 
@@ -59,7 +62,7 @@ function getSchemaAtPath(schema: any, path: string[]): any {
 export function getYAMLCompletions(
   content: string,
   position: Monaco.Position,
-  monaco: typeof Monaco,
+  monaco: typeof Monaco
 ): Monaco.languages.CompletionItem[] {
   const path = getYAMLPath(content, position)
   const schemaContext = getSchemaAtPath(QUERY_YAML_SCHEMA, path)
@@ -96,7 +99,9 @@ export function getYAMLCompletions(
 
     // Suggest type values
     if (path[path.length - 1] === "type" && schemaContext.type) {
-      const types = Array.isArray(schemaContext.type) ? schemaContext.type : [schemaContext.type]
+      const types = Array.isArray(schemaContext.type)
+        ? schemaContext.type
+        : [schemaContext.type]
       types.forEach((type: string) => {
         if (!schemaContext.enum || !schemaContext.enum.includes(type)) {
           completions.push({
@@ -135,26 +140,33 @@ export function getYAMLCompletions(
   } else {
     // Suggest property keys
     if (schemaContext.properties) {
-      Object.entries(schemaContext.properties).forEach(([key, value]: [string, any]) => {
-        completions.push({
-          label: key,
-          kind: monaco.languages.CompletionItemKind.Property,
-          insertText: `${key}: `,
-          documentation: value.description || `Property: ${key}`,
-          detail: value.type ? `Type: ${value.type}` : undefined,
-          range: {
-            startLineNumber: position.lineNumber,
-            startColumn: position.column,
-            endLineNumber: position.lineNumber,
-            endColumn: position.column,
-          },
-        })
-      })
+      Object.entries(schemaContext.properties).forEach(
+        ([key, value]: [string, any]) => {
+          completions.push({
+            label: key,
+            kind: monaco.languages.CompletionItemKind.Property,
+            insertText: `${key}: `,
+            documentation: value.description || `Property: ${key}`,
+            detail: value.type ? `Type: ${value.type}` : undefined,
+            range: {
+              startLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endLineNumber: position.lineNumber,
+              endColumn: position.column,
+            },
+          })
+        }
+      )
     }
 
     // Suggest common query names for queries object
     if (path[path.length - 1] === "queries") {
-      const queryNames = ["similar_users_content", "search_items", "recommend_products", "find_documents"]
+      const queryNames = [
+        "similar_users_content",
+        "search_items",
+        "recommend_products",
+        "find_documents",
+      ]
       queryNames.forEach((name) => {
         completions.push({
           label: name,
@@ -175,7 +187,9 @@ export function getYAMLCompletions(
   return completions
 }
 
-export function registerYAMLCompletionProvider(monaco: typeof Monaco): Monaco.IDisposable {
+export function registerYAMLCompletionProvider(
+  monaco: typeof Monaco
+): Monaco.IDisposable {
   return monaco.languages.registerCompletionItemProvider("yaml", {
     triggerCharacters: [":", " ", "\n"],
     provideCompletionItems: (model, position) => {

@@ -95,9 +95,12 @@ export function ResultsPreviewHorizontal({
   }, [data])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimationComplete(true)
-    }, data.length * 50 + 500) // Wait for all stagger animations + 500ms buffer
+    const timer = setTimeout(
+      () => {
+        setAnimationComplete(true)
+      },
+      data.length * 50 + 500
+    ) // Wait for all stagger animations + 500ms buffer
 
     return () => clearTimeout(timer)
   }, [data.length])
@@ -194,8 +197,8 @@ export function ResultsPreviewHorizontal({
           field.size === "large"
             ? "text-base font-semibold"
             : field.size === "medium"
-            ? "text-sm font-medium"
-            : "text-xs text-muted-foreground"
+              ? "text-sm font-medium"
+              : "text-xs text-muted-foreground"
         return (
           <p key={field.id} className={`${textSize} truncate`}>
             <span>{displayLabel ? `${displayLabel}: ` : ""}</span> &nbsp;

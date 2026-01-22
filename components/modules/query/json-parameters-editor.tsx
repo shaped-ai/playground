@@ -226,7 +226,8 @@ export function JsonParametersEditor({
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Enter parameters as JSON. Example: {"{"}"user_id": "123", "limit": 10{"}"}
+          Enter parameters as JSON. Example: {"{"}"user_id": "123", "limit": 10
+          {"}"}
         </p>
       </div>
     </Card>

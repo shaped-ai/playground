@@ -17,12 +17,17 @@ function QueryPageContentFallback() {
 
 export default function QueryPage() {
   return (
-    <ThemeProvider attribute="class" enableSystem={false} defaultTheme="light" disableTransitionOnChange>
-    <QueryClientProvider client={queryClient}>
-      <Suspense fallback={<QueryPageContentFallback />}>
-        <QueryPageContent />
-      </Suspense>
-    </QueryClientProvider>
+    <ThemeProvider
+      attribute="class"
+      enableSystem={false}
+      defaultTheme="light"
+      disableTransitionOnChange
+    >
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={<QueryPageContentFallback />}>
+          <QueryPageContent />
+        </Suspense>
+      </QueryClientProvider>
     </ThemeProvider>
   )
 }

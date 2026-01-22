@@ -9,7 +9,10 @@ import {
   getOrganizationInfo,
 } from "@/utils/organization-info"
 
-export function useOrganization(isDemoModel: boolean = false, isLoggedInOrganization: boolean = false) {
+export function useOrganization(
+  isDemoModel: boolean = false,
+  isLoggedInOrganization: boolean = false
+) {
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<unknown>(null)
@@ -25,8 +28,8 @@ export function useOrganization(isDemoModel: boolean = false, isLoggedInOrganiza
         const org = isLoggedInOrganization
           ? await getLoggedInUserOrganizationInfo()
           : isDemoModel
-          ? await getDemoOrganizationInfo()
-          : await getOrganizationInfo()
+            ? await getDemoOrganizationInfo()
+            : await getOrganizationInfo()
 
         if (isMounted) {
           setOrganization(org)
@@ -52,5 +55,3 @@ export function useOrganization(isDemoModel: boolean = false, isLoggedInOrganiza
 
   return { organization, isLoading, error }
 }
-
-

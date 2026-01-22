@@ -107,7 +107,12 @@ export const QUERY_YAML_SCHEMA = {
                         properties: {
                           type: {
                             type: "string",
-                            enum: ["user_attribute_pooling", "text_encoder", "image_encoder", "multi_modal_encoder"],
+                            enum: [
+                              "user_attribute_pooling",
+                              "text_encoder",
+                              "image_encoder",
+                              "multi_modal_encoder",
+                            ],
                             description: "Encoder type for query processing",
                           },
                           input_field: {
@@ -116,7 +121,13 @@ export const QUERY_YAML_SCHEMA = {
                           },
                           pooling_strategy: {
                             type: "string",
-                            enum: ["mean", "max", "sum", "weighted", "attention"],
+                            enum: [
+                              "mean",
+                              "max",
+                              "sum",
+                              "weighted",
+                              "attention",
+                            ],
                             description: "How to aggregate multiple values",
                           },
                           model: {
@@ -158,7 +169,8 @@ export const QUERY_YAML_SCHEMA = {
                       },
                       limit: {
                         type: "string",
-                        description: "Maximum results from this step (can reference $params.limit)",
+                        description:
+                          "Maximum results from this step (can reference $params.limit)",
                       },
                       filters: {
                         type: "array",
@@ -172,7 +184,18 @@ export const QUERY_YAML_SCHEMA = {
                             },
                             operator: {
                               type: "string",
-                              enum: ["eq", "ne", "gt", "gte", "lt", "lte", "in", "nin", "contains", "regex"],
+                              enum: [
+                                "eq",
+                                "ne",
+                                "gt",
+                                "gte",
+                                "lt",
+                                "lte",
+                                "in",
+                                "nin",
+                                "contains",
+                                "regex",
+                              ],
                               description: "Comparison operator",
                             },
                             value: {
@@ -192,7 +215,12 @@ export const QUERY_YAML_SCHEMA = {
                   properties: {
                     type: {
                       type: "string",
-                      enum: ["cross_encoder", "colbert", "bm25", "learning_to_rank"],
+                      enum: [
+                        "cross_encoder",
+                        "colbert",
+                        "bm25",
+                        "learning_to_rank",
+                      ],
                       description: "Reranking algorithm",
                     },
                     model: {

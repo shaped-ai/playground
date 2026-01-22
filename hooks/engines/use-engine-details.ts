@@ -14,7 +14,7 @@ export function useEngineDetails(
   const query = useQuery({
     queryKey: ["engine-details", engineName],
     queryFn: async () => {
-      // Find engine in DEMO_ENGINES by id
+      // Find engine in DEMO_ENGINES by id (which is now a unique demo identifier)
       if (engineName) {
         const engine = DEMO_ENGINES.find((e) => e.id === engineName)
         if (engine && engine.details) {
@@ -38,4 +38,3 @@ export function useEngineDetails(
     error: query.error,
   }
 }
-

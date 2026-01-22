@@ -15,8 +15,7 @@ import TruncatedText from "@/components/ui/truncated-text"
 import moment from "moment"
 import { ArrowDownWideNarrow, ArrowUpNarrowWide, Search, X } from "lucide-react"
 
-interface TableColumnSortingAndFilteringProps
-  extends HTMLAttributes<HTMLDivElement> {
+interface TableColumnSortingAndFilteringProps extends HTMLAttributes<HTMLDivElement> {
   idx: number
   data: string[]
   header: string
@@ -215,8 +214,8 @@ export default function TableColumnSortingAndFiltering({
                   headerType == FeatureType.TIMESTAMP
                     ? 60 * 60 * 24
                     : sliderRange[1] - sliderRange[0] > 100
-                    ? 1
-                    : (sliderRange[1] - sliderRange[0]) / 100
+                      ? 1
+                      : (sliderRange[1] - sliderRange[0]) / 100
                 }
                 onClick={() => {
                   const targetFilter = filters.find((e) => e.colName == header)

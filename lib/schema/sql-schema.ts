@@ -69,7 +69,14 @@ export const SQL_TABLES = {
     description: "User accounts table",
   },
   posts: {
-    columns: ["id", "user_id", "title", "content", "published_at", "created_at"],
+    columns: [
+      "id",
+      "user_id",
+      "title",
+      "content",
+      "published_at",
+      "created_at",
+    ],
     description: "Blog posts table",
   },
   comments: {

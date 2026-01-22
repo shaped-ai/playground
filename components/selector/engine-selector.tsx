@@ -33,6 +33,7 @@ import {
 import { StatusChip } from "@/components/status-chip"
 import { Icons } from "@/components/icons/icons"
 import { ModelStatus } from "@/types/enums"
+import { useIsMobile } from "@/hooks/shared/use-media-query"
 
 type EngineOption = {
   id: string
@@ -61,6 +62,7 @@ export function EngineSelector({
   filterByStatus,
 }: EngineSelectorProps) {
   const [apiKey, setApiKey] = useState("")
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     getOrganizationInfo()
@@ -181,6 +183,47 @@ export function EngineSelector({
     return matchingItem?.label || selectedEngine
   }, [selectedEngine, comboItems, engineOptions])
 
+  // Mobile: Horizontal scrollable selector
+  if (isMobile) {
+    return (
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 py-1">
+        {displayItems.map((item) => {
+          const isSelected = currentValue === item.label
+          return (
+            <button
+              key={item.id || item.label}
+              onClick={() => !disabled && handleEngineSelect(item.label)}
+              disabled={disabled || isLoading}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all",
+                "border",
+                isSelected
+                  ? "border-accent-brand-purple bg-accent-brand-purple/10 text-accent-brand-purple"
+                  : "border-border bg-background-primary text-foreground hover:border-border-active hover:bg-background-secondary",
+                disabled && "cursor-not-allowed opacity-60"
+              )}
+            >
+              <div
+                className={cn(
+                  "h-2 w-2 shrink-0 rounded-full",
+                  item.status?.toUpperCase() === "ACTIVE"
+                    ? "bg-green-500"
+                    : item.status?.toUpperCase() === "IDLE"
+                      ? "bg-gray-500"
+                      : item.status?.toUpperCase() === "ERROR"
+                        ? "bg-red-500"
+                        : "bg-yellow-500"
+                )}
+              />
+              <span className="whitespace-nowrap">{item.label}</span>
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Desktop: ComboSearchbox dropdown
   return (
     <ComboSearchbox
       name="engine"

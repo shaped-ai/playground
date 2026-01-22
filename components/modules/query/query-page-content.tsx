@@ -44,6 +44,14 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 
+// Helper function to get default parameter values for DEFAULT_SQL_QUERY
+const getDefaultParameterValues = (content: string): ParameterValue => {
+  if (content?.trim() === DEFAULT_SQL_QUERY.trim()) {
+    return { query: "romeo and juliet" }
+  }
+  return {}
+}
+
 export function QueryPageContent({}: {}) {
   const pathname = usePathname()
   const isMobile = useIsMobile()
@@ -57,7 +65,9 @@ export function QueryPageContent({}: {}) {
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>(
     undefined
   )
-  const [parameterValues, setParameterValues] = useState<ParameterValue>({})
+  const [parameterValues, setParameterValues] = useState<ParameterValue>(
+    getDefaultParameterValues(DEFAULT_SQL_QUERY)
+  )
   const [previewMode, setPreviewMode] = useState<ResultViewMode>(
     ResultViewMode.PREVIEW_MASONRY
   )
@@ -154,12 +164,19 @@ export function QueryPageContent({}: {}) {
   ])
 
   const applyState = useCallback((state: QueryPageState) => {
-    setContent(state.content || DEFAULT_SQL_QUERY)
+    const contentToUse = state.content || DEFAULT_SQL_QUERY
+    setContent(contentToUse)
     setLanguage(state.language || "sql")
     setEditorMode(state.editorMode || EditorMode.SQL)
     setEngine(state.engine ?? "")
     setSavedQueryId(state.savedQueryId)
-    setParameterValues(state.parameterValues || {})
+    // Use provided parameterValues if it exists, otherwise use defaults for DEFAULT_SQL_QUERY
+    // This ensures parameterValues from URL are properly restored
+    if (state.parameterValues !== undefined) {
+      setParameterValues(state.parameterValues)
+    } else {
+      setParameterValues(getDefaultParameterValues(contentToUse))
+    }
     setPreviewMode(state.previewMode || ResultViewMode.PREVIEW_MASONRY)
 
     if (state.savedQueryId || state.parameterValues || state.previewMode) {
@@ -210,7 +227,8 @@ export function QueryPageContent({}: {}) {
     (engineValue: string) => {
       setEngine(engineValue)
       setSavedQueryId(undefined)
-      setParameterValues({})
+      // Reset to default parameter values if using DEFAULT_SQL_QUERY
+      setParameterValues(getDefaultParameterValues(content))
 
       if (isInitialized) {
         setTimeout(() => {
@@ -219,11 +237,22 @@ export function QueryPageContent({}: {}) {
         }, 100)
       }
     },
-    [isInitialized, getCurrentState, pushToHistory]
+    [isInitialized, getCurrentState, pushToHistory, content]
   )
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent)
+    // Update parameter values when content changes to DEFAULT_SQL_QUERY
+    if (newContent?.trim() === DEFAULT_SQL_QUERY.trim()) {
+      const defaultParams = getDefaultParameterValues(newContent)
+      // Only set defaults if parameterValues is empty or doesn't have the query param
+      if (
+        !parameterValues.query ||
+        Object.keys(parameterValues).length === 0
+      ) {
+        setParameterValues(defaultParams)
+      }
+    }
   }
 
   const handleEditorModeChange = (mode: EditorMode) => {
@@ -517,7 +546,7 @@ export function QueryPageContent({}: {}) {
           <h1 className="text-sm md:text-xl font-semibold text-foreground">
             ShapedQL Playground
           </h1>
-          <p className="hidden md:block text-sm text-foreground-muted">
+          <p className="text-xs md:text-sm text-foreground-muted">
             <a
               href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
               target="_blank"
@@ -547,12 +576,11 @@ export function QueryPageContent({}: {}) {
           )}
           <Button
             asChild
-            className="flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-1.5 py-1 md:px-2 md:py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
+            className="hidden md:flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
             variant="default"
           >
             <Link href="https://console.shaped.ai/register" target="_blank">
-              <span className="md:hidden">Add your own data</span>
-              <span className="hidden md:inline">Try with your data</span>
+              Try with your data
             </Link>
           </Button>
         </div>
@@ -623,7 +651,7 @@ export function QueryPageContent({}: {}) {
               maxSize={80}
               className="bg-background-solid"
             >
-              <div className="flex h-full flex-col bg-background-solid px-4 py-2">
+              <div className="flex h-full flex-col bg-background-solid px-4 pt-2 pb-0">
                 <div className="shrink-0">
                   <QueryControls
                     engineDetails={
@@ -655,13 +683,15 @@ export function QueryPageContent({}: {}) {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex min-h-0 flex-1 flex-col ">
+                  <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                     {(engineDetails?.status == ModelStatus.ACTIVE ||
                       engineDetails?.status == ModelStatus.IDLE) && (
                       <div
                         className={
                           shouldShowParametersPane
-                            ? "h-[400px] shrink-0"
+                            ? isMobile
+                              ? "min-h-[150px] shrink-0"
+                              : "h-[400px] shrink-0"
                             : "min-h-0 flex-1"
                         }
                       >
@@ -690,7 +720,7 @@ export function QueryPageContent({}: {}) {
                     )}
 
                     {shouldShowParametersPane && (
-                      <div className="shrink-0">
+                      <div className="shrink-0 mt-auto mb-0">
                         <QueryParametersEditor
                           parameters={displayParameters}
                           values={parameterValues}
@@ -747,6 +777,22 @@ export function QueryPageContent({}: {}) {
               )}
             </ResizablePanel>
           </ResizablePanelGroup>
+        </div>
+      )}
+
+      {/* Floating "Add your own data" button for mobile */}
+      {isMobile && (
+        <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
+          <Button
+            asChild
+            className="flex w-full h-auto cursor-pointer items-center justify-center gap-2 rounded-xl border border-border-active bg-background-accent px-4 py-3 text-sm font-medium text-accent-brand-off-white shadow-lg hover:border-border-active hover:bg-accent-active"
+            variant="default"
+          >
+            <Link href="https://console.shaped.ai/register" target="_blank">
+              Add your own data
+              <ArrowUpRight className="size-4" />
+            </Link>
+          </Button>
         </div>
       )}
     </div>

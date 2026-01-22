@@ -11,4 +11,10 @@ return_metadata: true
 return_journey_explanations: true
 return_explanation: true`
 
-export const DEFAULT_SQL_QUERY = `SELECT * FROM items`
+export const DEFAULT_SQL_QUERY = `SELECT *
+FROM text_search(
+  query='$query',  
+  mode='vector',  
+  text_embedding_ref='title_embedding', 
+  limit=50)
+LIMIT 200`

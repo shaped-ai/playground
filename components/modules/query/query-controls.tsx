@@ -62,14 +62,11 @@ export function QueryControls({
             isMobile ? "gap-1" : "gap-2"
           )}
         >
-          <span
-            className={cn(
-              "font-bold text-foreground",
-              isMobile ? "text-xs" : "text-sm"
-            )}
-          >
-            Engine
-          </span>
+          {!isMobile && (
+            <span className="text-sm font-bold text-foreground">
+              Engine
+            </span>
+          )}
           <EngineSelector
             selectedEngine={selectedEngine}
             onEngineChange={onEngineChange}

@@ -63,9 +63,7 @@ export function QueryControls({
           )}
         >
           {!isMobile && (
-            <span className="text-sm font-bold text-foreground">
-              Engine
-            </span>
+            <span className="text-sm font-bold text-foreground">Engine</span>
           )}
           <EngineSelector
             selectedEngine={selectedEngine}

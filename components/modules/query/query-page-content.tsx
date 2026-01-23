@@ -246,10 +246,7 @@ export function QueryPageContent({}: {}) {
     if (newContent?.trim() === DEFAULT_SQL_QUERY.trim()) {
       const defaultParams = getDefaultParameterValues(newContent)
       // Only set defaults if parameterValues is empty or doesn't have the query param
-      if (
-        !parameterValues.query ||
-        Object.keys(parameterValues).length === 0
-      ) {
+      if (!parameterValues.query || Object.keys(parameterValues).length === 0) {
         setParameterValues(defaultParams)
       }
     }
@@ -748,8 +745,8 @@ export function QueryPageContent({}: {}) {
               maxSize={80}
               className="h-full overflow-y-auto"
             >
-              {(engineDetails?.status == ModelStatus.ACTIVE ||
-                engineDetails?.status == ModelStatus.IDLE) ||
+              {engineDetails?.status == ModelStatus.ACTIVE ||
+              engineDetails?.status == ModelStatus.IDLE ||
               showDocumentation ? (
                 <QueryResults
                   results={results || null}

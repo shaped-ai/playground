@@ -640,7 +640,7 @@ export function QueryResults({
         </div>
       </div>
     )
-  ) : (!results && !isExecuting && !error) || showDocumentation ? (
+  ) : !results && !isExecuting && !error ? (
     <div className="relative flex h-full w-full overflow-hidden bg-background-solid">
       <div
         className={`absolute inset-0 z-50 bg-background-solid transition-opacity duration-300 ${

@@ -219,9 +219,11 @@ function MasonryCard({
               isHovered ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className={`absolute bottom-0 left-0 right-0 transform space-y-2 p-6 transition-transform duration-500 ${
-              theme === "dark" ? "text-black" : "text-white"
-            }`}>
+            <div
+              className={`absolute bottom-0 left-0 right-0 transform space-y-2 p-6 transition-transform duration-500 ${
+                theme === "dark" ? "text-black" : "text-white"
+              }`}
+            >
               {otherFields.map((field) => (
                 <div key={field.id}>{renderField(field)}</div>
               ))}

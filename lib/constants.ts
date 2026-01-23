@@ -214,6 +214,35 @@ LIMIT 50`,
         parameters: [],
       },
       {
+        id: "recommendations",
+        name: "Recommendations feed",
+        description:
+          "Fetch the most highly rated films for a given user, falling back to popular",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM similarity(
+    embedding_ref='als_embedding',
+    encoder='precomputed_user',
+    input_user_id='$user_id'
+  ),
+  similarity(
+    embedding_ref='title_embedding',
+    encoder='precomputed_user',
+    input_user_id='$user_id'
+  )
+ORDER BY score(expression='0.2 * click_through_rate + 0.8 * cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="als_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
+REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
+        parameters: [
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "122",
+          },
+        ],
+        defaultViewMode: ResultViewMode.PREVIEW_LIST,
+        defaultFeatures: ["interaction_count"],
+      },
+      {
         id: "cold_start",
         name: "Cold start",
         description:

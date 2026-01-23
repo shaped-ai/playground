@@ -78,7 +78,7 @@ LIMIT 200`,
         template: `SELECT *
 FROM similarity( -- items similar to what user has interacted with
     input_user_id='$user_id', 
-    embedding_ref='als_embedding', 
+    embedding_ref='collaborative_embedding', 
     limit=50), 
   text_search(
     name='text_match',
@@ -87,7 +87,7 @@ FROM similarity( -- items similar to what user has interacted with
     fuzziness=0, 
     limit=50)
   -- change user_id to see results for different users
-ORDER BY score(expression='cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="als_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
+ORDER BY score(expression='cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="collaborative_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
 LIMIT 200`,
         parameters: [
           {
@@ -115,7 +115,7 @@ FROM text_search(
     text_embedding_ref='description_content_embedding', 
     limit=50)
   -- change user_id to see results for different users
-ORDER BY score(expression='cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="als_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
+ORDER BY score(expression='cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="collaborative_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
 REORDER BY exploration(0.2)
 LIMIT 200
 `,
@@ -202,7 +202,7 @@ LIMIT 50`,
         description: "Fetch the most highly rated films for a given user",
         engine: "movielens_demo_v2",
         template: `SELECT * FROM similarity(
-  embedding_ref="als_embedding" , 
+  embedding_ref="collaborative_embedding" , 
   entity_type="items",
   limit=200, 
   encoder='precomputed_user',
@@ -221,16 +221,11 @@ LIMIT 50`,
         engine: "movielens_demo_v2",
         template: `SELECT *
 FROM similarity(
-    embedding_ref='als_embedding',
-    encoder='precomputed_user',
-    input_user_id='$user_id'
-  ),
-  similarity(
-    embedding_ref='title_embedding',
+    embedding_ref='collaborative_embedding',
     encoder='precomputed_user',
     input_user_id='$user_id'
   )
-ORDER BY score(expression='0.2 * click_through_rate + 0.8 * cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="als_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
+ORDER BY score(expression='0.2 * click_through_rate + 0.8 * cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="collaborative_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
 REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
         parameters: [
           {
@@ -249,8 +244,8 @@ REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
           "Fetch the most highly rated films for a given user, falling back to popular",
         engine: "movielens_demo_v2",
         template: `SELECT * FROM similarity(
-    embedding_ref="als_embedding" , 
-    entity_type="items",
+    embedding_ref='collaborative_embedding' , 
+    entity_type='items',
     limit=200, 
     encoder='precomputed_user',
     input_user_id='120' 
@@ -263,6 +258,160 @@ REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
         parameters: [],
         defaultViewMode: ResultViewMode.PREVIEW_LIST,
         defaultFeatures: ["interaction_count"],
+      },
+    ],
+  },
+  {
+    id: "recommendations",
+    model_name: "Recommendations",
+    created_at: "2025-12-15 10:30:00 UTC",
+    status: "ACTIVE" as const,
+    details: {
+      model_name: "Movielens Dataset",
+      status: ModelStatus.ACTIVE,
+      created_at: "2025-12-15 10:30:00 UTC",
+      last_updated: "2025-12-15 10:30:00 UTC",
+      model_uri: "movielens_demo_v2",
+    },
+    saved_queries: [
+      {
+        id: "chronological",
+        name: "Chronological",
+        description: "Order items by release date",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM column_order(
+  columns='release_date desc',
+)`,
+        parameters: [],
+      },
+      {
+        id: "popular",
+        name: "Popular",
+        description: "Show popular items based on derived rank",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM column_order(
+  columns='_derived_popular_rank',
+)`,
+        parameters: [],
+      },
+      {
+        id: "content_filtering",
+        name: "Content Filtering",
+        description:
+          "Show items that have similar titles to what user has interacted with",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM similarity(
+  embedding_ref='title_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+)`,
+        parameters: [
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "3",
+          },
+        ],
+      },
+      {
+        id: "collaborative_filtering",
+        name: "Collaborative Filtering",
+        description:
+          "Show items that were interacted with by people similar to the user",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM similarity(
+  embedding_ref='collaborative_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+)`,
+        parameters: [
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "3",
+          },
+        ],
+      },
+      {
+        id: "collaborative_content_ensemble",
+        name: "Collaborative & Content Filtering ensemble",
+        description: "Combine collaborative and content filtering approaches",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM similarity(
+  embedding_ref='collaborative_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+),
+similarity(
+  embedding_ref='title_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+)`,
+        parameters: [
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "3",
+          },
+        ],
+      },
+      {
+        id: "ensemble_with_ctr_scorer",
+        name: "Ensemble with CTR scorer",
+        description:
+          "Collaborative & Content Filtering ensemble with click-through-rate scorer",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM similarity(
+  embedding_ref='collaborative_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+),
+similarity(
+  embedding_ref='title_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+)
+ORDER BY score(expression='click_through_rate')`,
+        parameters: [
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "3",
+          },
+        ],
+      },
+      {
+        id: "ensemble_ctr_diversity",
+        name: "Ensemble with CTR and diversity",
+        description:
+          "Collaborative & Content Filtering ensemble with click-through-rate scorer and reordering",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM similarity(
+  embedding_ref='collaborative_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+),
+similarity(
+  embedding_ref='title_embedding',
+  encoder='interaction_round_robin',
+  input_user_id='$user_id'
+)
+ORDER BY score(expression='click_through_rate')
+REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
+        parameters: [
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "3",
+          },
+        ],
       },
     ],
   },

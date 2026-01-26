@@ -58,8 +58,8 @@ export function QueryControls({
       >
         <div
           className={cn(
-            "flex shrink-0 items-center",
-            isMobile ? "gap-1" : "gap-2"
+            "flex items-center overflow-hidden",
+            isMobile ? "min-w-0 flex-1 gap-1" : "shrink-0 gap-2"
           )}
         >
           {!isMobile && (

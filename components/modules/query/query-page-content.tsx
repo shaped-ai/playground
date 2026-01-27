@@ -648,7 +648,7 @@ export function QueryPageContent({}: {}) {
               maxSize={80}
               className="bg-background-solid"
             >
-              <div className="flex h-full flex-col bg-background-solid px-4 pt-2 pb-0">
+              <div className="flex h-full flex-col bg-background-solid pt-2 pb-0">
                 <div className="shrink-0">
                   <QueryControls
                     engineDetails={
@@ -680,26 +680,36 @@ export function QueryPageContent({}: {}) {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                  <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
                     {(engineDetails?.status == ModelStatus.ACTIVE ||
                       engineDetails?.status == ModelStatus.IDLE) && (
-                      <div
-                        className={
-                          shouldShowParametersPane
-                            ? isMobile
-                              ? "min-h-[150px] shrink-0"
-                              : "h-[400px] shrink-0"
-                            : "min-h-0 flex-1"
-                        }
-                      >
-                        <QueryEditor
-                          value={content}
-                          onChange={handleContentChange}
-                          mode={currentEditorMode}
-                          readOnly={isReadOnly}
-                          onRun={handleRunWithConditions}
-                        />
-                      </div>
+                      <>
+                        <div className="min-h-[200px] flex-1 overflow-hidden">
+                          <QueryEditor
+                            value={content}
+                            onChange={handleContentChange}
+                            mode={currentEditorMode}
+                            readOnly={isReadOnly}
+                            onRun={handleRunWithConditions}
+                          />
+                        </div>
+                        {shouldShowParametersPane && (
+                          <div className="shrink-0 overflow-y-auto">
+                            <QueryParametersEditor
+                              parameters={displayParameters}
+                              values={parameterValues}
+                              onChange={handleParameterValuesChange}
+                              onRun={handleRun}
+                              isExecuting={isExecuting}
+                              engineDetails={
+                                (engineDetails ?? undefined) as
+                                  | ModelDetails
+                                  | undefined
+                              }
+                            />
+                          </div>
+                        )}
+                      </>
                     )}
                     {((engineDetails?.status != ModelStatus.ACTIVE &&
                       engineDetails?.status != ModelStatus.IDLE) ||
@@ -713,23 +723,6 @@ export function QueryPageContent({}: {}) {
                         <p className="text-sm font-medium text-foreground">
                           Please check again in a little bit.
                         </p>
-                      </div>
-                    )}
-
-                    {shouldShowParametersPane && (
-                      <div className="shrink-0 mt-auto mb-0">
-                        <QueryParametersEditor
-                          parameters={displayParameters}
-                          values={parameterValues}
-                          onChange={handleParameterValuesChange}
-                          onRun={handleRun}
-                          isExecuting={isExecuting}
-                          engineDetails={
-                            (engineDetails ?? undefined) as
-                              | ModelDetails
-                              | undefined
-                          }
-                        />
                       </div>
                     )}
                   </div>

@@ -27,9 +27,10 @@ export const DEMO_ENGINES = [
         name: "Semantic search",
         description: "Fetch all items for the Movielens demo engine",
         engine: "movielens_demo_v2",
-        template: `SELECT *
+        template: `-- semantic vector search on movie titles
+SELECT *
 FROM text_search(
-  query='$query',  
+  query='$query',  -- change query to see results from other search terms
   mode='vector',  
   text_embedding_ref='title_embedding', 
   limit=50)
@@ -47,7 +48,8 @@ LIMIT 200`,
         name: "Hybrid search",
         description: "Fetch all items for the Movielens demo engine",
         engine: "movielens_demo_v2",
-        template: `SELECT *
+        template: `-- keyword and semantic search with weighting
+SELECT *
 FROM text_search(
     name='semantic',
     query='$query',  
@@ -60,6 +62,7 @@ FROM text_search(
     mode='lexical', 
     fuzziness=0, 
     limit=50)
+-- weigh semantic matches more heavily than the keyword matches
 ORDER BY score(expression= '1.5 * retrieval.get_score("semantic") + 0.01 * retrieval.get_score("text_match")')
 LIMIT 200`,
         parameters: [
@@ -80,14 +83,24 @@ FROM similarity( -- items similar to what user has interacted with
     input_user_id='$user_id', 
     embedding_ref='collaborative_embedding', 
     limit=50), 
-  text_search(
+  text_search( -- items matching the text query
     name='text_match',
     query='$query', 
     mode='lexical', 
     fuzziness=0, 
     limit=50)
   -- change user_id to see results for different users
-ORDER BY score(expression='cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="description_content_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
+ORDER BY score(expression='cosine_similarity(\\
+  pooled_text_encoding(\\
+    user.recent_interactions, \\
+    pool_fn=''mean'', \\
+    embedding_ref="description_content_embedding"\\
+  ), \\
+  text_encoding(\\
+    item, \\
+    embedding_ref="description_content_embedding"\\
+  )\\
+)', input_user_id='$user_id')
 LIMIT 200`,
         parameters: [
           {
@@ -114,8 +127,18 @@ FROM text_search(
     mode='vector',  
     text_embedding_ref='description_content_embedding', 
     limit=50)
-  -- change user_id to see results for different users
-ORDER BY score(expression='cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="description_content_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
+ORDER BY score(expression='cosine_similarity(\\
+  pooled_text_encoding(\\
+    user.recent_interactions, \\
+    pool_fn=''mean'', \\
+    embedding_ref="description_content_embedding"\\
+  ), \\
+  text_encoding(\\
+    item, \\
+    embedding_ref="description_content_embedding"\\
+  )\\
+)', input_user_id='$user_id')
+-- change user_id to see results for different users
 REORDER BY exploration(0.2)
 LIMIT 200
 `,
@@ -186,13 +209,18 @@ FROM text_search(
   mode='vector',  
   text_embedding_ref='poster_embedding', 
   limit=25)
-ORDER BY score(expression='click_through_rate')
+ORDER BY score(expression='click_through_rate', input_user_id='$user_id')
 LIMIT 50`,
         parameters: [
           {
             name: "query",
             type: "string" as const,
             value: "space",
+          },
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "122",
           },
         ],
       },
@@ -225,7 +253,19 @@ FROM similarity(
     encoder='precomputed_user',
     input_user_id='$user_id'
   )
-ORDER BY score(expression='0.2 * click_through_rate + 0.8 * cosine_similarity(pooled_text_encoding(user.recent_interactions, pool_fn=''mean'', embedding_ref="description_content_embedding"), text_encoding(item, embedding_ref="description_content_embedding"))', input_user_id='$user_id')
+ORDER BY score(
+  expression='0.2 * click_through_rate + \\
+    0.8 * cosine_similarity(\\
+    pooled_text_encoding(\\
+      user.recent_interactions, \\
+      pool_fn=''mean'', \\
+      embedding_ref="description_content_embedding"\\
+    ), \\
+    text_encoding(\\
+      item, \\
+      embedding_ref="description_content_embedding"\\
+    )\\
+  )', input_user_id='$user_id')
 REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
         parameters: [
           {
@@ -246,15 +286,14 @@ REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
         template: `SELECT * FROM similarity(
     embedding_ref='collaborative_embedding' , 
     entity_type='items',
-    limit=200, 
     encoder='precomputed_user',
     input_user_id='120' 
   ),
-  filter(
-    -- cold start: return popular items 
-    -- if similarity returns no results
-    where='interaction_count > 200' 
-)`,
+  column_order(
+    -- cold start: return popular items for 
+    -- users with no interactions
+    columns='_derived_popular_rank asc',
+  )`,
         parameters: [],
         defaultViewMode: ResultViewMode.PREVIEW_LIST,
         defaultFeatures: ["interaction_count"],
@@ -377,7 +416,7 @@ similarity(
   encoder='interaction_round_robin',
   input_user_id='$user_id'
 )
-ORDER BY score(expression='click_through_rate')`,
+ORDER BY score(expression='click_through_rate', input_user_id='$user_id')`,
         parameters: [
           {
             name: "user_id",
@@ -403,7 +442,7 @@ similarity(
   encoder='interaction_round_robin',
   input_user_id='$user_id'
 )
-ORDER BY score(expression='click_through_rate')
+ORDER BY score(expression='click_through_rate', input_user_id='$user_id)
 REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
         parameters: [
           {

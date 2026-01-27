@@ -43,6 +43,7 @@ import { useIsMobile } from "@/hooks/shared/use-media-query"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useTheme } from "next-themes"
+import { useAnalytics } from "@/components/providers/analytics-provider"
 
 // Helper function to get default parameter values for DEFAULT_SQL_QUERY
 const getDefaultParameterValues = (content: string): ParameterValue => {
@@ -56,6 +57,7 @@ export function QueryPageContent({}: {}) {
   const pathname = usePathname()
   const isMobile = useIsMobile()
   const { theme, setTheme } = useTheme()
+  const { trackEvent } = useAnalytics()
 
   // Direct state variables instead of tab-based state
   const [content, setContent] = useState<string>(DEFAULT_SQL_QUERY)
@@ -463,6 +465,15 @@ export function QueryPageContent({}: {}) {
           setResults(normalizedResults)
           setIsExecuting(false)
 
+          // Track query execution event
+          trackEvent("playground_query_executed", {
+            engine: actualEngineId,
+            has_parameters: Object.keys(parameterValues).length > 0,
+            result_count: normalizedResults.rowCount,
+            execution_time_ms: normalizedResults.executionTime,
+            saved_query_id: savedQueryId,
+          })
+
           if (isInitialized) {
             setTimeout(() => {
               const state = getCurrentState()
@@ -549,6 +560,11 @@ export function QueryPageContent({}: {}) {
               target="_blank"
               rel="noopener noreferrer"
               className="text-accent-brand-purple hover:underline inline-flex items-center gap-1"
+              onClick={() =>
+                trackEvent("playground_documentation_clicked", {
+                  source: "header_link",
+                })
+              }
             >
               Read the docs
               <ArrowUpRight className="size-3" />
@@ -576,7 +592,15 @@ export function QueryPageContent({}: {}) {
             className="hidden md:flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
             variant="default"
           >
-            <Link href="https://console.shaped.ai/register" target="_blank">
+            <Link
+              href="https://console.shaped.ai/register?utm_source=playground&utm_medium=product&utm_campaign=shapedql&utm_content=register_cta"
+              target="_blank"
+              onClick={() =>
+                trackEvent("playground_register_clicked", {
+                  source: "desktop_header",
+                })
+              }
+            >
               Try with your data
             </Link>
           </Button>
@@ -779,7 +803,15 @@ export function QueryPageContent({}: {}) {
             className="flex w-full h-auto cursor-pointer items-center justify-center gap-2 rounded-xl border border-border-active bg-background-accent px-4 py-3 text-sm font-medium text-accent-brand-off-white shadow-lg hover:border-border-active hover:bg-accent-active"
             variant="default"
           >
-            <Link href="https://console.shaped.ai/register" target="_blank">
+            <Link
+              href="https://console.shaped.ai/register?utm_source=playground&utm_medium=product&utm_campaign=shapedql&utm_content=register_cta"
+              target="_blank"
+              onClick={() =>
+                trackEvent("playground_register_clicked", {
+                  source: "mobile_floating",
+                })
+              }
+            >
               Add your own data
               <ArrowUpRight className="size-4" />
             </Link>

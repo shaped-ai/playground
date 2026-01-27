@@ -92,6 +92,7 @@ export function QueryPageContent({}: {}) {
   const [apiExplanation, setApiExplanation] = useState<any>(null)
   const [mounted, setMounted] = useState(false)
   const [rawResponse, setRawResponse] = useState<any>(null)
+  const hasAutoRun = useRef(false)
 
   const selectedSavedQueryObject = useMemo(() => {
     if (!savedQueryId || !engine) return null
@@ -525,6 +526,27 @@ export function QueryPageContent({}: {}) {
       handleRun()
     }
   }, [engineDetails?.status, isLoadingEngineDetails, handleRun])
+
+  // Auto-run query on first load
+  useEffect(() => {
+    if (
+      !hasAutoRun.current &&
+      isInitialized &&
+      engine &&
+      !isLoadingEngineDetails &&
+      (engineDetails?.status === ModelStatus.ACTIVE ||
+        engineDetails?.status === ModelStatus.IDLE)
+    ) {
+      hasAutoRun.current = true
+      handleRun()
+    }
+  }, [
+    isInitialized,
+    engine,
+    isLoadingEngineDetails,
+    engineDetails?.status,
+    handleRun,
+  ])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

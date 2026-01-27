@@ -43,7 +43,7 @@ export function QueryControls({
   engineDetails,
 }: QueryControlsProps) {
   const isMobile = useIsMobile()
-  const [showEngineInfo, setShowEngineInfo] = useState(false)
+  const [showEngineInfo, setShowEngineInfo] = useState(true)
 
   const handleSavedQuerySelect = useCallback(
     (query: SavedQuery | null) => {

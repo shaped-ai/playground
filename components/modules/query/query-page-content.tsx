@@ -30,6 +30,7 @@ import { EngineSelector } from "@/components/selector/engine-selector"
 import {
   ArrowUpRight,
   BrainCircuit,
+  HelpCircle,
   Loader2,
   Moon,
   Sun,
@@ -44,6 +45,8 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { useAnalytics } from "@/components/providers/analytics-provider"
+import { useOnboardingTour } from "@/hooks/use-onboarding-tour"
+import { QueryOnboardingOverlay } from "@/components/modules/query/query-onboarding-overlay"
 
 // Helper function to get default parameter values for DEFAULT_SQL_QUERY
 const getDefaultParameterValues = (content: string): ParameterValue => {
@@ -88,6 +91,7 @@ export function QueryPageContent({}: {}) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [apiExplanation, setApiExplanation] = useState<any>(null)
   const [mounted, setMounted] = useState(false)
+  const [rawResponse, setRawResponse] = useState<any>(null)
 
   const selectedSavedQueryObject = useMemo(() => {
     if (!savedQueryId || !engine) return null
@@ -107,9 +111,31 @@ export function QueryPageContent({}: {}) {
     isDemoModel: false,
   })
 
+  const {
+    steps: tourSteps,
+    isOpen: isTourOpen,
+    currentStepIndex: tourStepIndex,
+    startTour,
+    nextStep: nextTourStep,
+    prevStep: prevTourStep,
+    skipTour,
+    closeTour,
+  } = useOnboardingTour(isMobile)
+
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const hasSeenTour = localStorage.getItem(
+      "playground-onboarding-tour-viewed"
+    )
+    if (!hasSeenTour) {
+      startTour()
+      localStorage.setItem("playground-onboarding-tour-viewed", "true")
+    }
+  }, [startTour])
 
   useEffect(() => {
     const hasViewedDocs = localStorage.getItem("query-docs-viewed")
@@ -427,6 +453,7 @@ export function QueryPageContent({}: {}) {
               ? (results as any).results
               : []
           const responseData = results?.data || results
+          setRawResponse(responseData)
           console.log("[DEBUG] Raw results after check:", {
             results: resultsArray,
           })
@@ -554,7 +581,8 @@ export function QueryPageContent({}: {}) {
           <h1 className="text-sm md:text-xl font-semibold text-foreground">
             ShapedQL Playground
           </h1>
-          <p className="text-xs md:text-sm text-foreground-muted">
+          <p className="hidden md:block text-xs md:text-sm text-foreground-muted mt-1">
+            Explore ShapedQL syntax with a live editor and query examples.{" "}
             <a
               href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
               target="_blank"
@@ -588,8 +616,17 @@ export function QueryPageContent({}: {}) {
             </Button>
           )}
           <Button
+            variant="outline"
+            size="icon"
+            onClick={() => startTour(true)}
+            className="h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-lg cursor-pointer"
+            aria-label="Start guided tour"
+          >
+            <HelpCircle className="size-3 md:size-4 text-foreground" />
+          </Button>
+          <Button
             asChild
-            className="hidden md:flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-1.5 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
+            className="hidden md:flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-2 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
             variant="default"
           >
             <Link
@@ -601,7 +638,7 @@ export function QueryPageContent({}: {}) {
                 })
               }
             >
-              Try with your data
+              Load your own dataset
             </Link>
           </Button>
         </div>
@@ -708,29 +745,65 @@ export function QueryPageContent({}: {}) {
                     {(engineDetails?.status == ModelStatus.ACTIVE ||
                       engineDetails?.status == ModelStatus.IDLE) && (
                       <>
-                        <div className="min-h-[200px] flex-1 overflow-hidden">
-                          <QueryEditor
-                            value={content}
-                            onChange={handleContentChange}
-                            mode={currentEditorMode}
-                            readOnly={isReadOnly}
-                            onRun={handleRunWithConditions}
-                          />
-                        </div>
-                        {shouldShowParametersPane && (
-                          <div className="shrink-0 overflow-y-auto">
-                            <QueryParametersEditor
-                              parameters={displayParameters}
-                              values={parameterValues}
-                              onChange={handleParameterValuesChange}
-                              onRun={handleRun}
-                              isExecuting={isExecuting}
-                              engineDetails={
-                                (engineDetails ?? undefined) as
-                                  | ModelDetails
-                                  | undefined
-                              }
-                            />
+                        {shouldShowParametersPane ? (
+                          <ResizablePanelGroup
+                            direction="vertical"
+                            className="flex-1 h-full w-full"
+                          >
+                            <ResizablePanel
+                              defaultSize={70}
+                              minSize={30}
+                              maxSize={85}
+                              className="overflow-hidden"
+                              data-tour="sql-editor"
+                            >
+                              <div className="h-full overflow-hidden rounded-lg bg-background-solid">
+                                <QueryEditor
+                                  value={content}
+                                  onChange={handleContentChange}
+                                  mode={currentEditorMode}
+                                  readOnly={isReadOnly}
+                                  onRun={handleRunWithConditions}
+                                />
+                              </div>
+                            </ResizablePanel>
+
+                            <ResizableHandle />
+
+                            <ResizablePanel
+                              defaultSize={30}
+                              minSize={15}
+                              maxSize={70}
+                              className="overflow-y-auto"
+                            >
+                              <QueryParametersEditor
+                                parameters={displayParameters}
+                                values={parameterValues}
+                                onChange={handleParameterValuesChange}
+                                onRun={handleRun}
+                                isExecuting={isExecuting}
+                                engineDetails={
+                                  (engineDetails ?? undefined) as
+                                    | ModelDetails
+                                    | undefined
+                                }
+                              />
+                            </ResizablePanel>
+                          </ResizablePanelGroup>
+                        ) : (
+                          <div
+                            data-tour="sql-editor"
+                            className="flex-1"
+                          >
+                            <div className="h-full overflow-hidden rounded-lg bg-background-solid">
+                              <QueryEditor
+                                value={content}
+                                onChange={handleContentChange}
+                                mode={currentEditorMode}
+                                readOnly={isReadOnly}
+                                onRun={handleRunWithConditions}
+                              />
+                            </div>
                           </div>
                         )}
                       </>
@@ -761,24 +834,28 @@ export function QueryPageContent({}: {}) {
               minSize={20}
               maxSize={80}
               className="h-full overflow-y-auto"
+              data-tour="results-pane"
             >
               {engineDetails?.status == ModelStatus.ACTIVE ||
               engineDetails?.status == ModelStatus.IDLE ||
               showDocumentation ? (
-                <QueryResults
-                  results={results || null}
-                  isExecuting={isExecuting}
-                  error={error}
-                  previewMode={previewMode}
-                  onPreviewModeChange={handlePreviewModeChange}
-                  engineDetails={
-                    (engineDetails ?? undefined) as ModelDetails | undefined
-                  }
-                  engineName={engine ?? ""}
-                  apiLatency={apiExplanation?.total_execution_time_ms}
-                  showDocumentation={showDocumentation}
-                  savedQueryId={savedQueryId}
-                />
+                <div className="h-full rounded-lg bg-background-solid">
+                  <QueryResults
+                    results={results || null}
+                    isExecuting={isExecuting}
+                    error={error}
+                    rawResponse={rawResponse}
+                    previewMode={previewMode}
+                    onPreviewModeChange={handlePreviewModeChange}
+                    engineDetails={
+                      (engineDetails ?? undefined) as ModelDetails | undefined
+                    }
+                    engineName={engine ?? ""}
+                    apiLatency={apiExplanation?.total_execution_time_ms}
+                    showDocumentation={showDocumentation}
+                    savedQueryId={savedQueryId}
+                  />
+                </div>
               ) : (
                 <div className="flex h-full flex-col items-center justify-center bg-background-solid p-4">
                   <ShapedLogo className="size-10 mb-4" />
@@ -817,6 +894,17 @@ export function QueryPageContent({}: {}) {
             </Link>
           </Button>
         </div>
+      )}
+      {mounted && (
+        <QueryOnboardingOverlay
+          steps={tourSteps}
+          currentStepIndex={tourStepIndex}
+          isOpen={isTourOpen}
+          onNext={nextTourStep}
+          onPrev={prevTourStep}
+          onSkip={skipTour}
+          onClose={closeTour}
+        />
       )}
     </div>
   )

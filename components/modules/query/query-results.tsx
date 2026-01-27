@@ -53,7 +53,7 @@ const allPreviewViewModes = [
 ]
 
 interface JsonMonacoViewerProps {
-  data: QueryResult | Error | null
+  data: any
 }
 
 function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
@@ -246,6 +246,7 @@ interface QueryResultsProps {
   results: QueryResult | null
   isExecuting?: boolean
   error?: Error | null
+  rawResponse?: any
   previewMode?: ResultViewMode
   onPreviewModeChange?: (mode: ResultViewMode) => void
   engineName: string
@@ -259,6 +260,7 @@ export function QueryResults({
   results,
   isExecuting,
   error,
+  rawResponse,
   previewMode: externalPreviewMode,
   onPreviewModeChange,
   engineName,
@@ -388,12 +390,15 @@ export function QueryResults({
             })
 
             // Try to find common field names
-            const imageKey = keys.find(
-              (k) =>
-                k.includes("image") ||
-                k.includes("poster") ||
-                k.includes("thumbnail")
-            )
+            // Prioritize poster_url for demo engines, then fall back to general detection
+            const imageKey =
+              keys.find((k) => k === "poster_url") ||
+              keys.find(
+                (k) =>
+                  k.includes("image") ||
+                  k.includes("poster") ||
+                  k.includes("thumbnail")
+              )
             const titleKey = keys.find(
               (k) => k.includes("title") || k.includes("name")
             )
@@ -609,7 +614,7 @@ export function QueryResults({
           className="min-h-0 flex-1 bg-background-solid"
           style={{ height: "calc(100vh - 171px)" }}
         >
-          <JsonMonacoViewer data={error} />
+          <JsonMonacoViewer data={rawResponse ?? error} />
         </div>
       </div>
     ) : (
@@ -715,7 +720,7 @@ export function QueryResults({
           className="min-h-0 flex-1 bg-background-solid"
           style={{ height: "calc(100vh - 171px)" }}
         >
-          <JsonMonacoViewer data={results} />
+          <JsonMonacoViewer data={rawResponse ?? results} />
         </div>
       ) : (
         <div
@@ -767,7 +772,7 @@ export function QueryResults({
               />
             )}
             {viewMode === ResultViewMode.JSON && results && (
-              <JsonMonacoViewer data={results} />
+              <JsonMonacoViewer data={rawResponse ?? results} />
             )}
             {viewMode === ResultViewMode.PREVIEW_GRID && results && (
               <ResultsPreviewGrid

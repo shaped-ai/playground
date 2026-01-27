@@ -33,12 +33,19 @@ export function QueryParametersEditor({
     onChange({ ...values, [name]: value })
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && onRun && !isExecuting) {
+      e.preventDefault()
+      onRun()
+    }
+  }
+
   if (parameters.length === 0) return null
 
   return (
     <Card
       className={cn(
-        "mt-2 rounded-sm gap-0 mb-0 px-0 pb-0",
+        "mt-2 rounded-sm gap-0 mb-0 px-0 pb-0 h-full flex flex-col",
         isMobile ? "pt-3" : "pt-4"
       )}
       style={{
@@ -50,7 +57,7 @@ export function QueryParametersEditor({
     >
       <div
         className={cn(
-          "space-y-3",
+          "space-y-3 flex-1",
           isMobile && "space-y-2",
           isMobile ? "px-3 pb-3" : "px-4 pb-4"
         )}
@@ -85,6 +92,7 @@ export function QueryParametersEditor({
                       : e.target.value
                   handleChange(param.name, val)
                 }}
+                onKeyDown={handleKeyDown}
                 placeholder={
                   (param.value ?? param.defaultValue)?.toString() ||
                   `Enter ${param.name}`

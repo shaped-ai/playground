@@ -118,10 +118,13 @@ export function TemplateEditorDialog({
     const defaultFields: TemplateField[] = []
 
     // Try to find common field names
-    const imageKey = keys.find(
-      (k) =>
-        k.includes("image") || k.includes("poster") || k.includes("thumbnail")
-    )
+    // Prioritize poster_url for demo engines, then fall back to general detection
+    const imageKey =
+      keys.find((k) => k === "poster_url") ||
+      keys.find(
+        (k) =>
+          k.includes("image") || k.includes("poster") || k.includes("thumbnail")
+      )
     const titleKey = keys.find((k) => k.includes("title") || k.includes("name"))
     const descKey = keys.find(
       (k) =>

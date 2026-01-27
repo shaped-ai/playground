@@ -36,8 +36,9 @@ export function SavedQuerySelector({
 
   return (
     <div
+      data-tour="query-examples"
       className={cn(
-        "flex min-w-0 flex-1 items-center border-border-muted",
+        "flex min-w-0 flex-1 items-center border-border-muted rounded-lg",
         isMobile ? "gap-1 px-2 py-1" : "gap-2 px-4 py-2",
         engineDetails?.status != ModelStatus.ACTIVE &&
           engineDetails?.status != ModelStatus.IDLE &&

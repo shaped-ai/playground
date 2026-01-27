@@ -806,3 +806,54 @@ input[type="number"] {
   --swiper-pagination-color: var(--accent-brand-purple);
   --swiper-pagination-bullet-opacity: 1;
 }
+
+.tour-highlight {
+  position: relative;
+  z-index: 40;
+  outline: 2px solid hsla(260, 69%, 61%, 0.9);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsla(260, 69%, 61%, 0.3);
+  border-radius: 0.5rem;
+  animation: tourHighlightPulse 2s ease-in-out infinite;
+}
+
+@keyframes tourHighlightPulse {
+  0% {
+    box-shadow: 0 0 0 0 hsla(260, 69%, 61%, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 8px hsla(260, 69%, 61%, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsla(260, 69%, 61%, 0);
+  }
+}
+
+.tour-backdrop {
+  background-color: rgba(0, 0, 0, 0.3);
+  animation: tourBackdropFadeIn 300ms ease-out;
+}
+
+@keyframes tourBackdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tour-card {
+  animation: tourCardEnter 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tourCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

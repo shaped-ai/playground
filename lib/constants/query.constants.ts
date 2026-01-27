@@ -11,7 +11,9 @@ return_metadata: true
 return_journey_explanations: true
 return_explanation: true`
 
-export const DEFAULT_SQL_QUERY = `SELECT *
+export const DEFAULT_SQL_QUERY = `-- write your query here and hit run when ready
+-- use the Query Parameters pane to change your search term
+SELECT *
 FROM text_search(
   query='$query',  
   mode='vector',  

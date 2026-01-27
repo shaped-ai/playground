@@ -110,15 +110,16 @@ export function QueryControls({
 
         {showRunButton && (
           <Button
-            variant="default"
+            variant="outline"
             onClick={onRun}
             disabled={
               isExecuting ||
               (engineDetails?.status != ModelStatus.ACTIVE &&
                 engineDetails?.status != ModelStatus.IDLE)
             }
+            data-tour="run-button"
             className={cn(
-              "ml-auto flex h-auto shrink-0 cursor-pointer items-center rounded-lg border border-border-active bg-background-accent text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active",
+              "ml-auto flex h-auto shrink-0 cursor-pointer items-center rounded-lg border text-xs font-medium text-foreground bg-background-primary hover:bg-background-secondary",
               isMobile ? "gap-0.5 px-1.5 py-1" : "gap-1 px-2 py-1.5",
               engineDetails?.status != ModelStatus.ACTIVE &&
                 engineDetails?.status != ModelStatus.IDLE &&

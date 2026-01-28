@@ -43,7 +43,7 @@ export function QueryControls({
   engineDetails,
 }: QueryControlsProps) {
   const isMobile = useIsMobile()
-  const [showEngineInfo, setShowEngineInfo] = useState(true)
+  const [showEngineInfo, setShowEngineInfo] = useState(false)
 
   const handleSavedQuerySelect = useCallback(
     (query: SavedQuery | null) => {
@@ -144,7 +144,8 @@ export function QueryControls({
         >
           <div className="mb-3">
             <p className="text-xs text-foreground">
-              Relevance engine for exploring data in the movielens dataset. Use the following embeddings and scoring models in your queries:
+              Relevance engine for exploring data in the movielens dataset. Use
+              the following embeddings and scoring models in your queries:
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

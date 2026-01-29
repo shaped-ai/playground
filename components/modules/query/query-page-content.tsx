@@ -527,6 +527,27 @@ export function QueryPageContent({}: {}) {
     }
   }, [engineDetails?.status, isLoadingEngineDetails, handleRun])
 
+  // Auto-run query on first load
+  useEffect(() => {
+    if (
+      !hasAutoRun.current &&
+      isInitialized &&
+      engine &&
+      !isLoadingEngineDetails &&
+      (engineDetails?.status === ModelStatus.ACTIVE ||
+        engineDetails?.status === ModelStatus.IDLE)
+    ) {
+      hasAutoRun.current = true
+      handleRun()
+    }
+  }, [
+    isInitialized,
+    engine,
+    isLoadingEngineDetails,
+    engineDetails?.status,
+    handleRun,
+  ])
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const canRun =

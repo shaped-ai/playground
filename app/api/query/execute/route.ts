@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       parameters,
       return_metadata: true,
       return_explanation: true,
+      return_journey_explanations: true,
     }
 
     resp = await axios.post(

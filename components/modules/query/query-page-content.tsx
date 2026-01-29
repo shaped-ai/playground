@@ -74,7 +74,7 @@ export function QueryPageContent({}: {}) {
     getDefaultParameterValues(DEFAULT_SQL_QUERY)
   )
   const [previewMode, setPreviewMode] = useState<ResultViewMode>(
-    ResultViewMode.PREVIEW_MASONRY
+    ResultViewMode.RAW_TABLE
   )
   const [isExecuting, setIsExecuting] = useState<boolean>(false)
 
@@ -206,7 +206,7 @@ export function QueryPageContent({}: {}) {
     } else {
       setParameterValues(getDefaultParameterValues(contentToUse))
     }
-    setPreviewMode(state.previewMode || ResultViewMode.PREVIEW_MASONRY)
+    setPreviewMode(state.previewMode || ResultViewMode.RAW_TABLE)
 
     if (state.savedQueryId || state.parameterValues || state.previewMode) {
       setPendingRestoration({
@@ -430,7 +430,7 @@ export function QueryPageContent({}: {}) {
     // On first run (when results is null), default to Masonry preview mode
     // But only if the selected query doesn't have a defaultViewMode configured
     if (results === null && !selectedSavedQueryObject?.defaultViewMode) {
-      setPreviewMode(ResultViewMode.PREVIEW_MASONRY)
+      setPreviewMode(ResultViewMode.RAW_TABLE)
     }
 
     setIsExecuting(true)
@@ -526,27 +526,6 @@ export function QueryPageContent({}: {}) {
       handleRun()
     }
   }, [engineDetails?.status, isLoadingEngineDetails, handleRun])
-
-  // Auto-run query on first load
-  useEffect(() => {
-    if (
-      !hasAutoRun.current &&
-      isInitialized &&
-      engine &&
-      !isLoadingEngineDetails &&
-      (engineDetails?.status === ModelStatus.ACTIVE ||
-        engineDetails?.status === ModelStatus.IDLE)
-    ) {
-      hasAutoRun.current = true
-      handleRun()
-    }
-  }, [
-    isInitialized,
-    engine,
-    isLoadingEngineDetails,
-    engineDetails?.status,
-    handleRun,
-  ])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -813,10 +792,7 @@ export function QueryPageContent({}: {}) {
                             </ResizablePanel>
                           </ResizablePanelGroup>
                         ) : (
-                          <div
-                            data-tour="sql-editor"
-                            className="flex-1"
-                          >
+                          <div data-tour="sql-editor" className="flex-1">
                             <div className="h-full overflow-hidden rounded-lg bg-background-solid">
                               <QueryEditor
                                 value={content}

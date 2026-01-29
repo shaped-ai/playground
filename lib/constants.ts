@@ -74,6 +74,32 @@ LIMIT 200`,
         ],
       },
       {
+        id: "hybrid_search_lightgbm",
+        name: "Image search",
+        description: "Fetch all items for the Movielens demo engine",
+        engine: "movielens_demo_v2",
+        template: `SELECT *
+FROM text_search(
+  query='$query',  
+  mode='vector',  
+  text_embedding_ref='poster_embedding', 
+  limit=25)
+ORDER BY score(expression='click_through_rate', input_user_id='$user_id')
+LIMIT 50`,
+        parameters: [
+          {
+            name: "query",
+            type: "string" as const,
+            value: "space",
+          },
+          {
+            name: "user_id",
+            type: "string" as const,
+            value: "122",
+          },
+        ],
+      },
+      {
         id: "personalized_hybrid",
         name: "Personalized hybrid search",
         description: "Fetch all items for the Movielens demo engine",

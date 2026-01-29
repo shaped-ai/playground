@@ -15,15 +15,13 @@ export function useOnboardingTour(isMobile: boolean) {
         id: "sql-editor",
         targetId: "sql-editor",
         title: "Write your queries here",
-        body:
-          "This is where you write ShapedQL queries. Start from the example, or type your own to explore the Movielens demo dataset.",
+        body: "This is where you write ShapedQL queries. Start from the example, or type your own to explore the Movielens demo dataset.",
       },
       {
         id: "run-button",
         targetId: "run-button",
         title: "Run your query and see results",
-        body:
-          "When you're ready, run your query to see how your parameters shape the results.",
+        body: "When you're ready, run your query to see how your parameters shape the results.",
         hint: "You can also press Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux) to run quickly.",
       },
     ]
@@ -42,13 +40,12 @@ export function useOnboardingTour(isMobile: boolean) {
       //   body:
       //     "Query results appear here. Switch between views, sort, and scan the data to understand what your query is returning.",
       // },
-      // {
-      //   id: "query-examples",
-      //   targetId: "query-examples",
-      //   title: "Jump-start with examples",
-      //   body:
-      //     "Use these saved queries to explore common patterns and ShapedQL syntax without starting from scratch.",
-      // },
+      {
+        id: "query-examples",
+        targetId: "query-examples",
+        title: "Jump-start with examples",
+        body: "Use these saved queries to explore common patterns and ShapedQL syntax without starting from scratch.",
+      },
     ]
   }, [isMobile])
 
@@ -101,4 +98,3 @@ export function useOnboardingTour(isMobile: boolean) {
     closeTour,
   }
 }
-

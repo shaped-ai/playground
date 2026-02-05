@@ -34,6 +34,7 @@ import { ResultsTable } from "@/components/results-table"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/shared/use-media-query"
+import { useIsInIframe } from "@/hooks/shared/use-is-in-iframe"
 import { DEMO_ENGINES } from "@/lib/constants"
 import type { SavedQuery } from "@/lib/types/query.types"
 
@@ -57,16 +58,31 @@ interface JsonMonacoViewerProps {
 }
 
 function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
-  const { theme } = useTheme()
+  const { theme, resolvedTheme } = useTheme()
   const isMobile = useIsMobile()
+  const isInIframe = useIsInIframe()
   const editorRef = useRef<any>(null)
+  const monacoRef = useRef<any>(null)
   const [mounted, setMounted] = useState(false)
+  const prevThemeRef = useRef<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const isDark = theme === "dark"
+  // Helper to get current theme, respecting iframe URL params
+  const getCurrentTheme = () => {
+    // When in iframe, read from URL - it's the source of truth (docs passes ?theme=dark|light)
+    if (isInIframe && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const themeParam = params.get("theme")
+      if (themeParam === "dark" || themeParam === "light") return themeParam
+    }
+    return resolvedTheme || theme || "light"
+  }
+
+  const currentTheme = getCurrentTheme()
+  const isDark = currentTheme === "dark"
 
   // Handle error objects - convert to JSON-serializable format
   const getJsonString = () => {
@@ -114,52 +130,58 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
+    monacoRef.current = monaco
 
-    try {
-      // Define dark theme for JSON viewer
-      monaco.editor.defineTheme("json-viewer-dark", {
-        base: "vs-dark",
-        inherit: true,
-        rules: [
-          { token: "string", foreground: "CE9178" },
-          { token: "number", foreground: "B5CEA8" },
-          { token: "keyword", foreground: "569CD6" },
-          { token: "delimiter", foreground: "D4D4D4" },
-        ],
-        colors: {
-          "editor.background": backgroundColor,
-          "editor.foreground": "#D4D4D4",
-          "editor.lineHighlightBackground": "#1A1A1A",
-          "editor.selectionBackground": "#9A9A9A99",
-          "editorCursor.foreground": "#FFFFFF",
-          "editorLineNumber.foreground": "#858585",
-          "editorLineNumber.activeForeground": "#C6C6C6",
-        },
-      })
+    // Helper function to define themes
+    const defineThemes = (bgColor: string) => {
+      try {
+        // Define dark theme for JSON viewer
+        monaco.editor.defineTheme("json-viewer-dark", {
+          base: "vs-dark",
+          inherit: true,
+          rules: [
+            { token: "string", foreground: "CE9178" },
+            { token: "number", foreground: "B5CEA8" },
+            { token: "keyword", foreground: "569CD6" },
+            { token: "delimiter", foreground: "D4D4D4" },
+          ],
+          colors: {
+            "editor.background": bgColor,
+            "editor.foreground": "#D4D4D4",
+            "editor.lineHighlightBackground": "#1A1A1A",
+            "editor.selectionBackground": "#9A9A9A99",
+            "editorCursor.foreground": "#FFFFFF",
+            "editorLineNumber.foreground": "#858585",
+            "editorLineNumber.activeForeground": "#C6C6C6",
+          },
+        })
 
-      // Define light theme for JSON viewer
-      monaco.editor.defineTheme("json-viewer-light", {
-        base: "vs",
-        inherit: true,
-        rules: [
-          { token: "string", foreground: "A31515" },
-          { token: "number", foreground: "098658" },
-          { token: "keyword", foreground: "0000FF" },
-          { token: "delimiter", foreground: "000000" },
-        ],
-        colors: {
-          "editor.background": backgroundColor,
-          "editor.foreground": "#000000",
-          "editor.lineHighlightBackground": "#F0F0F0",
-          "editor.selectionBackground": "#ADD6FF80",
-          "editorCursor.foreground": "#000000",
-          "editorLineNumber.foreground": "#858585",
-          "editorLineNumber.activeForeground": "#000000",
-        },
-      })
-    } catch (error) {
-      // Silently fail
+        // Define light theme for JSON viewer
+        monaco.editor.defineTheme("json-viewer-light", {
+          base: "vs",
+          inherit: true,
+          rules: [
+            { token: "string", foreground: "A31515" },
+            { token: "number", foreground: "098658" },
+            { token: "keyword", foreground: "0000FF" },
+            { token: "delimiter", foreground: "000000" },
+          ],
+          colors: {
+            "editor.background": bgColor,
+            "editor.foreground": "#000000",
+            "editor.lineHighlightBackground": "#F0F0F0",
+            "editor.selectionBackground": "#ADD6FF80",
+            "editorCursor.foreground": "#000000",
+            "editorLineNumber.foreground": "#858585",
+            "editorLineNumber.activeForeground": "#000000",
+          },
+        })
+      } catch (error) {
+        // Silently fail
+      }
     }
+
+    defineThemes(backgroundColor)
 
     editor.updateOptions({
       theme: themeName,
@@ -200,6 +222,88 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
     })
   }
 
+  // Manually update Monaco editor theme when it changes (important for iframe)
+  // WORKAROUND: Redefine and set theme to force Monaco to properly update
+  useEffect(() => {
+    if (editorRef.current && monacoRef.current && mounted) {
+      const currentTheme = getCurrentTheme()
+      const currentThemeName = currentTheme === "dark" ? "json-viewer-dark" : "json-viewer-light"
+      const currentBgColor = currentTheme === "dark" ? "#0f0f0f" : "#FFFFFF"
+
+      // Only update if theme actually changed
+      if (prevThemeRef.current !== currentThemeName) {
+        try {
+          // WORKAROUND 1: Redefine the theme to force Monaco to re-apply all colors
+          monacoRef.current.editor.defineTheme(currentThemeName, {
+            base: currentTheme === "dark" ? "vs-dark" : "vs",
+            inherit: true,
+            rules: currentTheme === "dark" 
+              ? [
+                  { token: "string", foreground: "CE9178" },
+                  { token: "number", foreground: "B5CEA8" },
+                  { token: "keyword", foreground: "569CD6" },
+                  { token: "delimiter", foreground: "D4D4D4" },
+                ]
+              : [
+                  { token: "string", foreground: "A31515" },
+                  { token: "number", foreground: "098658" },
+                  { token: "keyword", foreground: "0000FF" },
+                  { token: "delimiter", foreground: "000000" },
+                ],
+            colors: currentTheme === "dark"
+              ? {
+                  "editor.background": currentBgColor,
+                  "editor.foreground": "#D4D4D4",
+                  "editor.lineHighlightBackground": "#1A1A1A",
+                  "editor.selectionBackground": "#9A9A9A99",
+                  "editorCursor.foreground": "#FFFFFF",
+                  "editorLineNumber.foreground": "#858585",
+                  "editorLineNumber.activeForeground": "#C6C6C6",
+                }
+              : {
+                  "editor.background": currentBgColor,
+                  "editor.foreground": "#000000",
+                  "editor.lineHighlightBackground": "#F0F0F0",
+                  "editor.selectionBackground": "#ADD6FF80",
+                  "editorCursor.foreground": "#000000",
+                  "editorLineNumber.foreground": "#858585",
+                  "editorLineNumber.activeForeground": "#000000",
+                },
+          })
+
+          // WORKAROUND 2: Set the theme
+          monacoRef.current.editor.setTheme(currentThemeName)
+
+          // WORKAROUND 3: Manually update DOM styles
+          requestAnimationFrame(() => {
+            if (editorRef.current) {
+              try {
+                const container = editorRef.current.getContainerDomNode()
+                const background = container?.querySelector(".monaco-editor-background")
+
+                if (container) {
+                  container.style.backgroundColor = currentBgColor
+                }
+                if (background) {
+                  (background as HTMLElement).style.backgroundColor = currentBgColor
+                }
+                if (container) {
+                  container.style.setProperty("--vscode-editor-background", currentBgColor)
+                }
+              } catch (error) {
+                // Silently fail if DOM update fails
+              }
+            }
+          })
+
+          prevThemeRef.current = currentThemeName
+        } catch (error) {
+          // Silently fail if theme update fails
+        }
+      }
+    }
+  }, [theme, resolvedTheme, mounted, isInIframe])
+
   if (!mounted) {
     return (
       <div
@@ -218,6 +322,7 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
   return (
     <div className="h-full w-full" style={{ backgroundColor }}>
       <MonacoEditorComponent
+        key={`json-viewer-${themeName}`}
         height="100%"
         language="json"
         value={jsonString}

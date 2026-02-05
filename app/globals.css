@@ -24,7 +24,7 @@
      ------------------------------------------------------------------- */
   :root {
     /* ------------------------------ 🧱 Background Colors ------------------------------ */
-    --background-solid: hsla(0, 0%, 100%, 1);
+    --background-solid: rgb(249, 247, 253);
     /* Use this to set the color for the entire page. This is black or white.  */
 
     --background-base: hsla(260, 60%, 98%, 1);
@@ -118,7 +118,7 @@
      🌑 DARK MODE THEME
      ------------------------------------------------------------------- */
   .dark {
-    --background-solid: hsla(0, 0%, 6%, 1);
+    --background-solid: rgb(26, 26, 26);
     /* Use this to set the color for the entire page. This is black or white.  */
 
     --background-base: hsla(0, 0%, 10%, 1);

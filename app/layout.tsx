@@ -4,6 +4,7 @@ import { Suspense } from "react"
 import "./globals.css"
 import { PHProvider } from "@/components/providers/posthog-provider"
 import { AnalyticsProvider } from "@/components/providers/analytics-provider"
+import { SessionProvider } from "@/components/providers/session-provider"
 import PostHogPageView from "./PostHogPageView"
 
 const geistSans = Geist({
@@ -33,10 +34,12 @@ export default function RootLayout({
       >
         <PHProvider>
           <AnalyticsProvider>
-            <Suspense fallback={null}>
-              <PostHogPageView />
-            </Suspense>
-            {children}
+            <SessionProvider>
+              <Suspense fallback={null}>
+                <PostHogPageView />
+              </Suspense>
+              {children}
+            </SessionProvider>
           </AnalyticsProvider>
         </PHProvider>
       </body>

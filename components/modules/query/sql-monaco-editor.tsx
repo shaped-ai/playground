@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react"
 import Editor, { type OnMount } from "@monaco-editor/react"
 import { useTheme } from "next-themes"
 import { useIsMobile } from "@/hooks/shared/use-media-query"
+import { useIsInIframe } from "@/hooks/shared/use-is-in-iframe"
 import {
   SQL_KEYWORDS,
   SQL_FUNCTIONS,
@@ -25,6 +26,7 @@ export function SqlMonacoEditor({
 }: SqlMonacoEditorProps) {
   const { resolvedTheme, theme } = useTheme()
   const isMobile = useIsMobile()
+  const isInIframe = useIsInIframe()
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -62,6 +64,12 @@ export function SqlMonacoEditor({
   // Helper to get theme synchronously with fallbacks
   // This must work on initial render before next-themes hydrates
   const getCurrentTheme = () => {
+    // When in iframe, read from URL - it's the source of truth (docs passes ?theme=dark|light)
+    if (isInIframe && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const themeParam = params.get("theme")
+      if (themeParam === "dark" || themeParam === "light") return themeParam
+    }
     // First try the theme from useTheme hook (works after hydration)
     if (theme === "dark" || theme === "light") {
       return theme
@@ -588,6 +596,36 @@ export function SqlMonacoEditor({
       }
     `
   }, [themeName, backgroundColor, mounted, readOnly, isMobile])
+
+  // Manually update Monaco editor theme when it changes (e.g., iframe reload with new theme param)
+  // This ensures theme updates even when key doesn't change due to timing
+  useEffect(() => {
+    if (editorRef.current && monacoRef.current && mounted) {
+      const currentTheme = getCurrentTheme()
+      const currentThemeName = readOnly
+        ? currentTheme === "dark"
+          ? "sql-custom-dark-readonly"
+          : "sql-custom-light-readonly"
+        : currentTheme === "dark"
+          ? "sql-custom-dark"
+          : "sql-custom-light"
+
+      if (prevThemeRef.current !== currentThemeName) {
+        try {
+          defineThemeIfNeeded(
+            monacoRef.current,
+            currentThemeName,
+            currentTheme === "dark",
+            readOnly
+          )
+          monacoRef.current.editor.setTheme(currentThemeName)
+          prevThemeRef.current = currentThemeName
+        } catch (error) {
+          // Silently fail
+        }
+      }
+    }
+  }, [theme, resolvedTheme, mounted, readOnly, isInIframe])
 
   return (
     <div className={`h-full w-full ${readOnly ? "bg-muted/30" : ""}`}>

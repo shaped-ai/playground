@@ -6,6 +6,7 @@ import { useTheme } from "next-themes"
 import YAML from "yaml"
 import { registerYAMLCompletionProvider } from "@/lib/utils/yaml-autocomplete"
 import { useIsMobile } from "@/hooks/shared/use-media-query"
+import { useIsInIframe } from "@/hooks/shared/use-is-in-iframe"
 
 interface PlainMonacoEditorProps {
   value: string
@@ -23,6 +24,7 @@ export function PlainMonacoEditor({
   const MonacoEditorComponent = Editor as unknown as React.FC<any>
   const { theme, resolvedTheme } = useTheme()
   const isMobile = useIsMobile()
+  const isInIframe = useIsInIframe()
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -326,12 +328,22 @@ export function PlainMonacoEditor({
   }
 
   // Manually update Monaco editor theme when it changes
-  // This handles theme changes after initial mount (e.g., user toggles theme)
+  // This handles theme changes after initial mount (e.g., user toggles theme, iframe with forcedTheme)
   // WORKAROUND: Multiple approaches to force background color update (Monaco bug)
   useEffect(() => {
     if (editorRef.current && monacoRef.current && mounted) {
-      // Calculate theme name based on current theme state
-      const currentTheme = resolvedTheme || theme || "light"
+      // When in iframe, read from URL - it's the source of truth (docs passes ?theme=dark|light)
+      let currentTheme: string
+      if (isInIframe && typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search)
+        const themeParam = params.get("theme")
+        currentTheme =
+          themeParam === "dark" || themeParam === "light"
+            ? themeParam
+            : resolvedTheme || theme || "light"
+      } else {
+        currentTheme = resolvedTheme || theme || "light"
+      }
       const isDark = currentTheme === "dark"
       const currentThemeName = readOnly
         ? isDark
@@ -403,7 +415,7 @@ export function PlainMonacoEditor({
         }
       }
     }
-  }, [theme, resolvedTheme, mounted, readOnly])
+  }, [theme, resolvedTheme, mounted, readOnly, isInIframe])
 
   // Force scrollbar to always be visible on mobile
   useEffect(() => {
@@ -437,11 +449,20 @@ export function PlainMonacoEditor({
   }, [mounted, isMobile])
 
   // Calculate theme name based on current theme and readOnly state
+  // When in iframe, read from URL - it's the source of truth (docs passes ?theme=dark|light)
+  const getThemeForKey = () => {
+    if (isInIframe && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const themeParam = params.get("theme")
+      if (themeParam === "dark" || themeParam === "light") return themeParam
+    }
+    return theme || resolvedTheme || "light"
+  }
   const themeName = readOnly
-    ? theme === "dark"
+    ? getThemeForKey() === "dark"
       ? "yaml-custom-dark-readonly"
       : "yaml-custom-light-readonly"
-    : theme === "dark"
+    : getThemeForKey() === "dark"
       ? "yaml-custom-dark"
       : "yaml-custom-light"
 

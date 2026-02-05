@@ -38,13 +38,16 @@ import {
 } from "lucide-react"
 import ShapedLogo from "@/components/logo/shaped-logo"
 import { AccountUpgradeModal } from "@/components/modals/account-upgrade-modal"
+import { RegistrationPromptModal } from "@/components/modals/registration-prompt-modal"
 import { TRIAL_CREDIT_LIMIT, DEMO_ENGINES } from "@/lib/constants"
 import { DEFAULT_SQL_QUERY } from "@/lib/constants/query.constants"
 import { useIsMobile } from "@/hooks/shared/use-media-query"
+import { useIsInIframe } from "@/hooks/shared/use-is-in-iframe"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { useAnalytics } from "@/components/providers/analytics-provider"
+import { useSession } from "@/hooks/use-session"
 import { useOnboardingTour } from "@/hooks/use-onboarding-tour"
 import { QueryOnboardingOverlay } from "@/components/modules/query/query-onboarding-overlay"
 
@@ -61,6 +64,11 @@ export function QueryPageContent({}: {}) {
   const isMobile = useIsMobile()
   const { theme, setTheme } = useTheme()
   const { trackEvent } = useAnalytics()
+  const {
+    incrementQueryCount,
+    showRegistrationModal,
+    setShowRegistrationModal,
+  } = useSession()
 
   // Direct state variables instead of tab-based state
   const [content, setContent] = useState<string>(DEFAULT_SQL_QUERY)
@@ -91,6 +99,7 @@ export function QueryPageContent({}: {}) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [apiExplanation, setApiExplanation] = useState<any>(null)
   const [mounted, setMounted] = useState(false)
+  const isInIframe = useIsInIframe()
   const [rawResponse, setRawResponse] = useState<any>(null)
   const hasAutoRun = useRef(false)
 
@@ -128,7 +137,7 @@ export function QueryPageContent({}: {}) {
   }, [])
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined" || isInIframe) return
     const hasSeenTour = localStorage.getItem(
       "playground-onboarding-tour-viewed"
     )
@@ -136,7 +145,7 @@ export function QueryPageContent({}: {}) {
       startTour()
       localStorage.setItem("playground-onboarding-tour-viewed", "true")
     }
-  }, [startTour])
+  }, [startTour, isInIframe])
 
   useEffect(() => {
     const hasViewedDocs = localStorage.getItem("query-docs-viewed")
@@ -502,6 +511,8 @@ export function QueryPageContent({}: {}) {
             saved_query_id: savedQueryId,
           })
 
+          incrementQueryCount()
+
           if (isInitialized) {
             setTimeout(() => {
               const state = getCurrentState()
@@ -596,75 +607,86 @@ export function QueryPageContent({}: {}) {
   // Selecting a saved query should only replace the editor content (not lock the UI)
   const isReadOnly = false
 
+  // Prevent SSR hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-border bg-background-base px-3 py-2 md:px-6 md:py-4 flex flex-row items-center justify-between">
-        <div className="flex flex-col">
-          <h1 className="text-sm md:text-xl font-semibold text-foreground">
-            ShapedQL Playground
-          </h1>
-          <p className="hidden md:block text-xs md:text-sm text-foreground-muted mt-1">
-            Explore ShapedQL syntax with a live editor and query examples.{" "}
-            <a
-              href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent-brand-purple hover:underline inline-flex items-center gap-1"
-              onClick={() =>
-                trackEvent("playground_documentation_clicked", {
-                  source: "header_link",
-                })
-              }
-            >
-              Read the docs
-              <ArrowUpRight className="size-3" />
-            </a>
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-1 md:gap-2">
-          {mounted && (
+      {!isInIframe && (
+        <div className="shrink-0 border-b border-border bg-background-base px-3 py-2 md:px-6 md:py-4 flex flex-row items-center justify-between">
+          <div className="flex flex-col">
+            <h1 className="text-sm md:text-xl font-semibold text-foreground">
+              ShapedQL Playground
+            </h1>
+            <p className="hidden md:block text-xs md:text-sm text-foreground-muted mt-1">
+              Explore ShapedQL syntax with a live editor and query examples.{" "}
+              <a
+                href="https://docs.shaped.ai/docs/v2/query_reference/shapedql"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-brand-purple hover:underline inline-flex items-center gap-1"
+                onClick={() =>
+                  trackEvent("playground_documentation_clicked", {
+                    source: "header_link",
+                  })
+                }
+              >
+                Read the docs
+                <ArrowUpRight className="size-3" />
+              </a>
+            </p>
+          </div>
+          <div className="ml-auto flex items-center gap-1 md:gap-2">
+            {mounted && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-lg cursor-pointer"
+                aria-label="Toggle theme"
+              >
+                {theme === "dark" ? (
+                  <Sun className="size-3 md:size-4 text-foreground" />
+                ) : (
+                  <Moon className="size-3 md:size-4 text-foreground" />
+                )}
+              </Button>
+            )}
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() => startTour(true)}
               className="h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-lg cursor-pointer"
-              aria-label="Toggle theme"
+              aria-label="Start guided tour"
             >
-              {theme === "dark" ? (
-                <Sun className="size-3 md:size-4 text-foreground" />
-              ) : (
-                <Moon className="size-3 md:size-4 text-foreground" />
-              )}
+              <HelpCircle className="size-3 md:size-4 text-foreground" />
             </Button>
-          )}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => startTour(true)}
-            className="h-7 w-7 md:h-8 md:w-8 shrink-0 rounded-lg cursor-pointer"
-            aria-label="Start guided tour"
-          >
-            <HelpCircle className="size-3 md:size-4 text-foreground" />
-          </Button>
-          <Button
-            asChild
-            className="hidden md:flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-2 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
-            variant="default"
-          >
-            <Link
-              href="https://console.shaped.ai/register?utm_source=playground&utm_medium=product&utm_campaign=shapedql&utm_content=register_cta"
-              target="_blank"
-              onClick={() =>
-                trackEvent("playground_register_clicked", {
-                  source: "desktop_header",
-                })
-              }
+            <Button
+              asChild
+              className="hidden md:flex h-auto shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-border-active bg-background-accent px-2 py-2 text-xs font-medium text-accent-brand-off-white hover:border-border-active hover:bg-accent-active"
+              variant="default"
             >
-              Load your own dataset
-            </Link>
-          </Button>
+              <Link
+                href="https://console.shaped.ai/register?utm_source=playground&utm_medium=product&utm_campaign=shapedql&utm_content=register_cta"
+                target="_blank"
+                onClick={() =>
+                  trackEvent("playground_register_clicked", {
+                    source: "desktop_header",
+                  })
+                }
+              >
+                Load your own dataset
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {isLoadingEngineDetails ? (
         <div className="flex min-h-0 flex-1 items-center justify-center bg-background-solid">
@@ -744,13 +766,6 @@ export function QueryPageContent({}: {}) {
                     onRun={handleRun}
                     isExecuting={isExecuting}
                   />
-
-                  {/* {!selectedSavedQueryObject && (
-                  <EditorModeSelector
-                    mode={currentEditorMode}
-                    onChange={handleEditorModeChange}
-                  />
-                )} */}
                 </div>
 
                 {!engine ? (
@@ -925,6 +940,10 @@ export function QueryPageContent({}: {}) {
           onClose={closeTour}
         />
       )}
+      <RegistrationPromptModal
+        open={showRegistrationModal && !isInIframe}
+        onOpenChange={setShowRegistrationModal}
+      />
     </div>
   )
 }

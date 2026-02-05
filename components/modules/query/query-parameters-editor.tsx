@@ -45,7 +45,7 @@ export function QueryParametersEditor({
   return (
     <Card
       className={cn(
-        "mt-2 rounded-sm gap-0 mb-0 px-0 pb-0 h-full flex flex-col",
+        "mt-0 border-none rounded-none gap-0 mb-0 px-0 pb-0 h-full flex flex-col",
         isMobile ? "pt-3" : "pt-4"
       )}
       style={{

@@ -190,14 +190,8 @@ const getMonacoThemeConfig = (
   const themeVariant = readOnly ? "-readonly" : ""
   const themeName = `${themePrefix}-custom-${isDark ? "dark" : "light"}${themeVariant}`
   const backgroundColor = isDark
-    ? readOnly
-      ? "#0f0f0f"
-      : "#1E1E1E"
-    : readOnly
-      ? editorMode === EditorMode.PLAIN
-        ? "#FFFFFF"
-        : "#F9FAFB"
-      : "#FFFFFF"
+    ? "#1A1A1A"
+    : "#F9F7FD"
 
   return { themeName, backgroundColor }
 }

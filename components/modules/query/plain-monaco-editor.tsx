@@ -124,7 +124,7 @@ export function PlainMonacoEditor({
           { token: "comment", foreground: "6B7280", fontStyle: "italic" },
         ],
         colors: {
-          "editor.background": "#FFFFFF",
+          "editor.background": "#F9F7FD",
           "editor.lineHighlightBorder": "#00000000",
         },
       })
@@ -140,7 +140,7 @@ export function PlainMonacoEditor({
           { token: "comment", foreground: "6B7280", fontStyle: "italic" },
         ],
         colors: {
-          "editor.background": "#FFFFFF",
+          "editor.background": "#F9F7FD",
           "editor.lineHighlightBorder": "#00000000",
         },
       })
@@ -156,7 +156,7 @@ export function PlainMonacoEditor({
           { token: "comment", foreground: "9CA3AF", fontStyle: "italic" },
         ],
         colors: {
-          "editor.background": "#0f0f0f",
+          "editor.background": "#1A1A1A",
           "editor.lineHighlightBorder": "#00000000",
         },
       })
@@ -172,7 +172,7 @@ export function PlainMonacoEditor({
           { token: "comment", foreground: "9CA3AF", fontStyle: "italic" },
         ],
         colors: {
-          "editor.background": "#0f0f0f",
+          "editor.background": "#1A1A1A",
           "editor.lineHighlightBorder": "#00000000",
         },
       })
@@ -269,7 +269,7 @@ export function PlainMonacoEditor({
             { token: "comment", foreground: "9CA3AF", fontStyle: "italic" },
           ],
           colors: {
-            "editor.background": "#0f0f0f",
+            "editor.background": "#1A1A1A",
             "editor.lineHighlightBorder": "#00000000",
           },
         })
@@ -285,7 +285,7 @@ export function PlainMonacoEditor({
             { token: "comment", foreground: "6B7280", fontStyle: "italic" },
           ],
           colors: {
-            "editor.background": "#FFFFFF",
+            "editor.background": "#F9F7FD",
             "editor.lineHighlightBorder": "#00000000",
           },
         })
@@ -303,7 +303,7 @@ export function PlainMonacoEditor({
             { token: "comment", foreground: "9CA3AF", fontStyle: "italic" },
           ],
           colors: {
-            "editor.background": "#0f0f0f",
+            "editor.background": "#1A1A1A",
             "editor.lineHighlightBorder": "#00000000",
           },
         })
@@ -319,7 +319,7 @@ export function PlainMonacoEditor({
             { token: "comment", foreground: "6B7280", fontStyle: "italic" },
           ],
           colors: {
-            "editor.background": "#FFFFFF",
+            "editor.background": "#F9F7FD",
             "editor.lineHighlightBorder": "#00000000",
           },
         })
@@ -371,11 +371,11 @@ export function PlainMonacoEditor({
           // Get the background color from the theme definition
           const backgroundColor = readOnly
             ? isDark
-              ? "#0f0f0f"
-              : "#FFFFFF"
+              ? "#1A1A1A"
+              : "#F9F7FD"
             : isDark
-              ? "#0f0f0f"
-              : "#FFFFFF"
+              ? "#1A1A1A"
+              : "#F9F7FD"
 
           // Use requestAnimationFrame to ensure DOM is ready
           requestAnimationFrame(() => {

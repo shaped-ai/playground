@@ -73,7 +73,7 @@ export function JsonParametersEditor({
           { token: "delimiter", foreground: "000000" },
         ],
         colors: {
-          "editor.background": "#FFFFFF",
+          "editor.background": "#F9F7FD",
           "editor.foreground": "#000000",
           "editor.lineHighlightBackground": "#F0F0F0",
           "editor.selectionBackground": "#ADD6FF80",
@@ -100,7 +100,7 @@ export function JsonParametersEditor({
           { token: "delimiter", foreground: "D4D4D4" },
         ],
         colors: {
-          "editor.background": "#1E1E1E",
+          "editor.background": "#1A1A1A",
           "editor.foreground": "#D4D4D4",
           "editor.lineHighlightBackground": "#2A2D2E",
           "editor.selectionBackground": "#9A9A9A99",

@@ -109,7 +109,7 @@ export function SqlMonacoEditor({
           { token: "delimiter", foreground: "000000" },
         ],
         colors: {
-          "editor.background": "#FFFFFF",
+          "editor.background": "#F9F7FD",
           "editor.foreground": "#000000",
           "editor.lineHighlightBackground": "#F0F0F0",
           "editor.selectionBackground": "#ADD6FF80",
@@ -131,7 +131,7 @@ export function SqlMonacoEditor({
           { token: "delimiter", foreground: "000000" },
         ],
         colors: {
-          "editor.background": "#F9FAFB",
+          "editor.background": "#F9F7FD",
           "editor.foreground": "#000000",
           "editor.lineHighlightBackground": "#E5E7EB",
           "editor.selectionBackground": "#ADD6FF80",
@@ -153,7 +153,7 @@ export function SqlMonacoEditor({
           { token: "delimiter", foreground: "D4D4D4" },
         ],
         colors: {
-          "editor.background": "#1E1E1E",
+          "editor.background": "#1A1A1A",
           "editor.foreground": "#D4D4D4",
           "editor.lineHighlightBackground": "#2A2D2E",
           "editor.selectionBackground": "#9A9A9A99",
@@ -175,7 +175,7 @@ export function SqlMonacoEditor({
           { token: "delimiter", foreground: "D4D4D4" },
         ],
         colors: {
-          "editor.background": "#0f0f0f",
+          "editor.background": "#1A1A1A",
           "editor.foreground": "#D4D4D4",
           "editor.lineHighlightBackground": "#1A1A1A",
           "editor.selectionBackground": "#9A9A9A99",
@@ -448,7 +448,7 @@ export function SqlMonacoEditor({
             { token: "delimiter", foreground: "D4D4D4" },
           ],
           colors: {
-            "editor.background": "#0f0f0f",
+            "editor.background": "#1A1A1A",
             "editor.foreground": "#D4D4D4",
             "editor.lineHighlightBackground": "#1A1A1A",
             "editor.selectionBackground": "#9A9A9A99",
@@ -470,7 +470,7 @@ export function SqlMonacoEditor({
             { token: "delimiter", foreground: "000000" },
           ],
           colors: {
-            "editor.background": "#F9FAFB",
+            "editor.background": "#F9F7FD",
             "editor.foreground": "#000000",
             "editor.lineHighlightBackground": "#E5E7EB",
             "editor.selectionBackground": "#ADD6FF80",
@@ -494,7 +494,7 @@ export function SqlMonacoEditor({
             { token: "delimiter", foreground: "D4D4D4" },
           ],
           colors: {
-            "editor.background": "#1E1E1E",
+            "editor.background": "#1A1A1A",
             "editor.foreground": "#D4D4D4",
             "editor.lineHighlightBackground": "#2A2D2E",
             "editor.selectionBackground": "#9A9A9A99",
@@ -516,7 +516,7 @@ export function SqlMonacoEditor({
             { token: "delimiter", foreground: "000000" },
           ],
           colors: {
-            "editor.background": "#FFFFFF",
+            "editor.background": "#F9F7FD",
             "editor.foreground": "#000000",
             "editor.lineHighlightBackground": "#F0F0F0",
             "editor.selectionBackground": "#ADD6FF80",
@@ -543,11 +543,11 @@ export function SqlMonacoEditor({
   // Get background color for CSS override
   const backgroundColor = readOnly
     ? currentTheme === "dark"
-      ? "#0f0f0f"
-      : "#F9FAFB"
+      ? "#1A1A1A"
+      : "#F9F7FD"
     : currentTheme === "dark"
-      ? "#1E1E1E"
-      : "#FFFFFF"
+      ? "#1A1A1A"
+      : "#F9F7FD"
 
   // CSS override workaround for Monaco background bug
   // Inject styles that override the background color with !important

@@ -13,7 +13,7 @@ interface MonacoCodeEditorProps {
 export default function MonacoCodeEditor({
   initialDoc,
   language = "python",
-  backgroundColor = "#0f0f0f",
+  backgroundColor = "#1A1A1A",
   themeName = "code-editor-dark",
 }: MonacoCodeEditorProps) {
   const MonacoEditorComponent = Editor as unknown as React.FC<any>
@@ -136,7 +136,7 @@ export default function MonacoCodeEditor({
           { token: "function", foreground: "795E26" },
         ],
         colors: {
-          "editor.background": "#FFFFFF",
+          "editor.background": "#F9F7FD",
           "editor.foreground": "#000000",
           "editor.lineHighlightBackground": "#F0F0F0",
           "editor.lineHighlightBorder": "#F0F0F0",

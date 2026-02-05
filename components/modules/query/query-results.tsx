@@ -126,7 +126,7 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
 
   const jsonString = getJsonString()
   const themeName = isDark ? "json-viewer-dark" : "json-viewer-light"
-  const backgroundColor = isDark ? "#0f0f0f" : "#FFFFFF"
+  const backgroundColor = isDark ? "#1A1A1A" : "#F9F7FD"
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
@@ -227,8 +227,9 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
   useEffect(() => {
     if (editorRef.current && monacoRef.current && mounted) {
       const currentTheme = getCurrentTheme()
-      const currentThemeName = currentTheme === "dark" ? "json-viewer-dark" : "json-viewer-light"
-      const currentBgColor = currentTheme === "dark" ? "#0f0f0f" : "#FFFFFF"
+      const currentThemeName =
+        currentTheme === "dark" ? "json-viewer-dark" : "json-viewer-light"
+      const currentBgColor = currentTheme === "dark" ? "#1A1A1A" : "#F9F7FD"
 
       // Only update if theme actually changed
       if (prevThemeRef.current !== currentThemeName) {
@@ -237,38 +238,40 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
           monacoRef.current.editor.defineTheme(currentThemeName, {
             base: currentTheme === "dark" ? "vs-dark" : "vs",
             inherit: true,
-            rules: currentTheme === "dark" 
-              ? [
-                  { token: "string", foreground: "CE9178" },
-                  { token: "number", foreground: "B5CEA8" },
-                  { token: "keyword", foreground: "569CD6" },
-                  { token: "delimiter", foreground: "D4D4D4" },
-                ]
-              : [
-                  { token: "string", foreground: "A31515" },
-                  { token: "number", foreground: "098658" },
-                  { token: "keyword", foreground: "0000FF" },
-                  { token: "delimiter", foreground: "000000" },
-                ],
-            colors: currentTheme === "dark"
-              ? {
-                  "editor.background": currentBgColor,
-                  "editor.foreground": "#D4D4D4",
-                  "editor.lineHighlightBackground": "#1A1A1A",
-                  "editor.selectionBackground": "#9A9A9A99",
-                  "editorCursor.foreground": "#FFFFFF",
-                  "editorLineNumber.foreground": "#858585",
-                  "editorLineNumber.activeForeground": "#C6C6C6",
-                }
-              : {
-                  "editor.background": currentBgColor,
-                  "editor.foreground": "#000000",
-                  "editor.lineHighlightBackground": "#F0F0F0",
-                  "editor.selectionBackground": "#ADD6FF80",
-                  "editorCursor.foreground": "#000000",
-                  "editorLineNumber.foreground": "#858585",
-                  "editorLineNumber.activeForeground": "#000000",
-                },
+            rules:
+              currentTheme === "dark"
+                ? [
+                    { token: "string", foreground: "CE9178" },
+                    { token: "number", foreground: "B5CEA8" },
+                    { token: "keyword", foreground: "569CD6" },
+                    { token: "delimiter", foreground: "D4D4D4" },
+                  ]
+                : [
+                    { token: "string", foreground: "A31515" },
+                    { token: "number", foreground: "098658" },
+                    { token: "keyword", foreground: "0000FF" },
+                    { token: "delimiter", foreground: "000000" },
+                  ],
+            colors:
+              currentTheme === "dark"
+                ? {
+                    "editor.background": currentBgColor,
+                    "editor.foreground": "#D4D4D4",
+                    "editor.lineHighlightBackground": "#1A1A1A",
+                    "editor.selectionBackground": "#9A9A9A99",
+                    "editorCursor.foreground": "#FFFFFF",
+                    "editorLineNumber.foreground": "#858585",
+                    "editorLineNumber.activeForeground": "#C6C6C6",
+                  }
+                : {
+                    "editor.background": currentBgColor,
+                    "editor.foreground": "#000000",
+                    "editor.lineHighlightBackground": "#F0F0F0",
+                    "editor.selectionBackground": "#ADD6FF80",
+                    "editorCursor.foreground": "#000000",
+                    "editorLineNumber.foreground": "#858585",
+                    "editorLineNumber.activeForeground": "#000000",
+                  },
           })
 
           // WORKAROUND 2: Set the theme
@@ -279,16 +282,22 @@ function JsonMonacoViewer({ data }: JsonMonacoViewerProps) {
             if (editorRef.current) {
               try {
                 const container = editorRef.current.getContainerDomNode()
-                const background = container?.querySelector(".monaco-editor-background")
+                const background = container?.querySelector(
+                  ".monaco-editor-background"
+                )
 
                 if (container) {
                   container.style.backgroundColor = currentBgColor
                 }
                 if (background) {
-                  (background as HTMLElement).style.backgroundColor = currentBgColor
+                  ;(background as HTMLElement).style.backgroundColor =
+                    currentBgColor
                 }
                 if (container) {
-                  container.style.setProperty("--vscode-editor-background", currentBgColor)
+                  container.style.setProperty(
+                    "--vscode-editor-background",
+                    currentBgColor
+                  )
                 }
               } catch (error) {
                 // Silently fail if DOM update fails

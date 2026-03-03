@@ -1,0 +1,15 @@
+/* Import ABCArizonaMix-Light font (from shaped-docs) */
+@font-face {
+  font-family: 'ABCArizonaMix-Light';
+  src: url('/font/ABCArizonaMix-Light.woff') format('woff'),
+       url('/font/ABCArizonaMix-Light.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.markdown-guide h1,
+.markdown-guide h2,
+.markdown-guide h3 {
+  font-family: 'ABCArizonaMix-Light', serif !important;
+}

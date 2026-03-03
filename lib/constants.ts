@@ -468,7 +468,7 @@ similarity(
   encoder='interaction_round_robin',
   input_user_id='$user_id'
 )
-ORDER BY score(expression='click_through_rate', input_user_id='$user_id)
+ORDER BY score(expression='click_through_rate', input_user_id='$user_id')
 REORDER BY diversity(0.2, text_encoding_embedding_ref='personnel_embedding')`,
         parameters: [
           {

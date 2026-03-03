@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 /.gradle
+/public/fonts
 .pnp.*
 .yarn/*
 !.yarn/patches

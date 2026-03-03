@@ -82,7 +82,7 @@ export function QueryPageContent({}: {}) {
     getDefaultParameterValues(DEFAULT_SQL_QUERY)
   )
   const [previewMode, setPreviewMode] = useState<ResultViewMode>(
-    ResultViewMode.RAW_TABLE
+    ResultViewMode.PREVIEW_MASONRY
   )
   const [isExecuting, setIsExecuting] = useState<boolean>(false)
 
@@ -101,7 +101,6 @@ export function QueryPageContent({}: {}) {
   const [mounted, setMounted] = useState(false)
   const isInIframe = useIsInIframe()
   const [rawResponse, setRawResponse] = useState<any>(null)
-  const hasAutoRun = useRef(false)
 
   const selectedSavedQueryObject = useMemo(() => {
     if (!savedQueryId || !engine) return null
@@ -215,7 +214,7 @@ export function QueryPageContent({}: {}) {
     } else {
       setParameterValues(getDefaultParameterValues(contentToUse))
     }
-    setPreviewMode(state.previewMode || ResultViewMode.RAW_TABLE)
+    setPreviewMode(state.previewMode || ResultViewMode.PREVIEW_MASONRY)
 
     if (state.savedQueryId || state.parameterValues || state.previewMode) {
       setPendingRestoration({
@@ -439,7 +438,7 @@ export function QueryPageContent({}: {}) {
     // On first run (when results is null), default to Masonry preview mode
     // But only if the selected query doesn't have a defaultViewMode configured
     if (results === null && !selectedSavedQueryObject?.defaultViewMode) {
-      setPreviewMode(ResultViewMode.RAW_TABLE)
+      setPreviewMode(ResultViewMode.PREVIEW_MASONRY)
     }
 
     setIsExecuting(true)
@@ -537,27 +536,6 @@ export function QueryPageContent({}: {}) {
       handleRun()
     }
   }, [engineDetails?.status, isLoadingEngineDetails, handleRun])
-
-  // Auto-run query on first load
-  useEffect(() => {
-    if (
-      !hasAutoRun.current &&
-      isInitialized &&
-      engine &&
-      !isLoadingEngineDetails &&
-      (engineDetails?.status === ModelStatus.ACTIVE ||
-        engineDetails?.status === ModelStatus.IDLE)
-    ) {
-      hasAutoRun.current = true
-      handleRun()
-    }
-  }, [
-    isInitialized,
-    engine,
-    isLoadingEngineDetails,
-    engineDetails?.status,
-    handleRun,
-  ])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

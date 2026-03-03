@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Schibsted_Grotesk } from "next/font/google"
 import { Suspense } from "react"
 import "./globals.css"
 import { PHProvider } from "@/components/providers/posthog-provider"
@@ -17,6 +17,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
+const schibstedGrotesk = Schibsted_Grotesk({
+  variable: "--font-schibsted-grotesk",
+  subsets: ["latin"],
+  display: "swap",
+})
+
 export const metadata: Metadata = {
   title: "ShapedQL Playground",
   description: "Test and explore the Shaped query language with real data",
@@ -30,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${schibstedGrotesk.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <PHProvider>
           <AnalyticsProvider>
